@@ -1,0 +1,43 @@
+:root {
+  /* Charte SaamBiz : bleu marine #0D1B3D, jaune or #F2B705.
+     Ce sont les mêmes valeurs que le site vitrine et l'application mobile. */
+  --color-primary: #0D1B3D;
+  --color-primary-dark: #060F26;
+  --color-primary-light: #1E3A78;
+  --color-accent: #F2B705;
+  --color-accent-dark: #B0850B;
+  /* Bleu très doux : fonds de pastilles et d'encarts d'information. Le même
+     que --navy-light du site vitrine et kAccentSoft de l'application. */
+  --color-accent-soft: #E8EDF7;
+  --color-bg: #F7F9FC;
+  --color-white: #ffffff;
+
+  /* Barre de navigation sombre — contraste élevé, texte lisible */
+  --color-sidebar: #0D1B3D;
+  --color-sidebar-2: #16295180;
+  --color-sidebar-text: #C7D2E6;
+  --color-sidebar-muted: #8D9CBA;
+  --color-sidebar-active-bg: rgba(242,183,5,0.16);
+  --color-sidebar-hover: rgba(255,255,255,0.08);
+
+  --color-text: #0D1B3D;
+  --color-text-muted: #5B6C8A;
+  --color-border: #E2E7F0;
+  --color-danger: #EF4444;
+  --color-warning: #B0850B;
+  --color-success: #22C55E;
+  --color-info: #1E3A78;
+  --radius: 9px;
+  --radius-lg: 14px;
+  --shadow: 0 1px 3px rgba(13,27,61,0.06), 0 1px 2px rgba(13,27,61,0.04);
+  --shadow-md: 0 8px 28px rgba(13,27,61,0.12);
+  --shadow-lg: 0 20px 60px rgba(13,27,61,0.22);
+  --sidebar-width: 268px;
+  --sidebar-closed: 80px;
+  /* Barre de navigation horizontale : marque + rubriques + compte */
+  --topnav-height: 62px;
+  --topbar-height: 62px;
+  --transition: all 0.2s ease;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}

@@ -1,0 +1,439 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE « MON SITE »
+
+   Réglages du site web public de la boutique. Tout est préfixé
+   `vitrine-` / `apercu-` et chargé uniquement par cette page : les
+   classes communes (card, form-*, btn) viennent de global.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vitrine-marge-haut { margin-top: 0.85rem; }
+.vitrine-marge-bas  { margin-bottom: 0.85rem; }
+
+/* ─── Site pas encore créé : renvoi vers l'application ──────────── */
+.vitrine-invitation .card-body {
+  max-width: 620px;
+  padding: 2.4rem 2rem;
+  text-align: center;
+  margin: 0 auto;
+}
+.vitrine-invitation__picto {
+  display: inline-grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-primary);
+  margin-bottom: 1.1rem;
+}
+.vitrine-invitation h2 {
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  color: var(--color-text);
+  margin-bottom: 0.7rem;
+}
+.vitrine-invitation p {
+  color: var(--color-text-muted);
+  font-size: 0.87rem;
+  line-height: 1.65;
+  margin-bottom: 0.9rem;
+}
+.vitrine-invitation__chemin {
+  display: inline-block;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  font-size: 0.82rem;
+}
+.vitrine-invitation__chemin strong { color: var(--color-text); }
+.vitrine-invitation__note { font-size: 0.78rem; margin-bottom: 0; }
+
+/* ─── Partage : adresse, boutons, QR ────────────────────────────── */
+.vitrine-partage {
+  display: flex;
+  gap: 1.75rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.vitrine-partage__gauche { flex: 1; min-width: 260px; }
+
+.vitrine-url {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: var(--color-primary);
+  word-break: break-all;
+  margin-bottom: 0.6rem;
+}
+
+.vitrine-hors-ligne { color: var(--color-warning); }
+
+.vitrine-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.vitrine-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 172px;
+}
+.vitrine-qr img {
+  width: 172px;
+  height: 172px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.vitrine-qr .form-hint { text-align: center; }
+
+.vitrine-vues {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin: 0.75rem 0 0;
+}
+
+/* ─── Deux colonnes : réglages + aperçu ─────────────────────────── */
+.vitrine-colonnes {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.5rem;
+  align-items: start;
+  margin-top: 1.25rem;
+}
+.vitrine-reglages { min-width: 0; }
+
+.vitrine-apercu-colonne {
+  position: sticky;
+  top: calc(var(--topnav-height) + 1rem);
+}
+.vitrine-apercu-titre {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.6rem;
+}
+
+/* ─── Bascules ──────────────────────────────────────────────────── */
+.vitrine-bascule {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.7rem 0;
+  cursor: pointer;
+}
+.vitrine-bascule + .vitrine-bascule { border-top: 1px solid var(--color-border); }
+.vitrine-bascule input {
+  margin-top: 3px;
+  width: 17px;
+  height: 17px;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+.vitrine-bascule span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+.vitrine-bascule strong { font-size: 0.86rem; color: var(--color-text); }
+.vitrine-bascule input:disabled + span { opacity: 0.5; }
+
+/* ─── Adresse du site ───────────────────────────────────────────── */
+.vitrine-slug {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-bg);
+}
+.vitrine-slug span {
+  padding: 0 0.1rem 0 0.7rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+/* Le champ perd sa bordure : le préfixe et la saisie forment une seule
+   adresse, et deux cadres imbriqués donneraient l'impression de deux champs. */
+.vitrine-slug .form-input {
+  border: none;
+  background: transparent;
+  flex: 1;
+  min-width: 0;
+}
+.vitrine-slug:focus-within { border-color: var(--color-primary); background: var(--color-white); }
+
+/* ─── Choix de la mise en page ──────────────────────────────────── */
+.vitrine-modeles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+}
+.vitrine-modele {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0.85rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-white);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition);
+  font: inherit;
+}
+.vitrine-modele:hover { border-color: var(--color-primary-light); }
+.vitrine-modele.est-actif {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(13, 27, 61, 0.08);
+}
+.vitrine-modele strong { font-size: 0.88rem; color: var(--color-text); }
+.vitrine-modele__resume { font-size: 0.76rem; color: var(--color-text-muted); }
+.vitrine-modele__pour { font-size: 0.72rem; color: var(--color-text-muted); opacity: 0.85; }
+
+/* Croquis de la mise en page : des blocs disposés comme le site le sera.
+   Un mot ne dit pas ce que « Galerie » change ; cette forme, si — à condition
+   que les trois croquis se distinguent au premier regard, ce qu'une simple
+   pile de bandes horizontales ne permettait pas. */
+.vitrine-modele__croquis {
+  display: grid;
+  gap: 3px;
+  height: 40px;
+  padding: 5px;
+  margin-bottom: 5px;
+  border-radius: 6px;
+  background: var(--color-bg);
+}
+.vitrine-modele__croquis i { background: var(--color-primary-light); border-radius: 3px; opacity: 0.45; }
+.vitrine-modele.est-actif .vitrine-modele__croquis i { opacity: 0.9; }
+
+/* Classique : une grille de cartes, trois colonnes. */
+.vitrine-modele__croquis--classique { grid-template-columns: repeat(3, 1fr); }
+.vitrine-modele__croquis--classique i:nth-child(4) { display: none; }
+
+/* Galerie : une grande image en tête, deux plus petites en dessous. */
+.vitrine-modele__croquis--galerie {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1.6fr 1fr;
+}
+.vitrine-modele__croquis--galerie i:first-child { grid-column: 1 / -1; }
+.vitrine-modele__croquis--galerie i:nth-child(4) { display: none; }
+
+/* Catalogue : quatre rangées fines — une liste, pas une grille. */
+.vitrine-modele__croquis--catalogue { grid-template-rows: repeat(4, 1fr); }
+
+/* ─── Couleur ───────────────────────────────────────────────────── */
+.vitrine-couleurs { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.vitrine-couleur {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--pastille);
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 0;
+}
+.vitrine-couleur:hover { transform: scale(1.06); }
+.vitrine-couleur.est-actif {
+  border-color: var(--color-text);
+  box-shadow: 0 0 0 3px rgba(13, 27, 61, 0.13);
+}
+
+.vitrine-couleur-libre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem 0.3rem 0.3rem;
+  border: 1.5px dashed var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+.vitrine-couleur-libre input {
+  width: 30px;
+  height: 30px;
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* ─── Barre d'enregistrement ────────────────────────────────────── */
+.vitrine-barre-enregistrer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   APERÇU
+
+   Une maquette en HTML, pas une iframe : elle réagit pendant que le
+   vendeur règle, sans qu'il ait à enregistrer pour voir. Les blocs
+   n'ont pas de contenu, seulement la forme et la couleur — les deux
+   choses qu'on lui demande de trancher.
+   ═══════════════════════════════════════════════════════════════ */
+.apercu-cadre {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #fff;
+  box-shadow: var(--shadow);
+  font-size: 10px;
+}
+
+.apercu-annonce {
+  background: var(--apercu-accent);
+  color: #fff;
+  text-align: center;
+  padding: 4px 8px;
+  font-size: 8.5px;
+  font-weight: 600;
+  /* Une annonce longue ne doit pas faire grandir l'aperçu : on la coupe,
+     comme le vrai bandeau la ferait passer sur une seconde ligne. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apercu-entete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--color-border);
+}
+.apercu-logo {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--apercu-accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 9px;
+}
+.apercu-nom {
+  font-weight: 650;
+  font-size: 9.5px;
+  color: var(--color-text);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.apercu-menu {
+  width: 14px;
+  height: 2px;
+  background: var(--color-border);
+  box-shadow: 0 4px 0 var(--color-border), 0 -4px 0 var(--color-border);
+}
+
+.apercu-banniere {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 22px 12px;
+  background: linear-gradient(150deg, var(--apercu-accent), rgba(0, 0, 0, 0.55));
+  color: #fff;
+}
+.apercu-banniere.est-compacte { padding: 12px; }
+.apercu-titre { font-weight: 700; font-size: 13px; }
+.apercu-slogan {
+  font-size: 8.5px;
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.apercu-bouton {
+  align-self: flex-start;
+  margin-top: 3px;
+  padding: 4px 9px;
+  border-radius: 5px;
+  background: #fff;
+  color: var(--color-text);
+  font-size: 8px;
+  font-weight: 650;
+}
+
+.apercu-rayons { display: flex; gap: 5px; padding: 9px 12px 0; }
+.apercu-rayons span {
+  height: 13px;
+  flex: 1;
+  border-radius: 999px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+.apercu-grille { display: grid; gap: 5px; padding: 9px 12px; }
+.apercu-grille--3 { grid-template-columns: repeat(3, 1fr); }
+.apercu-grille--2 { grid-template-columns: repeat(2, 1fr); }
+.apercu-grille > div {
+  aspect-ratio: 3 / 4;
+  border-radius: 5px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+.apercu-galerie { padding-bottom: 0; }
+.apercu-vedette {
+  height: 58px;
+  margin: 9px 12px 0;
+  border-radius: 6px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+.apercu-liste { display: flex; flex-direction: column; gap: 5px; padding: 9px 12px; }
+.apercu-liste > div {
+  height: 26px;
+  border-radius: 5px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+/* L'encart de téléchargement de l'application, aux couleurs de SaamBiz et
+   non à celles du vendeur : c'est bien ce que verront ses clients. */
+.apercu-app {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--color-primary);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 8.5px;
+}
+.apercu-app__picto {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--color-accent);
+  flex-shrink: 0;
+}
+
+/* ─── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .vitrine-colonnes { grid-template-columns: 1fr; }
+  .vitrine-apercu-colonne { position: static; max-width: 340px; }
+}
+
+@media (max-width: 640px) {
+  .vitrine-partage { flex-direction: column; }
+  .vitrine-qr { width: 100%; align-items: flex-start; }
+  .vitrine-actions .btn { flex: 1; justify-content: center; }
+}
