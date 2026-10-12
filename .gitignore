@@ -23,7 +23,19 @@ dist-ssr
 *.sln
 *.sw?
 
-# Variables d'environnement — jamais versionnées, sauf l'exemple
+# Variables d'environnement.
+#
+# `.env` — le développement local, propre à chaque machine — et toute variante
+# non listée ci-dessous restent hors de git. Deux exceptions :
+#
+#   • .env.example    le modèle à recopier ;
+#   • .env.production les valeurs de production. Elles ne sont pas secrètes :
+#     Vite compile les variables VITE_* dans le bundle livré au navigateur,
+#     elles sont donc publiques par construction. Les ignorer n'achetait aucune
+#     confidentialité et empêchait la CI de reconstruire le site — un build
+#     sans elles part avec les replis de développement (API sur localhost,
+#     liens morts), sans que rien ne le signale.
 .env
 .env.*
 !.env.example
+!.env.production

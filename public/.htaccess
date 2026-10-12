@@ -1,0 +1,58 @@
+# Configuration Apache de l'espace vendeur SaamBiz — app.saambiz.com
+#
+# Application à page unique : /connexion, /produits, /commandes n'existent pas
+# comme fichiers sur le disque. Sans la règle ci-dessous, l'hébergeur répond
+# 404 dès qu'un vendeur ouvre un lien direct ou recharge la page — et c'est
+# exactement l'adresse /connexion que le bouton de la vitrine vise.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Un fichier ou un dossier réellement présent est servi tel quel.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Tout le reste est une route React.
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# ─── Cache ──────────────────────────────────────────────────────────────────
+# Les fichiers de dist/assets portent une empreinte dans leur nom : un contenu
+# modifié change de nom, on peut donc les garder un an. index.html est le seul
+# point d'entrée à revalider, sinon un vendeur garderait indéfiniment les
+# anciens noms de fichiers.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 month"
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|woff2?|png|jpe?g|webp|svg|ico|avif)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "^index\.html$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# ─── Compression ────────────────────────────────────────────────────────────
+# Comme pour la vitrine, sans effet en l'état : le proxy de cet hébergeur
+# retire Accept-Encoding avant d'atteindre Apache, et ne compresse lui-même
+# que text/html. Le bloc est conservé — correct, gratuit, et actif de lui-même
+# si la configuration de l'hébergeur change.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml \
+    text/javascript application/javascript application/x-javascript \
+    application/json application/xml image/svg+xml
+</IfModule>
+
+# Un espace de gestion n'a rien à faire dans les moteurs de recherche.
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow"
+</IfModule>
+
+Options -Indexes
+DirectoryIndex index.html

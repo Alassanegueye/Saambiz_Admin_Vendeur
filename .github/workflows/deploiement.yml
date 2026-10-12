@@ -1,0 +1,146 @@
+name: Déploiement — espace vendeur
+
+# L'interface est reconstruite et envoyée par FTPS à chaque poussée sur main.
+#
+# `workflow_dispatch` permet de relancer un déploiement sans commit : utile
+# quand rien n'a changé dans le code mais qu'on veut réécrire les fichiers
+# sur l'hébergeur.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Deux déploiements simultanés écriraient dans le même dossier FTP et
+# laisseraient un mélange des deux versions en ligne.
+#
+# `cancel-in-progress: false` est délibéré : interrompre un envoi en cours
+# laisserait le site à moitié déployé — un index.html neuf réclamant des
+# fragments JS jamais envoyés, donc une page blanche. Mieux vaut attendre.
+concurrency:
+  group: deploiement-espace-vendeur
+  cancel-in-progress: false
+
+env:
+  # Dossier créé par LWS à la création du sous-domaine app.saambiz.com.
+  DOSSIER_DISTANT: /app.saambiz.com
+  URL_PUBLIQUE: https://app.saambiz.com
+  # Route servie uniquement grâce au .htaccess — c'est l'adresse exacte que
+  # vise le bouton « Connexion » du site vitrine.
+  ROUTE_PROFONDE: /connexion
+
+jobs:
+  deployer:
+    name: Construire et envoyer
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Construire
+        # Vite charge .env.production tout seul en mode production. Ce fichier
+        # est versionné depuis que cette CI existe : sans lui, le build part
+        # avec les replis de développement — VITE_API_BASE_URL vide, donc des
+        # appels d'API vers la mauvaise origine — et rien ne le signale.
+        run: npm run build
+
+      - name: Vérifier ce qui a été produit
+        # Un dist/ sans .htaccess donne un site dont toutes les routes
+        # profondes répondent 404, alors que l'envoi FTP, lui, réussit. Le
+        # contrôle se fait donc ici, avant d'écrire chez l'hébergeur.
+        run: |
+          set -e
+          test -f dist/index.html || { echo "::error::dist/index.html absent"; exit 1; }
+          test -f dist/.htaccess || { echo "::error::dist/.htaccess absent — toutes les routes profondes répondraient 404"; exit 1; }
+          echo "Fichiers produits : $(find dist -type f | wc -l)"
+
+      - name: Installer lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Vérifier les secrets et le dossier distant
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          set -e
+          for v in FTP_HOST FTP_USER FTP_PASSWORD; do
+            if [ -z "${!v}" ]; then
+              echo "::error::Le secret $v est absent. GitHub → Settings → Secrets and variables → Actions → New repository secret."
+              exit 1
+            fi
+          done
+
+          # On entre dans le dossier sans jamais le créer : un `mirror` sur un
+          # chemin inexistant le créerait silencieusement, et les fichiers
+          # atterriraient dans un dossier que l'hébergeur ne sert à personne.
+          lftp -c "
+            set ftp:ssl-force true;
+            set ssl:verify-certificate no;
+            set net:timeout 20;
+            open \"$FTP_HOST\";
+            user \"$FTP_USER\" \"$FTP_PASSWORD\";
+            cd \"$DOSSIER_DISTANT\";
+            bye
+          " || { echo "::error::Connexion impossible, ou le dossier $DOSSIER_DISTANT n'existe pas sur $FTP_HOST."; exit 1; }
+          echo "Connexion FTPS établie, dossier $DOSSIER_DISTANT accessible."
+
+      - name: Envoyer par FTPS
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          set -e
+          # ssl-force impose le chiffrement : sans lui, lftp retomberait en FTP
+          # clair si la négociation TLS échouait, et le mot de passe passerait
+          # en clair sans que rien ne l'indique dans les journaux.
+          #
+          # verify-certificate est désactivé parce que cet hébergeur présente
+          # un certificat *.lwspanel.com sur ftp.saambiz.com : le nom ne
+          # correspond pas et la vérification échoue toujours. Le transport
+          # reste chiffré ; seule l'identité du serveur n'est pas contrôlée.
+          # C'est une limite de l'hébergeur, pas un choix de confort.
+          #
+          # `user` est passé séparément plutôt que par `open -u user,pass` :
+          # cette forme coupe sur la virgule et casserait sur un mot de passe
+          # qui en contient un.
+          #
+          # mirror SANS --delete, volontairement. Le dossier distant contient
+          # aussi des fichiers étrangers au build (default_index.html de
+          # l'hébergeur, .quarantaine), et les anciens fragments JS doivent
+          # survivre le temps que les visiteurs déjà sur le site finissent de
+          # charger leur page : leur index.html en cache réclame encore les
+          # anciens noms.
+          lftp -c "
+            set ftp:ssl-force true;
+            set ftp:ssl-protect-data true;
+            set ssl:verify-certificate no;
+            set net:timeout 20;
+            set net:max-retries 3;
+            open \"$FTP_HOST\";
+            user \"$FTP_USER\" \"$FTP_PASSWORD\";
+            mirror --reverse --no-delete --parallel=4 --verbose dist/ \"$DOSSIER_DISTANT\";
+            bye
+          "
+
+      - name: Vérifier le site en ligne
+        run: |
+          set -e
+          code=$(curl -sS -m 30 -o /dev/null -w '%{http_code}' "$URL_PUBLIQUE/")
+          echo "Accueil        $URL_PUBLIQUE/ -> $code"
+          [ "$code" = "200" ] || { echo "::error::la page d'accueil répond $code"; exit 1; }
+
+          code=$(curl -sS -m 30 -o /dev/null -w '%{http_code}' "$URL_PUBLIQUE$ROUTE_PROFONDE")
+          echo "Route profonde $ROUTE_PROFONDE -> $code"
+          [ "$code" = "200" ] || { echo "::error::la route profonde répond $code — le .htaccess n'est pas pris en compte par l'hébergeur"; exit 1; }
+
+          echo "Déploiement vérifié."
