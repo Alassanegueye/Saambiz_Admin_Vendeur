@@ -1,3 +1,5 @@
+import ChampsSpecifications from '../../../components/forms/ChampsSpecifications';
+
 /**
  * Champs du produit, présentés dans la modale de création comme dans celle de
  * modification. Un seul formulaire pour les deux : les champs sont identiques,
@@ -15,6 +17,10 @@ export default function FormProduit({
   estModification,
 }) {
   const majChamp = (champ) => (e) => setValeurs({ ...valeurs, [champ]: e.target.value });
+  // Changer de catégorie change les caractéristiques à renseigner : celles
+  // de l'ancienne catégorie n'ont plus de sens (des pointures pour un jus).
+  const majCategorie = (e) => setValeurs({ ...valeurs, categorieId: e.target.value, attributs: {} });
+  const specifications = categories.find((c) => c.id === valeurs.categorieId)?.specifications || [];
 
   return (
     <>
@@ -38,7 +44,7 @@ export default function FormProduit({
           rows={3}
           value={valeurs.description}
           onChange={majChamp('description')}
-          placeholder="Matière, taille, couleurs disponibles…"
+          placeholder="Ce qui rend ce produit unique…"
         />
       </div>
 
@@ -78,15 +84,23 @@ export default function FormProduit({
             id="p-cat"
             className="form-input"
             value={valeurs.categorieId}
-            onChange={majChamp('categorieId')}
+            onChange={majCategorie}
           >
             <option value="">— Choisir —</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.nom}</option>
             ))}
           </select>
+          {erreurs.categorieId && <span className="form-error">{erreurs.categorieId}</span>}
         </div>
       )}
+
+      <ChampsSpecifications
+        specifications={specifications}
+        valeurs={valeurs.attributs || {}}
+        onChange={(attributs) => setValeurs({ ...valeurs, attributs })}
+        erreurs={erreurs.attributs || {}}
+      />
 
       <div className="form-field">
         <label className="form-label" htmlFor="p-img">Photo principale</label>

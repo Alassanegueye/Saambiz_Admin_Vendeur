@@ -969,3 +969,27 @@ table.data-table .td-muted { color: var(--color-text-muted); }
   font-size: 0.82rem;
   color: var(--color-text-muted);
 }
+
+/* ── Caractéristiques produit et catégories (puces) ── */
+.specs { border: 1px solid var(--color-border); border-radius: 10px; padding: 0.9rem 1rem 0.2rem; margin: 0.25rem 0 1rem; }
+.specs-titre { font-size: 0.82rem; font-weight: 700; padding: 0 0.35rem; color: var(--color-text); }
+.specs-puces { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.specs-puce {
+  border: 1px solid var(--color-border); background: var(--color-white); color: var(--color-text);
+  border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 0.8rem; font-weight: 500; cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.specs-puce:hover:not(:disabled) { border-color: var(--color-primary); }
+.specs-puce--on { background: #FEF3D6; border-color: #F2B705; font-weight: 600; }
+.specs-puce:disabled { opacity: 0.45; cursor: not-allowed; }
+.specs-ajout { display: flex; gap: 6px; margin-top: 8px; max-width: 320px; }
+.specs-nombre { display: flex; align-items: center; gap: 8px; }
+.specs-unite { font-size: 0.85rem; color: var(--color-text-muted); }
+.specs-case { display: inline-flex; align-items: center; gap: 8px; font-size: 0.875rem; cursor: pointer; }
+.specs-facultatif { font-weight: 500; color: var(--color-text-muted); }
+.specs-intro { margin: 0 0 0.75rem; }
+.specs-entete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.specs-retirer { background: none; border: none; color: var(--color-text-muted); font: inherit; font-size: 0.78rem; cursor: pointer; text-decoration: underline; }
+.specs-ajout { max-width: none; }
+.specs-nouvelle { display: flex; gap: 6px; margin: 0.25rem 0 0.9rem; }
+.specs-puce--on { background: #EEF3FC; border-color: #0D1B3D; }

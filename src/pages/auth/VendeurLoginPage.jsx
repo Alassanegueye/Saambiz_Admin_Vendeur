@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Helmet } from 'react-helmet';
@@ -7,11 +7,7 @@ import useLoginForm from '../../hooks/useLoginForm';
 import PICTO from '../../assets/images/picto-saambiz.png';
 
 // Retour vers le site public, réglable pour les environnements de recette.
-const SITE_VITRINE = import.meta.env.VITE_SITE_URL || 'https://saambiz.sn';
-
-// Adresse mémorisée par « Se souvenir de moi » : uniquement l'email, jamais
-// le mot de passe.
-const CLE_EMAIL = 'saambiz_email_vendeur';
+const SITE_VITRINE = import.meta.env.VITE_SITE_URL || 'https://saambiz.com';
 
 const ATOUTS = [
   {
@@ -39,31 +35,15 @@ const ATOUTS = [
 export default function VendeurLoginPage() {
   const navigate = useNavigate();
   const [voirMdp, setVoirMdp] = useState(false);
-  const [seSouvenir, setSeSouvenir] = useState(true);
 
   const { email, setEmail, password, setPassword, loading, frozen, countdown, handleSubmit } =
     useLoginForm((utilisateur) => {
       if (utilisateur.role !== 'Vendeur') {
         return "Ce compte n'est pas un compte vendeur.";
       }
-      // Seule l'adresse est retenue, et seulement si on l'a demandé.
-      try {
-        if (seSouvenir) localStorage.setItem(CLE_EMAIL, utilisateur.email || '');
-        else localStorage.removeItem(CLE_EMAIL);
-      } catch { /* stockage indisponible : sans conséquence */ }
-
       toast.success('Bienvenue sur votre espace vendeur !');
       navigate(ROUTES.DASHBOARD, { replace: true });
     });
-
-  // Pré-remplissage à l'ouverture si l'adresse a été mémorisée.
-  useEffect(() => {
-    try {
-      const memorise = localStorage.getItem(CLE_EMAIL);
-      if (memorise) setEmail(memorise);
-    } catch { /* ignore */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const motDePasseOublie = (e) => {
     e.preventDefault();
@@ -84,13 +64,6 @@ export default function VendeurLoginPage() {
       <div className="cnx">
         {/* ── Panneau de gauche ── */}
         <aside className="cnx-panneau">
-          <div className="cnx-decor" aria-hidden="true">
-            <span className="cnx-cercle c1" />
-            <span className="cnx-cercle c2" />
-            <span className="cnx-cercle c3" />
-            <span className="cnx-halo" />
-          </div>
-
           <div className="cnx-panneau-contenu">
             <div className="cnx-marque">
               <div className="cnx-marque-ligne">
@@ -130,17 +103,16 @@ export default function VendeurLoginPage() {
 
         {/* ── Panneau de droite ── */}
         <main className="cnx-droite">
-          <div className="cnx-carte">
-            <span className="cnx-carte-icone" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8"
-                   strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" stroke="currentColor" />
-                <path d="M9 21v-6h6v6" stroke="currentColor" />
-                <path d="M3 9l1.5-5h15L21 9" stroke="var(--color-accent)" />
-                <path d="M8 4v5M12 4v5M16 4v5" stroke="var(--color-accent)" strokeWidth="1.5" />
-              </svg>
-            </span>
+          <a href={SITE_VITRINE} className="cnx-retour">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                 strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            Retour au site
+          </a>
 
+          <div className="cnx-carte">
             <h2 className="cnx-carte-titre">Espace vendeur</h2>
             <p className="cnx-carte-sous">Connectez-vous avec le compte de votre boutique</p>
 
@@ -208,35 +180,13 @@ export default function VendeurLoginPage() {
               </div>
 
               <div className="cnx-ligne">
-                <label className="cnx-souvenir">
-                  <input
-                    type="checkbox"
-                    checked={seSouvenir}
-                    onChange={(e) => setSeSouvenir(e.target.checked)}
-                  />
-                  <span className="cnx-case" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </span>
-                  Se souvenir de moi
-                </label>
                 <a href="#oubli" className="cnx-oubli" onClick={motDePasseOublie}>
                   Mot de passe oublié ?
                 </a>
               </div>
 
               <button className="cnx-bouton" type="submit" disabled={loading || frozen}>
-                <span className="cnx-bouton-fleche" aria-hidden="true">
-                  {loading ? (
-                    <div className="spinner spinner-sm" style={{ borderTopColor: '#fff', borderColor: 'rgba(255,255,255,0.3)' }} />
-                  ) : (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                      <polyline points="12 5 19 12 12 19" />
-                    </svg>
-                  )}
-                </span>
+                {loading && <div className="spinner spinner-sm" style={{ borderTopColor: '#fff', borderColor: 'rgba(255,255,255,0.3)' }} />}
                 {loading ? 'Connexion…' : frozen ? `Attente ${countdown}s…` : 'Se connecter'}
               </button>
             </form>
@@ -257,15 +207,6 @@ export default function VendeurLoginPage() {
             </a>
           </div>
 
-          <a href={SITE_VITRINE} className="cnx-retour">← Retour sur saambiz.sn</a>
-
-          <p className="cnx-securite">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"
-                 strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-            Sécurisé et fiable. Vos données sont protégées.
-          </p>
         </main>
       </div>
     </>

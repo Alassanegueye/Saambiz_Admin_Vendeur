@@ -73,7 +73,7 @@ const ROUTES = [
       token: 'demo.' + btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 86400 })) + '.demo',
       utilisateur: estAdmin
         ? { ...VENDEUR_DEMO, id: 'demo-admin', prenom: 'Alassane', nom: 'Gueye',
-            email: email || 'admin@saambiz.sn', role: 'Admin' }
+            email: email || 'admin@saambiz.com', role: 'Admin' }
         : { ...VENDEUR_DEMO, email: email || VENDEUR_DEMO.email },
       menus: estAdmin ? MENUS_DEMO : [],
     };

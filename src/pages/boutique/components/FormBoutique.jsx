@@ -1,9 +1,24 @@
+import { MAX_CATEGORIES } from '../useBoutique';
+
 /** Informations de la vitrine — ce que les clients voient de la boutique. */
 export default function FormBoutique({
   valeurs, setValeurs, erreurs, saving,
-  boutique, logo, setLogo, onEnregistrer,
+  boutique, logo, setLogo, onEnregistrer, categories = [],
 }) {
   const majChamp = (champ) => (e) => setValeurs({ ...valeurs, [champ]: e.target.value });
+
+  // Les valeurs peuvent être des slugs, des ids ou un ancien libellé.
+  const correspond = (c, v) => [c.slug, c.id, c.nom].some((x) => x && x.toLowerCase() === String(v).toLowerCase());
+  const choisies = valeurs.categories || [];
+  const rang = (c) => choisies.findIndex((v) => correspond(c, v));
+  const basculerCategorie = (c) => {
+    const i = rang(c);
+    if (i >= 0) {
+      setValeurs({ ...valeurs, categories: choisies.filter((_, j) => j !== i) });
+    } else if (choisies.length < MAX_CATEGORIES) {
+      setValeurs({ ...valeurs, categories: [...choisies, c.slug || c.id] });
+    }
+  };
 
   return (
     <div className="card">
@@ -66,14 +81,26 @@ export default function FormBoutique({
         </div>
 
         <div className="form-field">
-          <label className="form-label" htmlFor="b-cat">Catégorie principale</label>
-          <input
-            id="b-cat"
-            className="form-input"
-            value={valeurs.categorie}
-            onChange={majChamp('categorie')}
-            placeholder="Mode, Beauté, Alimentation…"
-          />
+          <span className="form-label">Catégories de la boutique</span>
+          <span className="form-hint">
+            1 à {MAX_CATEGORIES} catégories. La première choisie (★) est la principale.
+          </span>
+          <div className="specs-puces" role="group" aria-label="Catégories de la boutique">
+            {categories.map((c) => {
+              const i = rang(c);
+              const plein = i < 0 && choisies.length >= MAX_CATEGORIES;
+              return (
+                <button
+                  type="button" key={c.id}
+                  className={`specs-puce${i >= 0 ? ' specs-puce--on' : ''}`}
+                  aria-pressed={i >= 0}
+                  disabled={plein}
+                  onClick={() => basculerCategorie(c)}
+                >{i === 0 ? '★ ' : ''}{c.nom}</button>
+              );
+            })}
+          </div>
+          {erreurs.categories && <span className="form-error">{erreurs.categories}</span>}
         </div>
 
         <div className="form-field">

@@ -10,6 +10,7 @@ import {
 } from '../../service/vendeur.service';
 import { getCategories } from '../../service/categories.service';
 import useDebounce from '../../hooks/useDebounce';
+import { verifierSpecifications } from '../../components/forms/ChampsSpecifications';
 
 /**
  * Contrôleur de la page Produits.
@@ -31,6 +32,8 @@ export const CHAMPS_VIDES = {
   prix: '',
   quantite: '',
   categorieId: '',
+  // Caractéristiques propres à la catégorie : { tailles: [...], etat: 'Neuf' }
+  attributs: {},
 };
 
 export default function useProduits() {
@@ -122,6 +125,7 @@ export default function useProduits() {
       prix: produit.prix ?? '',
       quantite: produit.quantite ?? '',
       categorieId: produit.categorieId || produit.categorie?.id || '',
+      attributs: produit.attributs || {},
     });
     reinitialiserFormulaire();
     setEdition(produit);
@@ -138,6 +142,10 @@ export default function useProduits() {
     if (valeurs.quantite !== '' && Number(valeurs.quantite) < 0) {
       e.quantite = 'Quantité invalide.';
     }
+    if (categories.length && !valeurs.categorieId) e.categorieId = 'Choisissez une catégorie.';
+    const specs = categories.find((c) => c.id === valeurs.categorieId)?.specifications || [];
+    const erreursSpecs = verifierSpecifications(specs, valeurs.attributs);
+    if (Object.keys(erreursSpecs).length) e.attributs = erreursSpecs;
     setErreurs(e);
     return Object.keys(e).length === 0;
   };
@@ -159,6 +167,14 @@ export default function useProduits() {
     } catch (err) {
       // Le backend refuse la publication si l'abonnement est échu : on relaie
       // son message plutôt qu'une erreur générique.
+      // 422 : le backend précise champ par champ ce qui manque.
+      const details = err?.response?.data?.details || err?.response?.data?.errors;
+      if (Array.isArray(details) && details.length) {
+        setErreurs((prec) => ({
+          ...prec,
+          attributs: Object.fromEntries(details.filter((d) => d.champ).map((d) => [d.champ, d.message])),
+        }));
+      }
       toast.error(err?.response?.data?.message || "Erreur lors de l'enregistrement");
     } finally {
       setSaving(false);

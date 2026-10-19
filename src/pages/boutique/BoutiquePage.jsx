@@ -47,6 +47,7 @@ export default function BoutiquePage() {
         erreurs={b.erreurs}
         saving={b.saving}
         boutique={b.boutique}
+        categories={b.categories}
         logo={b.logo}
         setLogo={b.setLogo}
         onEnregistrer={b.enregistrer}

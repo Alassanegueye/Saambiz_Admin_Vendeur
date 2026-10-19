@@ -3,65 +3,40 @@
    Volontairement autonome : c'est la seule page publique du produit, elle ne
    partage rien avec la mise en page du back-office.
 
-   Règle de cet écran : tout tient dans la fenêtre, sans défilement. Les
-   hauteurs (marges, rembourrages, tailles d'icônes) sont donc exprimées en
-   clamp() indexé sur `vh` : sur un grand écran on retrouve la maquette, sur
-   un portable de 768 px la page se resserre au lieu de déborder. Ne pas
-   remettre de valeur fixe en hauteur sans vérifier un écran de 640 px.
+   Style : aplats uniquement (bleu marine, blanc, or en accent), aucun
+   dégradé ni décor. Tout tient dans la fenêtre sans défilement : les
+   hauteurs suivent `vh` via clamp() pour se resserrer sur un portable.
    ══════════════════════════════════════════════════════════════════════════ */
 
+/* Les largeurs à 100 % incluent les marges intérieures : sans cette
+   règle, la carte dépassait de l'écran sur téléphone. */
+.cnx, .cnx *, .cnx *::before, .cnx *::after { box-sizing: border-box; }
+
 .cnx {
-  /* dvh d'abord : sur mobile, la barre d'adresse ne doit pas créer un
-     débordement de quelques pixels. vh reste en repli. */
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  background: var(--color-bg);
-
-  /* Taille de la pastille qui chevauche la carte : elle commande aussi le
-     décalage négatif, sinon le chevauchement se décolle en se réduisant. */
-  --cnx-icone: clamp(46px, 7.4vh, 74px);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  background: #F7F9FC;
 }
 
 /* ── Panneau de gauche ───────────────────────────────────────────────────── */
 .cnx-panneau {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(155deg, #0D1B3D 0%, #0A1732 55%, #060F26 100%);
+  background: #0D1B3D;
   color: #fff;
   display: flex;
   align-items: center;
-  padding: clamp(1.5rem, 4vh, 3rem) clamp(1.75rem, 3.4vw, 3.5rem);
-  /* Bord droit en biais, comme sur la maquette. */
-  clip-path: polygon(0 0, 100% 0, calc(100% - 78px) 100%, 0 100%);
+  padding: clamp(1.5rem, 5vh, 3.5rem) clamp(1.75rem, 4vw, 4rem);
 }
 
-.cnx-decor { position: absolute; inset: 0; pointer-events: none; }
-.cnx-cercle {
-  position: absolute;
-  border: 1px solid rgba(255, 255, 255, 0.055);
-  border-radius: 50%;
-}
-.cnx-cercle.c1 { width: 640px; height: 640px; right: -230px; top: -170px; }
-.cnx-cercle.c2 { width: 900px; height: 900px; right: -330px; top: -290px; }
-.cnx-cercle.c3 { width: 520px; height: 520px; left: -220px; bottom: -190px; }
-.cnx-halo {
-  position: absolute;
-  width: 460px; height: 460px;
-  right: -120px; bottom: -140px;
-  background: radial-gradient(circle, rgba(242, 183, 5, 0.16), transparent 68%);
-  filter: blur(10px);
-}
+.cnx-panneau-contenu { max-width: 440px; }
 
-.cnx-panneau-contenu { position: relative; z-index: 1; max-width: 560px; max-height: 100%; }
-
-.cnx-marque { margin-bottom: clamp(1rem, 3vh, 2.75rem); }
-.cnx-marque-ligne { display: flex; align-items: center; gap: 14px; }
+.cnx-marque { margin-bottom: clamp(1.5rem, 5vh, 3rem); }
+.cnx-marque-ligne { display: flex; align-items: center; gap: 12px; }
 .cnx-picto {
-  width: clamp(46px, 6.4vh, 62px); height: clamp(46px, 6.4vh, 62px);
-  border-radius: 16px;
+  width: 42px; height: 42px;
+  border-radius: 10px;
   background: #fff;
   display: grid; place-items: center;
   flex-shrink: 0;
@@ -69,206 +44,159 @@
 .cnx-picto img { width: 68%; height: auto; }
 .cnx-mot {
   font-family: var(--font-display);
-  font-size: clamp(1.75rem, 3.4vh, 2.4rem);
-  font-weight: 800; letter-spacing: -1px; line-height: 1;
+  font-size: 1.5rem;
+  font-weight: 700; letter-spacing: -0.5px; line-height: 1;
 }
 .cnx-mot span { color: var(--color-accent); }
 .cnx-signature {
-  margin-top: 6px; margin-left: calc(clamp(46px, 6.4vh, 62px) + 14px);
-  font-size: clamp(0.84rem, 1.5vh, 0.94rem); color: rgba(255, 255, 255, 0.62);
+  margin-top: 6px; margin-left: 54px;
+  font-size: 0.8rem; color: rgba(255, 255, 255, 0.55);
 }
 
 .cnx-titre {
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 1.2vw + 1.85vh, 2.4rem);
-  font-weight: 800; line-height: 1.24; letter-spacing: -0.6px;
-  margin-bottom: clamp(0.55rem, 1.6vh, 1rem);
+  font-size: clamp(1.3rem, 0.8vw + 1.6vh, 1.85rem);
+  font-weight: 700; line-height: 1.25; letter-spacing: -0.4px;
+  margin-bottom: 0.75rem;
 }
 .cnx-titre em { font-style: normal; color: var(--color-accent); }
 
 .cnx-chapo {
-  font-size: clamp(0.88rem, 1.55vh, 1.05rem); line-height: 1.6;
-  color: rgba(255, 255, 255, 0.66);
-  margin-bottom: clamp(0.9rem, 2.6vh, 2rem);
+  font-size: 0.875rem; line-height: 1.6;
+  color: rgba(255, 255, 255, 0.62);
+  margin-bottom: clamp(1.25rem, 3.5vh, 2rem);
 }
 
-.cnx-atouts { list-style: none; display: flex; flex-direction: column; gap: clamp(7px, 1.4vh, 12px); }
+/* Les atouts : une simple liste, séparée par des filets — pas de cartes. */
+.cnx-atouts { list-style: none; display: flex; flex-direction: column; }
 .cnx-atout {
-  display: flex; align-items: center; gap: 14px;
-  padding: clamp(9px, 1.6vh, 14px) 16px;
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
-  transition: var(--transition);
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: clamp(10px, 1.8vh, 14px) 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
 }
-.cnx-atout:hover {
-  background: rgba(255, 255, 255, 0.075);
-  border-color: rgba(242, 183, 5, 0.28);
-}
+.cnx-atout:last-child { border-bottom: 1px solid rgba(255, 255, 255, 0.10); }
 .cnx-atout-icone {
-  width: clamp(32px, 4.6vh, 40px); height: clamp(32px, 4.6vh, 40px); flex-shrink: 0;
-  border-radius: 12px;
-  background: rgba(242, 183, 5, 0.14);
+  flex-shrink: 0; margin-top: 1px;
   color: var(--color-accent);
-  display: grid; place-items: center;
+  line-height: 0;
 }
-.cnx-atout-icone svg { width: clamp(17px, 2.4vh, 21px); height: clamp(17px, 2.4vh, 21px); }
+.cnx-atout-icone svg { width: 18px; height: 18px; }
 .cnx-atout-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.cnx-atout-texte strong { font-size: clamp(0.86rem, 1.55vh, 0.99rem); font-weight: 700; }
-.cnx-atout-texte small { font-size: clamp(0.78rem, 1.4vh, 0.89rem); color: rgba(255, 255, 255, 0.55); }
+.cnx-atout-texte strong { font-size: 0.875rem; font-weight: 600; }
+.cnx-atout-texte small { font-size: 0.78rem; color: rgba(255, 255, 255, 0.55); line-height: 1.5; }
 
 /* ── Panneau de droite ───────────────────────────────────────────────────── */
 .cnx-droite {
+  position: relative;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: clamp(1rem, 3.2vh, 3rem) clamp(1rem, 2.6vw, 2.5rem);
-  gap: clamp(0.45rem, 1.4vh, 1.1rem);
+  padding: clamp(3.5rem, 8vh, 4.5rem) clamp(1rem, 3vw, 3rem) clamp(1rem, 3vh, 2rem);
   min-height: 0;
 }
 
-.cnx-carte {
-  width: 100%; max-width: 512px;
-  background: var(--color-white);
+/* Retour vers le site public, en haut à gauche du panneau. */
+.cnx-retour {
+  position: absolute; top: clamp(1rem, 3vh, 1.75rem); left: clamp(1rem, 3vw, 2.25rem);
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px 8px 12px;
   border: 1px solid var(--color-border);
-  border-radius: 22px;
-  padding: clamp(1.5rem, 3.4vh, 2.9rem) clamp(1.5rem, 2.6vw, 2.6rem) clamp(1.4rem, 2.9vh, 2.4rem);
-  box-shadow: 0 22px 60px rgba(13, 27, 61, 0.10);
+  border-radius: 8px;
+  background: var(--color-white);
+  font-size: 0.82rem; font-weight: 600;
+  color: var(--color-text); text-decoration: none;
+  transition: border-color 0.2s ease;
 }
+.cnx-retour svg { width: 15px; height: 15px; }
+.cnx-retour:hover { border-color: var(--color-primary); }
 
-.cnx-carte-icone {
-  width: var(--cnx-icone); height: var(--cnx-icone);
-  /* -94,5 % de sa propre taille : la pastille reste à cheval sur le bord
-     supérieur de la carte quelle que soit la hauteur d'écran. */
-  margin: calc(var(--cnx-icone) * -0.945) auto clamp(0.7rem, 1.8vh, 1.35rem);
-  border-radius: 18px;
+.cnx-carte {
+  width: 100%; max-width: 560px;
   background: var(--color-white);
   border: 1px solid var(--color-border);
-  box-shadow: 0 8px 22px rgba(13, 27, 61, 0.10);
-  display: grid; place-items: center;
-  color: var(--color-primary);
+  border-radius: 16px;
+  padding: clamp(1.75rem, 4.5vh, 3rem) clamp(1.5rem, 3.2vw, 3rem);
+  box-shadow: 0 1px 3px rgba(13, 27, 61, 0.05);
 }
-.cnx-carte-icone svg { width: 47%; height: 47%; }
 
 .cnx-carte-titre {
   font-family: var(--font-display);
-  font-size: clamp(1.3rem, 3.2vh, 1.95rem); font-weight: 700; letter-spacing: -0.5px;
-  text-align: center; color: var(--color-text);
+  font-size: clamp(1.25rem, 2.6vh, 1.5rem); font-weight: 700; letter-spacing: -0.4px;
+  color: var(--color-text);
 }
 .cnx-carte-sous {
-  text-align: center;
-  font-size: clamp(0.85rem, 1.5vh, 0.98rem); color: var(--color-text-muted);
-  margin: 7px 0 clamp(0.9rem, 2.8vh, 1.8rem);
+  font-size: 0.875rem; color: var(--color-text-muted);
+  margin: 6px 0 clamp(1.25rem, 3.5vh, 2rem);
 }
 
-.cnx-champ { margin-bottom: clamp(0.6rem, 1.7vh, 1.05rem); }
+.cnx-champ { margin-bottom: clamp(0.85rem, 2.2vh, 1.25rem); }
 .cnx-label {
-  display: block; margin-bottom: clamp(4px, 0.9vh, 7px);
-  font-size: clamp(0.7rem, 1.25vh, 0.79rem); font-weight: 700;
-  letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--color-text-muted);
+  display: block; margin-bottom: 7px;
+  font-size: 0.82rem; font-weight: 600;
+  color: var(--color-text);
 }
 .cnx-saisie {
   display: flex; align-items: center;
-  background: var(--color-bg);
-  border: 1.5px solid var(--color-border);
-  border-radius: 12px;
-  transition: var(--transition);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .cnx-saisie:focus-within {
-  border-color: var(--color-accent);
-  background: var(--color-white);
-  box-shadow: 0 0 0 3px rgba(242, 183, 5, 0.14);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(13, 27, 61, 0.08);
 }
 .cnx-saisie-icone {
   display: grid; place-items: center;
-  padding: 0 10px 0 13px;
+  padding: 0 10px 0 14px;
   color: var(--color-text-muted);
 }
-.cnx-saisie-icone svg { width: 19px; height: 19px; }
+.cnx-saisie-icone svg { width: 18px; height: 18px; }
 .cnx-saisie input {
   flex: 1; min-width: 0;
   border: none; background: none; outline: none;
-  padding: clamp(9px, 1.8vh, 15px) 12px clamp(9px, 1.8vh, 15px) 0;
-  font-family: inherit; font-size: clamp(0.9rem, 1.65vh, 1.02rem);
+  padding: clamp(12px, 2.2vh, 16px) 12px clamp(12px, 2.2vh, 16px) 0;
+  font-family: inherit; font-size: 0.95rem;
   color: var(--color-text);
 }
-.cnx-saisie input::placeholder { color: var(--color-text-muted); opacity: 0.75; }
+.cnx-saisie input::placeholder { color: var(--color-text-muted); opacity: 0.7; }
 .cnx-oeil {
   background: none; border: none; cursor: pointer;
-  padding: 0 13px; display: grid; place-items: center;
+  padding: 0 14px; display: grid; place-items: center;
   color: var(--color-text-muted);
 }
 .cnx-oeil:hover { color: var(--color-primary); }
-.cnx-oeil svg { width: 19px; height: 19px; }
+.cnx-oeil svg { width: 18px; height: 18px; }
 
 .cnx-ligne {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 1rem; margin: 0.3rem 0 clamp(0.8rem, 2.1vh, 1.35rem);
-}
-.cnx-souvenir {
-  display: flex; align-items: center; gap: 10px;
-  font-size: clamp(0.82rem, 1.5vh, 0.93rem); color: var(--color-text); cursor: pointer;
-}
-.cnx-souvenir input { position: absolute; opacity: 0; width: 0; height: 0; }
-.cnx-case {
-  width: 21px; height: 21px; flex-shrink: 0;
-  border-radius: 6px;
-  border: 1.5px solid var(--color-border);
-  background: var(--color-white);
-  display: grid; place-items: center;
-  color: transparent;
-  transition: var(--transition);
-}
-.cnx-case svg { width: 12px; height: 12px; }
-.cnx-souvenir input:checked + .cnx-case {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-primary);
-}
-.cnx-souvenir input:focus-visible + .cnx-case {
-  box-shadow: 0 0 0 3px rgba(242, 183, 5, 0.28);
+  display: flex; justify-content: flex-end;
+  margin: -0.25rem 0 clamp(1rem, 2.6vh, 1.5rem);
 }
 .cnx-oubli {
-  font-size: clamp(0.82rem, 1.5vh, 0.93rem); font-weight: 600;
+  font-size: 0.82rem; font-weight: 600;
   color: var(--color-text-muted); text-decoration: none;
 }
 .cnx-oubli:hover { color: var(--color-primary); text-decoration: underline; }
 
-/* Bouton principal : dégradé marine → or, avec la flèche encadrée à gauche. */
+/* Bouton principal : bleu marine plein. */
 .cnx-bouton {
-  position: relative;
   width: 100%;
-  display: flex; align-items: center; justify-content: center;
-  padding: clamp(11px, 2.2vh, 17px) 20px;
-  border: none; border-radius: 13px;
-  background: linear-gradient(90deg, #0D1B3D 0%, #1E3A78 32%, #C9920A 72%, #F2B705 100%);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: clamp(12px, 2.2vh, 15px) 20px;
+  border: none; border-radius: 10px;
+  background: var(--color-primary);
   color: #fff;
-  font-family: var(--font-display);
-  font-size: clamp(0.95rem, 1.8vh, 1.08rem); font-weight: 700;
+  font-family: inherit;
+  font-size: 0.95rem; font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 10px 26px rgba(13, 27, 61, 0.22);
-  transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+  transition: background-color 0.2s ease;
 }
-.cnx-bouton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 34px rgba(13, 27, 61, 0.28);
-  filter: brightness(1.05);
-}
+.cnx-bouton:hover:not(:disabled) { background: #1E3A78; }
 .cnx-bouton:disabled { opacity: 0.7; cursor: not-allowed; }
-.cnx-bouton-fleche {
-  position: absolute; left: 10px;
-  width: clamp(34px, 4.6vh, 40px); height: clamp(34px, 4.6vh, 40px);
-  border-radius: 10px;
-  background: rgba(6, 15, 38, 0.55);
-  display: grid; place-items: center;
-}
-.cnx-bouton-fleche svg { width: 17px; height: 17px; }
 
 .cnx-ou {
-  display: flex; align-items: center; gap: 14px;
-  margin: clamp(0.7rem, 1.9vh, 1.35rem) 0;
-  font-size: clamp(0.72rem, 1.35vh, 0.8rem); font-weight: 700;
-  letter-spacing: 0.08em;
+  display: flex; align-items: center; gap: 12px;
+  margin: clamp(1rem, 2.6vh, 1.5rem) 0;
+  font-size: 0.75rem; font-weight: 500;
   color: var(--color-text-muted);
 }
 .cnx-ou::before, .cnx-ou::after {
@@ -276,87 +204,39 @@
 }
 
 .cnx-secondaire {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  padding: clamp(9px, 1.8vh, 15px) 18px;
-  border: 1.5px solid var(--color-border);
-  border-radius: 13px;
-  font-size: clamp(0.86rem, 1.6vh, 0.96rem); font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: clamp(11px, 2vh, 14px) 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 0.875rem; font-weight: 600;
   color: var(--color-text); text-decoration: none;
-  transition: var(--transition);
+  transition: border-color 0.2s ease;
 }
-.cnx-secondaire:hover {
-  border-color: var(--color-primary);
-  background: var(--color-bg);
-}
-.cnx-secondaire svg { width: 19px; height: 19px; color: var(--color-primary); }
-
-.cnx-retour {
-  font-size: clamp(0.82rem, 1.5vh, 0.92rem); font-weight: 500;
-  color: var(--color-text-muted); text-decoration: none;
-}
-.cnx-retour:hover { color: var(--color-primary); text-decoration: underline; }
-
-.cnx-securite {
-  display: flex; align-items: center; gap: 9px;
-  padding: clamp(6px, 1.2vh, 10px) 18px;
-  border-radius: 999px;
-  background: rgba(242, 183, 5, 0.11);
-  font-size: clamp(0.79rem, 1.45vh, 0.89rem); color: var(--color-text-muted);
-}
-.cnx-securite svg { width: 16px; height: 16px; color: var(--color-accent-dark); }
+.cnx-secondaire:hover { border-color: var(--color-primary); }
+.cnx-secondaire svg { width: 17px; height: 17px; color: var(--color-primary); }
 
 /* ── Adaptations ─────────────────────────────────────────────────────────── */
 @media (max-width: 1080px) {
-  .cnx-panneau { padding: 2.5rem; clip-path: none; }
-  .cnx-mot { font-size: 2rem; }
-  .cnx-picto { width: 54px; height: 54px; }
-  .cnx-picto img { width: 36px; }
-  .cnx-signature { margin-left: 68px; }
+  .cnx { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
+  .cnx-panneau { padding: 2rem; }
 }
 
 /* Sous 900 px, le panneau d'arguments passe derrière l'essentiel : se
    connecter. On le retire plutôt que de l'empiler au-dessus du formulaire. */
 @media (max-width: 900px) {
-  .cnx { grid-template-columns: 1fr; }
+  .cnx { grid-template-columns: minmax(0, 1fr); }
   .cnx-panneau { display: none; }
   .cnx-droite { height: 100%; }
 }
 
 @media (max-width: 480px) {
-  .cnx-droite { padding: clamp(0.75rem, 2.4vh, 2rem) 1rem; }
-  .cnx-carte {
-    padding: clamp(1.4rem, 3.2vh, 2.5rem) 1.5rem clamp(1.25rem, 2.6vh, 2rem);
-    border-radius: 18px;
-  }
-  .cnx-carte-titre { font-size: clamp(1.2rem, 2.7vh, 1.4rem); }
-  .cnx-ligne { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .cnx-droite { padding: 4.5rem 1rem 1rem; justify-content: flex-start; }
+  .cnx-carte { padding: 1.5rem 1.25rem; border-radius: 14px; }
+  .cnx-carte-titre { font-size: 1.25rem; }
 }
 
-/* Fenêtre courte : on resserre d'un cran de plus, et la pastille rentre à
-   moitié dans la carte au lieu de la chevaucher presque entièrement. C'est
-   ce qui permet de tout garder à l'écran sans retirer une ligne. */
-@media (max-height: 640px) {
-  .cnx { --cnx-icone: 42px; }
-  .cnx-carte-icone { margin-top: calc(var(--cnx-icone) * -0.5); }
-  .cnx-carte-titre { font-size: 1.2rem; }
-  .cnx-ou { margin: 0.55rem 0; }
-  .cnx-retour { font-size: 0.78rem; }
-  .cnx-securite { padding: 5px 14px; font-size: 0.74rem; }
-}
-
-/* Dernier cran avant le repli défilant (petits téléphones type 320 x 568). */
-@media (max-height: 580px) {
-  .cnx { --cnx-icone: 38px; }
-  .cnx-carte { padding-top: 0.95rem; padding-bottom: 0.85rem; }
-  .cnx-carte-sous { margin-bottom: 0.6rem; }
-  .cnx-champ { margin-bottom: 0.45rem; }
-  .cnx-droite { gap: 0.3rem; }
-}
-
-/* Écran très bas (téléphone couché, fenêtre réduite au minimum) : même
-   resserrée, la carte ne tient plus. Plutôt que de la rogner, on rend la
-   page défilable — le défilement est le repli, pas le fonctionnement normal. */
-@media (max-height: 460px) {
+/* Écran très bas (téléphone couché, fenêtre réduite) : on rend la page
+   défilable plutôt que de rogner la carte. */
+@media (max-height: 560px) {
   .cnx { height: auto; min-height: 100dvh; overflow: auto; }
-  .cnx-droite { padding-top: 2.5rem; padding-bottom: 1.5rem; }
 }

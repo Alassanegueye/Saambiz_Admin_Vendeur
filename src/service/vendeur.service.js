@@ -26,9 +26,10 @@ export const rechercherProduits = (q) => api.get(VENDEUR.RECHERCHE, { params: { 
 function toFormData(valeurs, fichiers = {}) {
   const form = new FormData();
   Object.entries(valeurs).forEach(([cle, valeur]) => {
-    if (valeur !== undefined && valeur !== null && valeur !== '') {
-      form.append(cle, valeur);
-    }
+    if (valeur === undefined || valeur === null || valeur === '') return;
+    // Objets et tableaux (caractéristiques du produit) partent en JSON :
+    // un FormData n'accepte que du texte et des fichiers.
+    form.append(cle, typeof valeur === 'object' ? JSON.stringify(valeur) : valeur);
   });
   if (fichiers.image) form.append('image', fichiers.image);
   (fichiers.images || []).forEach((f) => form.append('images', f));
@@ -56,7 +57,8 @@ export const getMaBoutique = () => api.get(VENDEUR.MA_BOUTIQUE);
 export const modifierBoutique = (valeurs, logo) => {
   const form = new FormData();
   Object.entries(valeurs).forEach(([cle, valeur]) => {
-    if (valeur !== undefined && valeur !== null) form.append(cle, valeur);
+    if (valeur === undefined || valeur === null) return;
+    form.append(cle, typeof valeur === 'object' ? JSON.stringify(valeur) : valeur);
   });
   if (logo) form.append('logo', logo);
   return api.put(VENDEUR.MODIFIER_BOUTIQUE, form, {

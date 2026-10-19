@@ -40,7 +40,7 @@ export const ENDPOINTS = {
     BOUTIQUE_PAUSE:   '/vendeur/boutique/pause',
     BOUTIQUE_REACTIVER:'/vendeur/boutique/reactiver',
 
-    // Vitrine : le site web public de la boutique (saambiz.sn/b/<slug>)
+    // Vitrine : le site web public de la boutique (saambiz.com/b/<slug>)
     MA_VITRINE:       '/vendeur/ma-vitrine',
 
     // Abonnement

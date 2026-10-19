@@ -198,7 +198,7 @@ export default function VitrinePage() {
               <div className="form-field">
                 <label className="form-label" htmlFor="v-slug">Nom dans l'adresse</label>
                 <div className="vitrine-slug">
-                  <span>saambiz.sn/b/</span>
+                  <span>saambiz.com/b/</span>
                   <input
                     id="v-slug"
                     className="form-input"

@@ -8,6 +8,10 @@ import {
   getStatutVerification,
   soumettreVerification,
 } from '../../service/vendeur.service';
+import { getCategories } from '../../service/categories.service';
+
+/** Une boutique se range dans 1 à 3 catégories ; la première est la principale. */
+export const MAX_CATEGORIES = 3;
 
 /**
  * Contrôleur de la page Boutique.
@@ -23,7 +27,7 @@ export const CHAMPS_VIDES = {
   description: '',
   localisation: '',
   telephone: '',
-  categorie: '',
+  categories: [],
   slogan: '',
 };
 
@@ -42,6 +46,7 @@ export default function useBoutique() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [erreurs, setErreurs] = useState({});
+  const [categories, setCategories] = useState([]);
   const [confirmPause, setConfirmPause] = useState(false);
 
   // Vérification du profil — indépendante de la boutique elle-même.
@@ -62,7 +67,11 @@ export default function useBoutique() {
           description: b.description || '',
           localisation: b.localisation || '',
           telephone: b.telephone || b.whatsapp || '',
-          categorie: b.categorie || '',
+          // Slugs, principale en premier. Une boutique d'avant la refonte n'a
+          // que son ancien libellé : le backend sait le traduire.
+          categories: Array.isArray(b.categories) && b.categories.length
+            ? b.categories.map((c) => c.slug || c.id)
+            : (b.categorie ? [b.categorie] : []),
           slogan: b.slogan || '',
         });
       }
@@ -92,9 +101,19 @@ export default function useBoutique() {
 
   useEffect(() => { chargerVerification(); }, [chargerVerification]);
 
+  useEffect(() => {
+    getCategories()
+      .then((res) => {
+        const liste = res.data?.categories || res.data?.data || res.data || [];
+        setCategories(Array.isArray(liste) ? liste : []);
+      })
+      .catch(() => setCategories([]));
+  }, []);
+
   const enregistrer = async () => {
     const e = {};
     if (!valeurs.nom.trim()) e.nom = 'Le nom est requis.';
+    if (!valeurs.categories.length) e.categories = 'Choisissez au moins une catégorie.';
     setErreurs(e);
     if (Object.keys(e).length > 0) return;
 
@@ -147,7 +166,7 @@ export default function useBoutique() {
 
   return {
     boutique, loading,
-    valeurs, setValeurs, erreurs, saving, logo, setLogo, enregistrer,
+    valeurs, setValeurs, erreurs, saving, logo, setLogo, enregistrer, categories,
     confirmPause, setConfirmPause, basculerPause,
     verif, piece, setPiece, typePiece, setTypePiece, envoiVerif, envoyerVerification,
   };
