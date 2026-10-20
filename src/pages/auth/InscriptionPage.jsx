@@ -118,6 +118,7 @@ export default function InscriptionPage() {
     }
     if (etape === 2) {
       if (nomBoutique.trim().length < 2) return 'Donnez un nom à votre boutique.';
+      if (!/^\p{L}/u.test(nomBoutique.trim())) return 'Le nom de la boutique doit commencer par une lettre.';
       if (choix.length === 0) return 'Choisissez au moins une catégorie.';
     }
     return '';

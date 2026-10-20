@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { toast } from '../../utils/alert';
+import { toast, showConfirm } from '../../utils/alert';
 import { getMaVitrine, modifierVitrine } from '../../service/vendeur.service';
 
 /**
@@ -142,8 +142,40 @@ export default function useVitrine() {
     }
   };
 
+  /**
+   * Mise en ligne / hors ligne immédiate, sans passer par « Enregistrer ».
+   * Si le site n'a jamais été composé, il est créé avec la mise en page par
+   * défaut et les informations de la boutique.
+   */
+  const [bascule, setBascule] = useState(false);
+  const basculerEnLigne = async (active) => {
+    const ok = await showConfirm(active ? {
+      titre: 'Mettre mon site en ligne',
+      message: 'Votre site sera visible par tous à son adresse. Vous pourrez le modifier ou le fermer à tout moment.',
+      confirmText: 'Mettre en ligne',
+    } : {
+      titre: 'Mettre mon site hors ligne',
+      message: "Vos clients ne pourront plus l'ouvrir. Votre boutique reste visible dans l'application.",
+      confirmText: 'Mettre hors ligne',
+      danger: true,
+    });
+    if (!ok) return;
+    setBascule(true);
+    try {
+      const r = await modifierVitrine({ active });
+      appliquer(extraire(r));
+      toast.success(active ? 'Votre site est en ligne.' : 'Votre site est hors ligne.');
+    } catch (e) {
+      toast.error(e, 'Impossible de modifier votre site.');
+    } finally {
+      setBascule(false);
+    }
+  };
+
   return {
     donnees,
+    basculerEnLigne,
+    bascule,
     valeurs,
     loading,
     saving,
@@ -153,8 +185,8 @@ export default function useVitrine() {
     majReseau,
     enregistrer,
     url: donnees?.vitrine?.url || '',
-    // Le site est-il passé par l'assistant de l'application mobile ? C'est
-    // là, et nulle part ailleurs, qu'il se crée.
+    // Le site a-t-il déjà été créé (assistant de l'application, ou bouton
+    // « Mettre mon site en ligne » de cette page) ?
     configuree: donnees?.vitrine?.configuree === true,
     nombreProduits: donnees?.nombreProduits ?? 0,
     vues: donnees?.vitrine?.vues ?? 0,

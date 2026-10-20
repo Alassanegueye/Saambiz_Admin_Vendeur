@@ -104,6 +104,7 @@ export default function useBoutique() {
   const enregistrer = async () => {
     const e = {};
     if (!valeurs.nom.trim()) e.nom = 'Le nom est requis.';
+    else if (!/^\p{L}/u.test(valeurs.nom.trim())) e.nom = 'Le nom de la boutique doit commencer par une lettre.';
     if (!valeurs.categories.length) e.categories = 'Choisissez au moins une catégorie.';
     setErreurs(e);
     if (Object.keys(e).length > 0) return;

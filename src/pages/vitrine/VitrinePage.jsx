@@ -55,6 +55,10 @@ export default function VitrinePage() {
      Le tableau de bord web sert donc à REPRENDRE un site existant, jamais à
      l'ouvrir — et il le dit clairement plutôt que d'afficher un formulaire
      de réglages sur quelque chose qui n'existe pas. */
+  /* ── Le site n'a pas encore été créé ───────────────────────────────
+     Un clic suffit : le site part avec la mise en page par défaut et les
+     informations de la boutique (nom, logo, produits). Le vendeur peut
+     ensuite l'ajuster ici, ou le composer depuis l'application. */
   if (!v.configuree) {
     return (
       <div>
@@ -65,35 +69,38 @@ export default function VitrinePage() {
             <h1>Mon site</h1>
             <p>Le site web de votre boutique, pour vos clients</p>
           </div>
-          <Badge variant="default">Pas encore créé</Badge>
+          <Badge variant="default">Hors ligne</Badge>
         </div>
 
         <div className="card vitrine-invitation">
           <div className="card-body">
             <span className="vitrine-invitation__picto" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.7">
-                <rect x="6" y="2" width="12" height="20" rx="3" />
-                <path d="M11 18h2" />
+                <circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z" />
               </svg>
             </span>
 
-            <h2>Activez votre boutique depuis l'application</h2>
+            <h2>Votre site n'est pas encore en ligne</h2>
 
             <p>
-              Votre site web se crée dans l'application SaamBiz, sur votre
-              téléphone. Vous y déposez votre logo, vous dites ce que vous
-              vendez — et votre site est composé pour vous, aux couleurs de
-              votre logo. Il vous reste à le relire et à le publier.
+              Activez-le en un clic : il reprend le nom, le logo et les produits
+              de votre boutique. Vous obtenez une adresse à partager à vos
+              clients sur WhatsApp ou sur vos cartes.
             </p>
 
-            <p className="vitrine-invitation__chemin">
-              Dans l'application : <strong>Menu</strong> → <strong>Ma boutique</strong> →{' '}
-              <strong>Mon site web</strong>
-            </p>
+            <button
+              type="button"
+              className="btn btn-primary vitrine-marge-haut"
+              onClick={() => v.basculerEnLigne(true)}
+              disabled={v.bascule}
+            >
+              {v.bascule ? 'Activation…' : 'Mettre mon site en ligne'}
+            </button>
 
             <p className="vitrine-invitation__note">
-              Une fois votre site en ligne, vous pourrez le modifier depuis
-              cette page comme depuis l'application.
+              Vous pourrez ensuite changer ses couleurs, sa mise en page et ses
+              textes ici, ou le composer à partir de votre logo dans
+              l'application (Menu → Ma boutique → Mon site web).
             </p>
           </div>
         </div>
@@ -112,9 +119,19 @@ export default function VitrinePage() {
           <h1>Mon site</h1>
           <p>L'adresse web de votre boutique, à partager à vos clients</p>
         </div>
-        <Badge variant={valeurs.active ? 'success' : 'default'}>
-          {valeurs.active ? 'En ligne' : 'Hors ligne'}
-        </Badge>
+        <div className="actions-rapides">
+          <Badge variant={valeurs.active ? 'success' : 'default'}>
+            {valeurs.active ? 'En ligne' : 'Hors ligne'}
+          </Badge>
+          <button
+            type="button"
+            className={`btn ${valeurs.active ? 'btn-secondary' : 'btn-primary'}`}
+            onClick={() => v.basculerEnLigne(!valeurs.active)}
+            disabled={v.bascule}
+          >
+            {v.bascule ? 'Un instant…' : valeurs.active ? 'Mettre hors ligne' : 'Mettre en ligne'}
+          </button>
+        </div>
       </div>
 
       {/* Un site sans produit ne vend rien : le dire ici évite qu'un vendeur
@@ -150,18 +167,6 @@ export default function VitrinePage() {
           <div className="card">
             <div className="card-header"><h3 className="card-title">Publication</h3></div>
             <div className="card-body">
-              <label className="vitrine-bascule">
-                <input
-                  type="checkbox"
-                  checked={valeurs.active}
-                  onChange={(e) => majChamp('active', e.target.checked)}
-                />
-                <span>
-                  <strong>Mon site est en ligne</strong>
-                  Décochez pour le fermer sans fermer votre boutique dans l'application.
-                </span>
-              </label>
-
               <label className="vitrine-bascule">
                 <input
                   type="checkbox"

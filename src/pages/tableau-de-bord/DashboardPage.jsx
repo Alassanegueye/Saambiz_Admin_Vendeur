@@ -30,18 +30,17 @@ const Icone = ({ children, taille = 20 }) => (
        strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
 );
 
-/** Chiffre clé ; avec `to`, la carte ouvre la liste concernée. */
+/** Chiffre clé ; avec `to`, toute la carte est cliquable et ouvre la liste concernée. */
 function CarteChiffre({ icone, ton, valeur, libelle, to }) {
   const contenu = (
     <>
       <div className={`stat-card-icon ${ton}`}><Icone>{icone}</Icone></div>
       <div className="stat-card-value">{valeur}</div>
       <div className="stat-card-label">{libelle}</div>
-      {to && <span className="stat-card-lien-texte">Voir →</span>}
     </>
   );
   return to
-    ? <Link to={to} className="stat-card stat-card-lien">{contenu}</Link>
+    ? <Link to={to} className="stat-card stat-card-lien" aria-label={`${libelle} : voir le détail`}>{contenu}</Link>
     : <div className="stat-card">{contenu}</div>;
 }
 

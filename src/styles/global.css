@@ -1369,7 +1369,7 @@ td.cat-col-nombre { font-variant-numeric: tabular-nums; }
 .specs-puce--on { background: #EEF3FC; border-color: #0D1B3D; }
 
 /* ── Accueil vendeur : à faire, chiffres, abonnement ── */
-.actions-rapides { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.actions-rapides { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .actions-rapides .btn { display: inline-flex; align-items: center; gap: 6px; }
 .bloc-taches { margin-bottom: 1.5rem; }
 .tache {
@@ -1402,3 +1402,77 @@ td.cat-col-nombre { font-variant-numeric: tabular-nums; }
 a.btn, a.btn:hover { text-decoration: none; }
 /* Dans une grille, les cartes s'alignent : pas de marge entre cartes voisines. */
 .dashboard-grid > .card + .card { margin-top: 0; }
+
+
+/* ════════════════════════════════════════════════════════════════════
+   Mobile : rien ne déborde, la page ne glisse ni à gauche ni à droite.
+   ════════════════════════════════════════════════════════════════════ */
+html, body { max-width: 100%; overflow-x: hidden; }
+.badge { white-space: nowrap; }
+body { overscroll-behavior-x: none; }
+img, svg, video, canvas { max-width: 100%; }
+.admin-main, .admin-content { min-width: 0; max-width: 100%; }
+
+@media (max-width: 720px) {
+  /* Les tableaux deviennent des cartes : une ligne = une carte, une valeur
+     par ligne avec le titre de sa colonne (data-label, posé par
+     utils/tablesMobiles.js). Plus de défilement horizontal. */
+  .table-wrap { overflow-x: visible; }
+  table.data-table, table.data-table tbody, table.data-table tr, table.data-table td { display: block; width: 100%; }
+  table.data-table thead { display: none; }
+  table.data-table tr {
+    padding: 0.85rem 1rem; border-bottom: 1px solid var(--color-border);
+  }
+  table.data-table tbody tr:last-child { border-bottom: none; }
+  table.data-table td {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+    padding: 0.3rem 0; border: none; text-align: right; min-width: 0;
+    overflow-wrap: anywhere; word-break: break-word;
+  }
+  table.data-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0; max-width: 45%;
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--color-text-muted); text-align: left;
+  }
+  table.data-table td > * { min-width: 0; }
+  /* Première colonne : le titre de la carte (nom, produit, référence). */
+  table.data-table td:first-child { display: block; text-align: left; padding-bottom: 0.5rem; font-size: 0.95rem; }
+  table.data-table td:first-child .cellule-personne,
+  table.data-table td:first-child .cellule-produit { flex-wrap: nowrap; align-items: center; }
+  table.data-table td:first-child .cellule-personne > *,
+  table.data-table td:first-child .cellule-produit > * { min-width: 0; }
+  table.data-table td:first-child .cellule-personne > :first-child,
+  table.data-table td:first-child .cellule-produit > :first-child { flex-shrink: 0; }
+  table.data-table td:first-child .cellule-personne > .badge { flex-shrink: 0; min-width: auto; }
+  table.data-table td:first-child::before { display: none; }
+  /* Colonne vide de titre (actions) et cellules fusionnées : sans libellé. */
+  table.data-table td[data-label=""]::before,
+  table.data-table td[colspan]::before { display: none; }
+  table.data-table td[colspan] { display: block; text-align: center; }
+  table.data-table td .table-actions,
+  table.data-table td[data-label="Actions"],
+  table.data-table td[data-label="Détails"] { justify-content: flex-start; }
+  table.data-table td[data-label="Actions"]::before { display: none; }
+  table.data-table td[data-label="Actions"] { padding-top: 0.6rem; }
+  .table-actions { flex-wrap: wrap; gap: 0.4rem; }
+  table.data-table tr.ligne-cliquable { cursor: pointer; }
+
+  /* En-têtes de liste et barres d'outils : tout passe à la ligne. */
+  .page-header { flex-wrap: wrap; gap: 0.75rem; }
+  .page-header-left { min-width: 0; }
+  .card-header { flex-wrap: wrap; gap: 0.6rem; }
+  .card-header-recherche .search-wrap { flex: 1 1 100%; max-width: none; }
+  .card-header-recherche .search-wrap + * { margin-left: 0; }
+  .groupe-filtres { flex-wrap: wrap; width: 100%; }
+  .groupe-filtres .filter-select, .filter-select { min-width: 0; flex: 1 1 140px; }
+  .tabs-bar { flex-wrap: wrap; }
+  .detail-grid { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat-card { min-width: 0; padding: 1rem; }
+  .stat-card-value { font-size: 1.35rem; overflow-wrap: anywhere; }
+}
+@media (max-width: 380px) {
+  .stats-grid, .stats-grid.stats-grid-3, .stats-grid.stats-grid-4 { grid-template-columns: minmax(0, 1fr); }
+}
