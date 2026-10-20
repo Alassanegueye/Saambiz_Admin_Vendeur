@@ -8,7 +8,7 @@ import {
   getStatutVerification,
   soumettreVerification,
 } from '../../service/vendeur.service';
-import { getCategories } from '../../service/categories.service';
+import useCategories from '../../hooks/useCategories';
 
 /** Une boutique se range dans 1 à 3 catégories ; la première est la principale. */
 export const MAX_CATEGORIES = 3;
@@ -46,7 +46,7 @@ export default function useBoutique() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [erreurs, setErreurs] = useState({});
-  const [categories, setCategories] = useState([]);
+  const { categories, etat: etatCategories, recharger: rechargerCategories } = useCategories();
   const [confirmPause, setConfirmPause] = useState(false);
 
   // Vérification du profil — indépendante de la boutique elle-même.
@@ -100,15 +100,6 @@ export default function useBoutique() {
   }, []);
 
   useEffect(() => { chargerVerification(); }, [chargerVerification]);
-
-  useEffect(() => {
-    getCategories()
-      .then((res) => {
-        const liste = res.data?.categories || res.data?.data || res.data || [];
-        setCategories(Array.isArray(liste) ? liste : []);
-      })
-      .catch(() => setCategories([]));
-  }, []);
 
   const enregistrer = async () => {
     const e = {};
@@ -166,7 +157,7 @@ export default function useBoutique() {
 
   return {
     boutique, loading,
-    valeurs, setValeurs, erreurs, saving, logo, setLogo, enregistrer, categories,
+    valeurs, setValeurs, erreurs, saving, logo, setLogo, enregistrer, categories, etatCategories, rechargerCategories,
     confirmPause, setConfirmPause, basculerPause,
     verif, piece, setPiece, typePiece, setTypePiece, envoiVerif, envoyerVerification,
   };

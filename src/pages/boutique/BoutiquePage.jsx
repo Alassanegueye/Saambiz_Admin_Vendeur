@@ -48,6 +48,8 @@ export default function BoutiquePage() {
         saving={b.saving}
         boutique={b.boutique}
         categories={b.categories}
+        etatCategories={b.etatCategories}
+        onRechargerCategories={b.rechargerCategories}
         logo={b.logo}
         setLogo={b.setLogo}
         onEnregistrer={b.enregistrer}

@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet';
 import { ROUTES } from '../../constants/routes';
 import { useAuth } from '../../hooks/useAuth';
 import PanneauMarque from '../../components/auth/PanneauMarque';
-import { getCategories } from '../../service/categories.service';
+import useCategories from '../../hooks/useCategories';
 import {
   envoyerCodeInscription,
   verifierCodeInscription,
@@ -89,22 +89,13 @@ export default function InscriptionPage() {
   const [voirMdp, setVoirMdp] = useState(false);
   // Étape 3
   const [nomBoutique, setNomBoutique] = useState('');
-  const [categories, setCategories] = useState([]);
+  const { categories, etat: etatCategories, recharger: rechargerCategories } = useCategories();
   const [choix, setChoix] = useState([]);
   const [ville, setVille] = useState(VILLES[0]);
   // Étape 4
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [renvoiDans, setRenvoiDans] = useState(0);
   const cases = useRef([]);
-
-  useEffect(() => {
-    getCategories()
-      .then((res) => {
-        const liste = res.data?.categories || res.data?.data || res.data || [];
-        setCategories(Array.isArray(liste) ? liste : []);
-      })
-      .catch(() => setCategories([]));
-  }, []);
 
   useEffect(() => {
     if (renvoiDans <= 0) return undefined;
@@ -340,7 +331,16 @@ export default function InscriptionPage() {
                     <div className="cnx-champ">
                       <span className="cnx-label">Catégories <small className="ins-discret">(1 à {MAX_CATEGORIES})</small></span>
                       <div className="ins-puces">
-                        {categories.length === 0 && <span className="ins-discret">Chargement…</span>}
+                        {etatCategories === 'chargement' && <span className="ins-discret">Chargement des catégories…</span>}
+                        {etatCategories === 'erreur' && (
+                          <span className="ins-discret">
+                            Impossible de charger les catégories.{' '}
+                            <button type="button" className="ins-lien" onClick={rechargerCategories}>Réessayer</button>
+                          </span>
+                        )}
+                        {etatCategories === 'ok' && categories.length === 0 && (
+                          <span className="ins-discret">Aucune catégorie disponible pour l&apos;instant.</span>
+                        )}
                         {categories.map((c) => {
                           const slug = c.slug || c.id || c.nom;
                           const actif = choix.includes(slug);

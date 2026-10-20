@@ -3,7 +3,7 @@ import { MAX_CATEGORIES } from '../useBoutique';
 /** Informations de la vitrine — ce que les clients voient de la boutique. */
 export default function FormBoutique({
   valeurs, setValeurs, erreurs, saving,
-  boutique, logo, setLogo, onEnregistrer, categories = [],
+  boutique, logo, setLogo, onEnregistrer, categories = [], etatCategories = 'ok', onRechargerCategories,
 }) {
   const majChamp = (champ) => (e) => setValeurs({ ...valeurs, [champ]: e.target.value });
 
@@ -86,6 +86,13 @@ export default function FormBoutique({
             1 à {MAX_CATEGORIES} catégories. La première choisie (★) est la principale.
           </span>
           <div className="specs-puces" role="group" aria-label="Catégories de la boutique">
+            {etatCategories === 'chargement' && <span className="form-hint">Chargement des catégories…</span>}
+            {etatCategories === 'erreur' && (
+              <span className="form-hint">
+                Impossible de charger les catégories.{' '}
+                <button type="button" className="btn btn-ghost btn-sm" onClick={onRechargerCategories}>Réessayer</button>
+              </span>
+            )}
             {categories.map((c) => {
               const i = rang(c);
               const plein = i < 0 && choisies.length >= MAX_CATEGORIES;
