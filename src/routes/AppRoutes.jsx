@@ -8,6 +8,7 @@ import ErrorBoundary from '../components/common/ErrorBoundary';
 import { ROUTES } from '../constants/routes';
 
 const ConnexionPage  = lazy(() => import('../pages/auth/VendeurLoginPage'));
+const InscriptionPage = lazy(() => import('../pages/auth/InscriptionPage'));
 const DashboardPage  = lazy(() => import('../pages/tableau-de-bord/DashboardPage'));
 const ProduitsPage   = lazy(() => import('../pages/produits/ProduitsPage'));
 const CommandesPage  = lazy(() => import('../pages/commandes/CommandesPage'));
@@ -26,6 +27,9 @@ export default function AppRoutes() {
           <Route element={<GuestRoute />}>
             <Route path={ROUTES.LOGIN} element={
               <ErrorBoundary><ConnexionPage /></ErrorBoundary>
+            } />
+            <Route path={ROUTES.INSCRIPTION} element={
+              <ErrorBoundary><InscriptionPage /></ErrorBoundary>
             } />
           </Route>
 

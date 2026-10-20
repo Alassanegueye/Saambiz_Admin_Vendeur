@@ -11,6 +11,12 @@ export const ENDPOINTS = {
     REFRESH:             '/auth/refresh',
     ME:                  '/account/me',
     CHANGER_MOT_DE_PASSE: '/auth/changer-mot-de-passe',
+
+    // Inscription (mêmes routes que l'application mobile) : code par email,
+    // jeton, puis création du compte.
+    INSCRIPTION_CODE:    '/auth/inscription/envoyer-code',
+    INSCRIPTION_VERIFIER: '/auth/inscription/verifier-code',
+    REGISTER:            '/auth/register',
   },
 
   COMPTE: {

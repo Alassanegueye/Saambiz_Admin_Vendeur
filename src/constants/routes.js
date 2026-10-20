@@ -6,6 +6,7 @@
  */
 export const ROUTES = {
   LOGIN:      '/connexion',
+  INSCRIPTION:'/inscription',
   DASHBOARD:  '/',
   PRODUITS:   '/produits',
   COMMANDES:  '/commandes',

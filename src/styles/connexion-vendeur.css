@@ -240,3 +240,86 @@
 @media (max-height: 560px) {
   .cnx { height: auto; min-height: 100dvh; overflow: auto; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Inscription vendeur — même écran que la connexion, en plusieurs étapes.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Les étapes peuvent dépasser la hauteur de la fenêtre : la page défile. */
+.cnx--defile { height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
+.cnx--defile .cnx-panneau { position: sticky; top: 0; height: 100vh; height: 100dvh; }
+button.cnx-retour { cursor: pointer; font-family: inherit; }
+
+.ins-etapes { display: flex; gap: 6px; margin-bottom: 8px; }
+.ins-segment { flex: 1; height: 5px; border-radius: 999px; background: var(--color-border); transition: background-color 0.3s ease; }
+.ins-segment.fait { background: var(--color-primary); }
+.ins-segment.actif { background: var(--color-accent); }
+.ins-etape-texte { font-size: 0.72rem; color: var(--color-text-muted); margin-bottom: 1.1rem; letter-spacing: 0.02em; }
+.ins-etape-texte strong { font-weight: 800; letter-spacing: 0.06em; }
+
+.ins-deux { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.ins-deux .cnx-saisie input { padding-left: 14px; }
+.ins-deux .cnx-champ:first-child .cnx-saisie input { padding-left: 0; }
+
+.ins-aide { margin-top: 6px; font-size: 0.78rem; color: var(--color-text-muted); }
+.ins-discret { font-size: 0.78rem; font-weight: 400; color: var(--color-text-muted); }
+.ins-centre { text-align: center; }
+
+.ins-erreur {
+  margin-bottom: 1rem; padding: 10px 14px;
+  border: 1px solid #F3C4C4; border-radius: 10px;
+  background: #FBEAEA; color: #C62828;
+  font-size: 0.85rem;
+}
+
+.ins-regles { list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 12px; margin: -0.25rem 0 1.25rem; }
+.ins-regles li { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--color-text-muted); }
+.ins-regles li::before {
+  content: ""; width: 14px; height: 14px; border-radius: 50%;
+  border: 1.6px solid var(--color-border); flex-shrink: 0;
+}
+.ins-regles li.ok { color: var(--color-text); font-weight: 600; }
+.ins-regles li.ok::before { background: #22C55E; border-color: #22C55E; box-shadow: inset 0 0 0 3px #fff; }
+
+.ins-puces { display: flex; flex-wrap: wrap; gap: 8px; }
+.ins-puce {
+  padding: 8px 14px; border-radius: 999px;
+  border: 1px solid var(--color-border); background: var(--color-white);
+  font-family: inherit; font-size: 0.82rem; font-weight: 600; color: var(--color-text);
+  cursor: pointer; transition: all 0.15s ease;
+}
+.ins-puce:hover { border-color: var(--color-primary); }
+.ins-puce.actif { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+
+.ins-select {
+  flex: 1; min-width: 0; border: none; background: none; outline: none;
+  padding: clamp(12px, 2.2vh, 16px) 12px clamp(12px, 2.2vh, 16px) 0;
+  font-family: inherit; font-size: 0.95rem; color: var(--color-text);
+}
+
+.ins-code { display: flex; gap: 8px; justify-content: space-between; margin-bottom: 1.25rem; }
+.ins-code input {
+  width: 100%; min-width: 0; max-width: 56px; height: 58px;
+  border: 1px solid var(--color-border); border-radius: 10px;
+  text-align: center; font-family: inherit; font-size: 1.5rem; font-weight: 700;
+  color: var(--color-primary); background: var(--color-white); outline: none;
+}
+.ins-code input.rempli { background: #F1F5FD; border-color: var(--color-primary); }
+.ins-code input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(13, 27, 61, 0.08); }
+
+.ins-renvoi { margin: 1rem 0 0.25rem; text-align: center; font-size: 0.85rem; color: var(--color-text-muted); }
+.ins-lien { background: none; border: none; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 700; color: var(--color-primary); }
+.ins-lien:hover { text-decoration: underline; }
+
+.ins-bas { margin-top: 1.25rem; text-align: center; font-size: 0.875rem; color: var(--color-text-muted); }
+.ins-bas a { font-weight: 700; color: var(--color-primary); text-decoration: none; }
+.ins-bas a:hover { text-decoration: underline; }
+
+@media (max-width: 900px) {
+  .cnx--defile .cnx-panneau { display: none; }
+}
+@media (max-width: 480px) {
+  .ins-deux, .ins-regles { grid-template-columns: 1fr; }
+  .ins-code { gap: 6px; }
+  .ins-code input { height: 50px; font-size: 1.3rem; }
+}
