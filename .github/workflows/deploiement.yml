@@ -120,6 +120,11 @@ jobs:
           # survivre le temps que les visiteurs déjà sur le site finissent de
           # charger leur page : leur index.html en cache réclame encore les
           # anciens noms.
+          #
+          # L'absence de drapeau SUFFIT : mirror ne supprime rien par
+          # defaut, seul --delete active la suppression. Ne PAS ecrire
+          # --no-delete : ce drapeau n'existe pas dans le lftp des runners
+          # Ubuntu, et l'envoi echoue sur « unrecognized option ».
           lftp -c "
             set ftp:ssl-force true;
             set ftp:ssl-protect-data true;
@@ -128,7 +133,7 @@ jobs:
             set net:max-retries 3;
             open \"$FTP_HOST\";
             user \"$FTP_USER\" \"$FTP_PASSWORD\";
-            mirror --reverse --no-delete --parallel=4 --verbose dist/ \"$DOSSIER_DISTANT\";
+            mirror --reverse --parallel=4 --verbose dist/ \"$DOSSIER_DISTANT\";
             bye
           "
 
