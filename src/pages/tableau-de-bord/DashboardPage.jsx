@@ -7,7 +7,7 @@ import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import MiniBarChart from '../../components/common/MiniBarChart';
 import Badge from '../../components/common/Badge';
-import { formatMontant, formatDate } from '../../utils/formatters';
+import { formatMontant, formatDate, libelle } from '../../utils/formatters';
 import { ROUTES } from '../../constants/routes';
 
 const ICONES = {
@@ -210,9 +210,9 @@ export default function DashboardPage() {
             {abonnement ? (
               <div className="ligne-abonnement">
                 <Badge variant={abonnement.statut === 'actif' ? 'success' : 'warning'}>
-                  {abonnement.statut === 'actif' ? 'Actif' : abonnement.statut}
+                  {libelle(abonnement.statut)}
                 </Badge>
-                <span>Formule <strong>{abonnement.type || '—'}</strong></span>
+                <span>Formule <strong>{libelle(abonnement.type)}</strong></span>
                 <span>Jusqu’au <strong>{formatDate(abonnement.dateFin)}</strong></span>
                 <span className="td-muted">{pluriel(abonnement.joursRestants ?? 0, 'jour restant', 'jours restants')}</span>
               </div>

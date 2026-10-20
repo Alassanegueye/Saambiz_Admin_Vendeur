@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Badge from '../../components/common/Badge';
-import { formatMontant, formatDate } from '../../utils/formatters';
+import { formatMontant, formatDate, libelle } from '../../utils/formatters';
 import HistoriquePaiements from './components/HistoriquePaiements';
 import useAbonnement, { MOYENS_PAIEMENT } from './useAbonnement';
 
@@ -34,7 +34,7 @@ export default function AbonnementPage() {
             {a.abonnement ? (
               <div className="detail-grid">
                 <div className="detail-item">
-                  <label>Formule</label><span>{a.abonnement.type || 'Premium'}</span>
+                  <label>Formule</label><span>{libelle(a.abonnement.type || 'premium')}</span>
                 </div>
                 <div className="detail-item">
                   <label>Montant</label><span>{formatMontant(a.abonnement.montant)}</span>

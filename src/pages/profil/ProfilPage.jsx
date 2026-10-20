@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet';
+import { libelle } from '../../utils/formatters';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import FormIdentite from './components/FormIdentite';
 import FormMotDePasse from './components/FormMotDePasse';
@@ -30,7 +31,7 @@ export default function ProfilPage() {
           <strong>{`${p.profil.prenom} ${p.profil.nom}`.trim() || 'Compte'}</strong>
           <span>{p.profil.email}</span>
         </div>
-        <span className="profil-role">{p.user?.role}</span>
+        <span className="profil-role">{libelle(p.user?.role)}</span>
       </div>
 
       <div className="profil-grille">

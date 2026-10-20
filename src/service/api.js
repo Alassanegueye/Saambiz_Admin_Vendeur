@@ -85,8 +85,32 @@ function deconnecter() {
   }
 }
 
+/**
+ * Prénoms et noms toujours affichés selon la règle SaamBiz (« Awa DIOP »),
+ * y compris pour un compte enregistré avant que le serveur ne l'applique.
+ * Ne touche qu'aux objets qui portent un `prenom` (personnes) : le `nom`
+ * d'un produit ou d'une catégorie reste intact.
+ */
+const formaterPrenom = (v) => (typeof v === 'string'
+  ? v.replace(/\s+/g, ' ').trim().toLocaleLowerCase('fr-FR')
+    .split(' ').map((m) => m.split('-').map((x) => (x ? x.charAt(0).toLocaleUpperCase('fr-FR') + x.slice(1) : x)).join('-')).join(' ')
+  : v);
+const formaterNom = (v) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().toLocaleUpperCase('fr-FR') : v);
+
+function normaliserNoms(donnee, profondeur = 0) {
+  if (!donnee || typeof donnee !== 'object' || profondeur > 8) return;
+  if (Array.isArray(donnee)) { donnee.forEach((d) => normaliserNoms(d, profondeur + 1)); return; }
+  if ('prenom' in donnee) {
+    donnee.prenom = formaterPrenom(donnee.prenom);
+    if ('nom' in donnee) donnee.nom = formaterNom(donnee.nom);
+  }
+  if ('clientPrenom' in donnee) donnee.clientPrenom = formaterPrenom(donnee.clientPrenom);
+  if ('clientNom' in donnee) donnee.clientNom = formaterNom(donnee.clientNom);
+  Object.values(donnee).forEach((v) => normaliserNoms(v, profondeur + 1));
+}
+
 api.interceptors.response.use(
-  (reponse) => reponse,
+  (reponse) => { normaliserNoms(reponse.data); return reponse; },
   async (erreur) => {
     const requete = erreur.config;
     const statut = erreur.response?.status;
