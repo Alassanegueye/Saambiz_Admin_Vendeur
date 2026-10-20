@@ -993,3 +993,26 @@ table.data-table .td-muted { color: var(--color-text-muted); }
 .specs-ajout { max-width: none; }
 .specs-nouvelle { display: flex; gap: 6px; margin: 0.25rem 0 0.9rem; }
 .specs-puce--on { background: #EEF3FC; border-color: #0D1B3D; }
+
+/* ── SweetAlert2 — alertes harmonisées avec la charte (comme Yobante) ── */
+.swal2-saambiz {
+  font-family: inherit;
+  border-radius: 0.75rem;
+}
+.swal2-saambiz__titre {
+  font-weight: 700;
+  color: #0D1B3D;
+}
+.swal2-saambiz .swal2-confirm,
+.swal2-saambiz .swal2-cancel {
+  border-radius: 0.5rem;
+  font-weight: 600;
+}
+.swal2-saambiz .swal2-timer-progress-bar {
+  background: rgba(242, 183, 5, 0.75);
+}
+@media (max-width: 480px) {
+  .swal2-saambiz {
+    width: calc(100% - 2rem) !important;
+  }
+}

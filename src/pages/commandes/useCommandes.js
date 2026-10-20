@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from '../../utils/alert';
 import { getCommandes, changerStatutCommande } from '../../service/vendeur.service';
 import useDebounce from '../../hooks/useDebounce';
 

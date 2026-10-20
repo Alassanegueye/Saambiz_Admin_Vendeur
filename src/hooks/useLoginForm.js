@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from '../utils/alert';
 import { useAuth } from './useAuth';
 
 const MAX_ATTEMPTS = 3;

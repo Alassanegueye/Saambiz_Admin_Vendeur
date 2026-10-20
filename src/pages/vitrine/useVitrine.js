@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from '../../utils/alert';
 import { getMaVitrine, modifierVitrine } from '../../service/vendeur.service';
 
 /**

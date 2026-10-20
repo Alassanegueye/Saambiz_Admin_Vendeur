@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { toast } from '../../utils/alert';
 import { Helmet } from 'react-helmet';
 import { ROUTES } from '../../constants/routes';
 import useLoginForm from '../../hooks/useLoginForm';

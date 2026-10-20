@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from '../utils/alert';
 
 /**
  * Chargement d'une page : données, état de chargement, erreur, rechargement.

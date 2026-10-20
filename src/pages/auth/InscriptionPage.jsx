@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { toast } from '../../utils/alert';
 import { Helmet } from 'react-helmet';
 import { ROUTES } from '../../constants/routes';
 import { useAuth } from '../../hooks/useAuth';
