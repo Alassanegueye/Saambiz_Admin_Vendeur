@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from '../../utils/alert';
 import { getCommandes, changerStatutCommande } from '../../service/vendeur.service';
 import useDebounce from '../../hooks/useDebounce';
@@ -24,6 +25,24 @@ export const STATUTS = [
   { code: 'livree',         label: 'Livrée',         variant: 'success' },
   { code: 'annulee',        label: 'Annulée',        variant: 'danger' },
 ];
+
+/** Statuts « en cours » : acceptée, en préparation, prête ou en route. */
+const EN_COURS = ['confirmee', 'en_preparation', 'prete', 'en_livraison'];
+
+/** Filtres en pastilles : les étapes qui comptent pour le vendeur. */
+export const FILTRES_COMMANDES = [
+  { valeur: 'tous', libelle: 'Toutes' },
+  { valeur: 'en_attente', libelle: 'À confirmer' },
+  { valeur: 'en_cours', libelle: 'En cours' },
+  { valeur: 'livree', libelle: 'Livrées' },
+  { valeur: 'annulee', libelle: 'Annulées' },
+];
+
+const correspond = (c, filtre) => {
+  if (filtre === 'tous') return true;
+  if (filtre === 'en_cours') return EN_COURS.includes(c.statut);
+  return c.statut === filtre;
+};
 
 export const infoStatut = (code) =>
   STATUTS.find((s) => s.code === code) || { label: code || '—', variant: 'default' };
@@ -60,7 +79,12 @@ export default function useCommandes() {
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState('');
-  const [filtreStatut, setFiltreStatut] = useState('tous');
+  // ?statut=en_attente : ouverture depuis l'accueil (« commandes à confirmer »).
+  const [params] = useSearchParams();
+  const [filtreStatut, setFiltreStatut] = useState(() => {
+    const v = params.get('statut');
+    return FILTRES_COMMANDES.some((f) => f.valeur === v) || STATUTS.some((x) => x.code === v) ? v : 'tous';
+  });
   const [page, setPage] = useState(1);
   const rechercheDifferee = useDebounce(search, 300);
 
@@ -87,7 +111,7 @@ export default function useCommandes() {
   const filtres = useMemo(() => {
     const s = rechercheDifferee.toLowerCase();
     return commandes.filter((c) => {
-      if (filtreStatut !== 'tous' && c.statut !== filtreStatut) return false;
+      if (!correspond(c, filtreStatut)) return false;
       if (!s) return true;
       return String(c.reference || c.id || '').toLowerCase().includes(s)
         || nomAcheteur(c).toLowerCase().includes(s);
@@ -117,12 +141,15 @@ export default function useCommandes() {
   };
 
   const enAttente = commandes.filter((c) => c.statut === 'en_attente').length;
+  const compteurs = Object.fromEntries(
+    FILTRES_COMMANDES.map((f) => [f.valeur, commandes.filter((c) => correspond(c, f.valeur)).length]),
+  );
 
   return {
     commandes, loading, enAttente,
     pageCourante, page, totalPages, setPage,
     search, rechercher, rechercheDifferee,
-    filtreStatut, filtrerParStatut,
+    filtreStatut, filtrerParStatut, compteurs,
     detail, setDetail, saving, changerStatut,
   };
 }

@@ -1,289 +1,228 @@
-import { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { NavLink } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import PICTO from '../../assets/images/picto-saambiz.png';
 import { ROUTES } from '../../constants/routes';
 import { useAuth } from '../../hooks/useAuth';
+import { AIDES, construireNavigation, estActif } from './navigationVendeur';
 
 /**
- * Barre de navigation horizontale — remplace le menu latéral.
- *
- * Les rubriques passent en haut : la page récupère toute la largeur, ce qui
- * profite aux tableaux, qui sont l'essentiel du back-office.
- *
- * Composant partagé par l'administration et l'espace vendeur ; seule la liste
- * `items` change (RBAC côté admin, liste fixe côté vendeur).
+ * Barre du haut de l'espace vendeur (même modèle que l'administration), dans le style du dashboard Yobante
+ * Boutique :
+ *  - pictogramme à gauche ;
+ *  - rubriques regroupées par sujet (menus dépliants), centrées, sans menu
+ *    « Plus » ;
+ *  - rubrique active repérée par un simple soulignement, sans fond coloré ;
+ *  - à droite, les initiales et le nom de l'administrateur connecté ; nom, email et
+ *    rôle ne s'affichent que dans le menu de compte.
+ * Sous 1024 px, un tiroir liste l'arborescence complète.
  */
-export default function TopNav({ items = [], espace }) {
-  const { user, logout } = useAuth();
-  const [menuMobile, setMenuMobile] = useState(false);
-  const [menuCompte, setMenuCompte] = useState(false);
-  const compteRef = useRef(null);
-  const listeRef = useRef(null);
-  const [menuPlus, setMenuPlus] = useState(false);
-  const plusRef = useRef(null);
 
-  // Nombre de rubriques affichées en clair ; les suivantes passent dans le
-  // menu « Plus ». Avec les icônes, quatorze rubriques dépassent la largeur
-  // de n'importe quel écran : un débordement horizontal masquerait les
-  // dernières derrière le bouton du compte, sans que rien ne l'indique.
-  const [nbVisibles, setNbVisibles] = useState(items.length);
-  const largeursRef = useRef([]);
+function Icone({ children, taille = 16 }) {
+  return (
+    <svg width={taille} height={taille} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {children}
+    </svg>
+  );
+}
+
+const Chevron = ({ ouvert }) => (
+  <svg className={`tn-chevron${ouvert ? ' ouvert' : ''}`} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
+export default function TopNav({ items = [] }) {
+  const { user, logout } = useAuth();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const nav = useMemo(() => construireNavigation(items), [items]);
+
+  const [groupeOuvert, setGroupeOuvert] = useState(null);
+  const [menuCompte, setMenuCompte] = useState(false);
+  const [tiroir, setTiroir] = useState(false);
+  const barreRef = useRef(null);
 
   const initiales = user
     ? `${(user.prenom || '')[0] || ''}${(user.nom || '')[0] || ''}`.toUpperCase() || 'A'
     : 'A';
-  const nomComplet = user
-    ? `${user.prenom || ''} ${user.nom || ''}`.trim() || user.email
-    : 'Compte';
+  const nomComplet = user ? `${user.prenom || ''} ${user.nom || ''}`.trim() || user.email : '';
 
-  // Fermeture du menu compte au clic extérieur et à l'échappement.
+  // Tout se referme en changeant de page (réglé pendant le rendu plutôt que
+  // dans un effet, pour éviter un second rendu en cascade).
+  const [cheminVu, setCheminVu] = useState(pathname);
+  if (cheminVu !== pathname) {
+    setCheminVu(pathname);
+    setGroupeOuvert(null);
+    setMenuCompte(false);
+    setTiroir(false);
+  }
+
+  // Clic à l'extérieur ou Échap : menus refermés.
   useEffect(() => {
-    if (!menuCompte) return;
+    if (!groupeOuvert && !menuCompte) return undefined;
     const clic = (e) => {
-      if (compteRef.current && !compteRef.current.contains(e.target)) setMenuCompte(false);
+      if (barreRef.current && !barreRef.current.contains(e.target)) {
+        setGroupeOuvert(null);
+        setMenuCompte(false);
+      }
     };
-    const touche = (e) => { if (e.key === 'Escape') setMenuCompte(false); };
+    const touche = (e) => {
+      if (e.key === 'Escape') { setGroupeOuvert(null); setMenuCompte(false); }
+    };
     document.addEventListener('mousedown', clic);
     document.addEventListener('keydown', touche);
     return () => {
       document.removeEventListener('mousedown', clic);
       document.removeEventListener('keydown', touche);
     };
-  }, [menuCompte]);
+  }, [groupeOuvert, menuCompte]);
 
-  // Fermeture du menu « Plus » au clic extérieur.
-  useEffect(() => {
-    if (!menuPlus) return;
-    const clic = (e) => {
-      if (plusRef.current && !plusRef.current.contains(e.target)) setMenuPlus(false);
-    };
-    const touche = (e) => { if (e.key === 'Escape') setMenuPlus(false); };
-    document.addEventListener('mousedown', clic);
-    document.addEventListener('keydown', touche);
-    return () => {
-      document.removeEventListener('mousedown', clic);
-      document.removeEventListener('keydown', touche);
-    };
-  }, [menuPlus]);
-
-  // Repartition entre la barre et le menu « Plus ».
-  //
-  // Les largeurs sont mesurees une seule fois, toutes rubriques affichees,
-  // puis conservees : apres le premier calcul les elements masques ne sont
-  // plus mesurables. La largeur du conteneur, elle, ne depend pas du nombre
-  // d'elements (flex: 1), on peut donc recalculer au redimensionnement.
-  useLayoutEffect(() => {
-    const nav = listeRef.current;
-    if (!nav || items.length === 0) return;
-
-    const LARGEUR_PLUS = 96; // bouton « Plus » + sa marge
-
-    const repartir = () => {
-      if (largeursRef.current.length !== items.length) {
-        const liens = nav.querySelectorAll('.topnav-link:not(.topnav-plus-btn)');
-        if (liens.length !== items.length) return; // mesure incomplete
-        largeursRef.current = Array.from(liens).map((el) => el.offsetWidth + 2);
-      }
-      const largeurs = largeursRef.current;
-      const dispo = nav.clientWidth;
-
-      // Sous 1100 px la barre laisse place au tiroir : la liste est masquée,
-      // sa largeur vaut 0. Sans ce garde-fou, le calcul conclurait que rien
-      // ne tient et laisserait un « Plus » fantôme dans un conteneur caché.
-      if (dispo === 0) { setNbVisibles(items.length); return; }
-
-      const total = largeurs.reduce((a, b) => a + b, 0);
-      if (total <= dispo) { setNbVisibles(items.length); return; }
-
-      let cumul = 0;
-      let n = 0;
-      for (const l of largeurs) {
-        if (cumul + l > dispo - LARGEUR_PLUS) break;
-        cumul += l;
-        n++;
-      }
-      setNbVisibles(Math.max(1, n));
-    };
-
-    repartir();
-    const observateur = new ResizeObserver(repartir);
-    observateur.observe(nav);
-    return () => observateur.disconnect();
-  }, [items]);
-
-  const visibles = items.slice(0, nbVisibles);
-  const caches = items.slice(nbVisibles);
+  const accueil = items.find((i) => i.to === '/')?.to || items[0]?.to || '/';
 
   return (
-    <header className="topnav">
-      <div className="topnav-inner">
-        {/* Marque */}
-        <NavLink to={items[0]?.to || '/'} className="topnav-brand" onClick={() => setMenuMobile(false)}>
+    <header className="tn" ref={barreRef}>
+      <div className="tn-barre">
+        <button
+          type="button"
+          className="tn-burger"
+          onClick={() => { setGroupeOuvert(null); setMenuCompte(false); setTiroir((o) => !o); }}
+          aria-label={tiroir ? 'Fermer le menu' : 'Ouvrir le menu'}
+          aria-expanded={tiroir}
+        >
+          <Icone taille={22}>
+            {tiroir
+              ? <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>
+              : <><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></>}
+          </Icone>
+        </button>
+
+        <NavLink to={accueil} className="tn-marque" title="SaamBiz — Espace vendeur">
           <img src={PICTO} alt="SaamBiz" />
-          {espace && <span className="topnav-espace">{espace}</span>}
         </NavLink>
 
-        {/* Rubriques — masquées sous 1100 px, reprises dans le tiroir */}
-        <nav className="topnav-links" aria-label="Navigation principale" ref={listeRef}>
-          {visibles.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) => `topnav-link${isActive ? ' active' : ''}`}
-            >
-              {item.icon && (
-                <span className="topnav-link-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                       strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                    {item.icon}
-                  </svg>
-                </span>
-              )}
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-          {items.length === 0 && (
-            <span className="topnav-vide">Aucune rubrique disponible</span>
-          )}
-
-          {caches.length > 0 && (
-            <div className="topnav-plus" ref={plusRef}>
-              <button
-                className="topnav-link topnav-plus-btn"
-                onClick={() => setMenuPlus((o) => !o)}
-                aria-haspopup="menu"
-                aria-expanded={menuPlus}
-              >
-                <span>Plus</span>
-                <svg className="topnav-chevron" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
-
-              {menuPlus && (
-                <div className="topnav-menu topnav-menu-plus" role="menu">
-                  {caches.map((item) => (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      end={item.end}
-                      className="topnav-menu-item"
-                      role="menuitem"
-                      onClick={() => setMenuPlus(false)}
-                    >
-                      {item.icon && (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                          {item.icon}
-                        </svg>
-                      )}
+        <nav className="tn-rubriques" aria-label="Menu principal">
+          <ul>
+            {nav.length === 0 && <li className="tn-vide">Aucune rubrique disponible</li>}
+            {nav.map((entree) => {
+              if (entree.type === 'lien') {
+                const { item } = entree;
+                return (
+                  <li key={item.to}>
+                    <NavLink to={item.to} end={item.end}
+                             className={() => `tn-onglet${estActif(item, pathname) ? ' actif' : ''}`}>
+                      <Icone>{item.icon}</Icone>
                       {item.label}
                     </NavLink>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                  </li>
+                );
+              }
+              const actif = entree.enfants.some((e) => estActif(e, pathname));
+              const ouvert = groupeOuvert === entree.label;
+              return (
+                <li key={entree.label} className="tn-groupe">
+                  <button
+                    type="button"
+                    className={`tn-onglet${actif ? ' actif' : ''}${ouvert ? ' ouvert' : ''}`}
+                    onClick={() => { setMenuCompte(false); setGroupeOuvert(ouvert ? null : entree.label); }}
+                    aria-haspopup="menu"
+                    aria-expanded={ouvert}
+                  >
+                    <Icone>{entree.icone}</Icone>
+                    {entree.label}
+                    <Chevron ouvert={ouvert} />
+                  </button>
+                  {ouvert && (
+                    <div className="tn-menu tn-menu-groupe" role="menu" aria-label={entree.label}>
+                      {entree.enfants.map((enfant) => {
+                        const courant = estActif(enfant, pathname);
+                        return (
+                          <button
+                            key={enfant.to}
+                            type="button"
+                            role="menuitem"
+                            className={`tn-menu-page${courant ? ' courant' : ''}`}
+                            onClick={() => navigate(enfant.to)}
+                          >
+                            <span className="tn-menu-icone"><Icone>{enfant.icon}</Icone></span>
+                            <span className="tn-menu-textes">
+                              <span className="tn-menu-titre">{enfant.label}</span>
+                              {AIDES[enfant.code] && <span className="tn-menu-aide">{AIDES[enfant.code]}</span>}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </nav>
 
-        {/* Compte */}
-        <div className="topnav-account" ref={compteRef}>
+        {/* Compte : initiales et nom de l'administrateur connecté. */}
+        <div className="tn-compte">
           <button
-            className="topnav-account-btn"
-            onClick={() => setMenuCompte((o) => !o)}
+            type="button"
+            className={`tn-compte-btn${menuCompte ? ' ouvert' : ''}`}
+            onClick={() => { setGroupeOuvert(null); setTiroir(false); setMenuCompte((o) => !o); }}
             aria-haspopup="menu"
             aria-expanded={menuCompte}
+            title={nomComplet}
           >
-            <span className="topnav-avatar" aria-hidden="true">{initiales}</span>
-            <span className="topnav-account-name">{nomComplet}</span>
-            <svg className="topnav-chevron" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
+            <span className="tn-avatar" aria-hidden="true">{initiales}</span>
+            <span className="tn-compte-nom">{nomComplet}</span>
+            <Chevron ouvert={menuCompte} />
           </button>
 
           {menuCompte && (
-            <div className="topnav-menu" role="menu">
-              <div className="topnav-menu-head">
+            <div className="tn-menu tn-menu-compte" role="menu">
+              <div className="tn-menu-entete">
                 <strong>{nomComplet}</strong>
-                <span>{user?.email}</span>
-                <span className="topnav-menu-role">{user?.role}</span>
+                {user?.email && <span>{user.email}</span>}
               </div>
-              <NavLink
-                to={ROUTES.PROFIL}
-                className="topnav-menu-item"
-                role="menuitem"
-                onClick={() => setMenuCompte(false)}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
+              <NavLink to={ROUTES.PROFIL} className="tn-menu-lien" role="menuitem">
+                <Icone><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></Icone>
                 Mon profil
               </NavLink>
-              <button className="topnav-menu-item danger" onClick={logout} role="menuitem">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                  <polyline points="16 17 21 12 16 7" />
-                  <line x1="21" y1="12" x2="9" y2="12" />
-                </svg>
-                Se déconnecter
+              <button type="button" className="tn-menu-lien danger" onClick={logout} role="menuitem">
+                <Icone><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></Icone>
+                Déconnexion
               </button>
             </div>
           )}
         </div>
+      </div>
 
-        <button
-          className="topnav-burger"
-          onClick={() => setMenuMobile((o) => !o)}
-          aria-label={menuMobile ? 'Fermer le menu' : 'Ouvrir le menu'}
-          aria-expanded={menuMobile}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            {menuMobile ? (
-              <>
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </>
+      {/* Tiroir (petits écrans) : l'arborescence complète, groupes compris. */}
+      {tiroir && (
+        <div className="tn-tiroir">
+          {nav.map((entree) =>
+            entree.type === 'lien' ? (
+              <div key={entree.item.to} className="tn-tiroir-groupe">
+                {entree.groupe && <p className="tn-tiroir-titre">{entree.groupe}</p>}
+                <NavLink to={entree.item.to} end={entree.item.end}
+                         className={() => `tn-tiroir-lien${estActif(entree.item, pathname) ? ' actif' : ''}`}>
+                  <Icone>{entree.item.icon}</Icone>
+                  {entree.item.label}
+                </NavLink>
+              </div>
             ) : (
-              <>
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </>
-            )}
-          </svg>
-        </button>
-      </div>
-
-      {/* Tiroir mobile */}
-      <div className={`topnav-drawer${menuMobile ? ' open' : ''}`}>
-        {items.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) => `topnav-drawer-link${isActive ? ' active' : ''}`}
-            onClick={() => setMenuMobile(false)}
-            tabIndex={menuMobile ? 0 : -1}
-          >
-            {item.label}
-          </NavLink>
-        ))}
-        <NavLink
-          to={ROUTES.PROFIL}
-          className={({ isActive }) => `topnav-drawer-link${isActive ? ' active' : ''}`}
-          onClick={() => setMenuMobile(false)}
-          tabIndex={menuMobile ? 0 : -1}
-        >
-          Mon profil
-        </NavLink>
-        <button className="topnav-drawer-logout" onClick={logout} tabIndex={menuMobile ? 0 : -1}>
-          Se déconnecter
-        </button>
-      </div>
+              <div key={entree.label} className="tn-tiroir-groupe">
+                <p className="tn-tiroir-titre">{entree.label}</p>
+                {entree.enfants.map((enfant) => (
+                  <NavLink key={enfant.to} to={enfant.to} end={enfant.end}
+                           className={() => `tn-tiroir-lien${estActif(enfant, pathname) ? ' actif' : ''}`}>
+                    <Icone>{enfant.icon}</Icone>
+                    {enfant.label}
+                  </NavLink>
+                ))}
+              </div>
+            )
+          )}
+        </div>
+      )}
     </header>
   );
 }

@@ -6,7 +6,8 @@ import SearchInput from '../../components/common/SearchInput';
 import Pagination from '../../components/common/Pagination';
 import TableProduits from './components/TableProduits';
 import FormProduit from './components/FormProduit';
-import useProduits from './useProduits';
+import FiltresStatut from '../../components/common/FiltresStatut';
+import useProduits, { FILTRES_PRODUITS } from './useProduits';
 
 /**
  * Catalogue du vendeur.
@@ -38,14 +39,17 @@ export default function ProduitsPage() {
       </div>
 
       <div className="card">
-        <div className="toolbar">
-          <div className="toolbar-left">
-            <SearchInput
-              value={p.search}
-              onChange={p.rechercher}
-              placeholder="Rechercher un produit…"
-            />
-          </div>
+        <div className="card-header card-header-recherche">
+          <SearchInput
+            value={p.search}
+            onChange={p.rechercher}
+            placeholder="Rechercher un produit…"
+          />
+          <FiltresStatut
+            options={FILTRES_PRODUITS.map((f) => ({ ...f, nombre: p.compteurs[f.valeur] }))}
+            valeur={p.filtre}
+            onChange={p.choisirFiltre}
+          />
         </div>
 
         <TableProduits
@@ -58,17 +62,21 @@ export default function ProduitsPage() {
         />
 
         {p.totalPages > 1 && (
-          <Pagination currentPage={p.page} totalPages={p.totalPages} onPageChange={p.setPage} />
+          <div className="bloc-pagination">
+            <Pagination currentPage={p.page} totalPages={p.totalPages} onPageChange={p.setPage} />
+          </div>
         )}
       </div>
 
       <Modal
         isOpen={p.edition !== null}
         onClose={p.fermer}
+        large
+        description={p.edition?.id ? undefined : 'Votre produit sera visible par les clients dès sa publication.'}
         title={p.edition?.id ? 'Modifier le produit' : 'Nouveau produit'}
         footer={(
           <>
-            <button className="btn btn-ghost" onClick={p.fermer} disabled={p.saving}>
+            <button className="btn btn-secondary" onClick={p.fermer} disabled={p.saving}>
               Annuler
             </button>
             <button className="btn btn-primary" onClick={p.enregistrer} disabled={p.saving}>

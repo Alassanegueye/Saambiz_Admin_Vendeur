@@ -52,7 +52,7 @@ export default function PromotionsPage() {
         title={p.edition?.id ? 'Modifier la promotion' : 'Nouvelle promotion'}
         footer={(
           <>
-            <button className="btn btn-ghost" onClick={p.fermer} disabled={p.saving}>
+            <button className="btn btn-secondary" onClick={p.fermer} disabled={p.saving}>
               Annuler
             </button>
             <button className="btn btn-primary" onClick={p.enregistrer} disabled={p.saving}>

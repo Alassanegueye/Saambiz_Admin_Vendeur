@@ -57,9 +57,13 @@ export default function TableProduits({
                 <td className="td-muted">{p.quantite ?? '—'}</td>
                 <td className="td-muted">{p.vues ?? 0}</td>
                 <td>
-                  <Badge variant={disponible ? 'success' : 'default'}>
-                    {disponible ? 'En vente' : 'Retiré'}
-                  </Badge>
+                  {!disponible ? (
+                    <Badge variant="default">Retiré</Badge>
+                  ) : Number(p.quantite ?? 1) <= 0 ? (
+                    <Badge variant="danger">Rupture</Badge>
+                  ) : (
+                    <Badge variant="success">En vente</Badge>
+                  )}
                 </td>
                 <td>
                   <div className="table-actions">

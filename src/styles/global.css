@@ -1,5 +1,4 @@
 @import './variables.css';
-@import './connexion-vendeur.css';
 
 *, *::before, *::after {
   margin: 0;
@@ -418,40 +417,76 @@ table.data-table .td-muted { color: var(--color-text-muted); }
 .toolbar-left { display: flex; gap: 0.75rem; align-items: center; flex: 1; min-width: 0; }
 .toolbar-right { display: flex; gap: 0.75rem; align-items: center; flex-shrink: 0; }
 
-/* ── Modal ── */
+/* ── Modal (style Yobante Boutique) ── */
 .modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.45); z-index: 999;
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(0, 0, 0, 0.4);
   display: flex; align-items: center; justify-content: center;
   padding: 1rem; animation: fadeIn 0.15s ease;
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .modal {
-  background: var(--color-white); border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md); width: 100%; max-width: 520px;
-  max-height: 90vh; overflow-y: auto;
-  animation: slideUp 0.18s ease;
+  width: 100%; max-width: 32rem; max-height: calc(100vh - 2rem);
+  display: flex; flex-direction: column;
+  background: #FFFFFF; border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+  overflow: hidden; animation: slideUp 0.18s ease;
 }
 @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 .modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--color-border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+  padding: 1.5rem 1.5rem 0;
 }
-.modal-title { font-size: 1rem; font-weight: 600; color: var(--color-text); }
+.modal-title { margin: 0; font-size: 1.125rem; font-weight: 700; line-height: 1.4; color: #111827; }
+.modal-description { margin: 0.25rem 0 0; font-size: 0.75rem; line-height: 1.5; color: #6B7280; }
 .modal-close {
-  background: none; border: none; cursor: pointer; padding: 4px;
-  color: var(--color-text-muted); border-radius: 6px; font-size: 1.1rem;
-  display: flex; align-items: center; transition: var(--transition);
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  min-width: 36px; min-height: 36px; margin: -0.4rem -0.5rem 0 0;
+  border: none; border-radius: 8px; background: none; cursor: pointer;
+  color: #9CA3AF; transition: var(--transition);
 }
-.modal-close:hover { background: var(--color-bg); color: var(--color-text); }
+.modal-close:hover { background: #F3F4F6; color: #374151; }
 
-.modal-body { padding: 1.25rem; }
+/* Seul le corps défile, sans barre visible (molette, tactile et clavier restent actifs). */
+.modal-body {
+  padding: 1rem 1.5rem 0.5rem; overflow-y: auto; flex: 1 1 auto; min-height: 0;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.modal-body::-webkit-scrollbar { display: none; }
+
 .modal-footer {
-  display: flex; align-items: center; justify-content: flex-end;
-  gap: 0.75rem; padding: 1rem 1.25rem;
-  border-top: 1px solid var(--color-border);
+  display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem;
+  padding: 1rem 1.5rem 1.5rem;
+}
+.modal-footer .btn { padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.875rem; }
+.modal-footer .btn-secondary { border-color: transparent; color: #4B5563; }
+.modal-footer .btn-secondary:hover:not(:disabled) { background: #F3F4F6; }
+
+/* Champs dans une modale : libellés simples, champs blancs, anneau au focus. */
+.modal .form-field { margin-bottom: 1rem; }
+.modal .form-label {
+  text-transform: none; letter-spacing: 0; font-size: 0.875rem; font-weight: 500;
+  color: #374151; margin-bottom: 0.25rem;
+}
+.modal .form-input, .modal .form-textarea, .modal .form-select {
+  background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px;
+  padding: 0.5rem 0.75rem; font-size: 0.875rem;
+}
+.modal .form-input:focus, .modal .form-textarea:focus, .modal .form-select:focus {
+  border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(13, 27, 61, 0.12);
+}
+.modal .form-hint { font-size: 0.75rem; color: #6B7280; }
+
+/* Mobile : la modale remonte du bas, boutons empilés pleine largeur. */
+@media (max-width: 640px) {
+  .modal-overlay { align-items: flex-end; padding: 0.75rem; }
+  .modal { max-height: calc(100vh - 1.5rem); }
+  .modal-header { padding: 1.25rem 1.25rem 0; }
+  .modal-body { padding: 1rem 1.25rem 0.5rem; }
+  .modal-footer { flex-direction: column-reverse; align-items: stretch; padding: 1rem 1.25rem 1.25rem; }
+  .modal-footer .btn { justify-content: center; padding: 0.65rem 1rem; }
 }
 
 /* ── Form ── */
@@ -667,33 +702,6 @@ table.data-table .td-muted { color: var(--color-text-muted); }
 }
 .change-pwd-banner strong { display: block; margin-bottom: 4px; font-size: 0.92rem; }
 
-/* ── Permission grid ── */
-.perm-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  max-height: 400px;
-  overflow-y: auto;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-}
-.perm-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.6rem 0.875rem;
-  gap: 1rem;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-white);
-  transition: background 0.1s;
-}
-.perm-row:last-child { border-bottom: none; }
-.perm-row:hover { background: var(--color-bg); }
-.perm-menu-name { font-size: 0.88rem; font-weight: 600; color: var(--color-text); min-width: 120px; }
-.perm-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-.perm-checkbox { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: var(--color-text-muted); cursor: pointer; user-select: none; }
-.perm-checkbox input { accent-color: var(--color-primary); width: 14px; height: 14px; cursor: pointer; }
-
 /* ── Input error state ── */
 .form-input.input-error, .form-textarea.input-error { border-color: var(--color-danger); }
 
@@ -879,10 +887,23 @@ table.data-table .td-muted { color: var(--color-text-muted); }
   animation: slideUp 0.35s ease;
 }
 .login-admin-head {
-  display: flex; align-items: center; gap: 14px;
+  /* Hauteur du logo définie une seule fois : le titre s'y aligne plus bas,
+     et les deux restent synchronisés si on change la taille. */
+  --taille-logo: 40px;
+  display: flex;
+  /* flex-start, et non center : le bloc texte (titre + sous-titre) est plus
+     HAUT que le logo. Centrer l'ensemble remonte donc le titre au-dessus du
+     logo au lieu de l'aligner dessus. On part du haut, et c'est le titre
+     seul qu'on centre sur le logo, juste en dessous. */
+  align-items: flex-start;
+  gap: 14px;
   margin-bottom: 1.75rem;
 }
-.login-admin-head img { height: 40px; width: auto; }
+.login-admin-head img { height: var(--taille-logo); width: auto; }
+/* Le titre occupe une ligne de la hauteur exacte du logo : son centre optique
+   tombe donc pile sur le centre du logo, quelle que soit la longueur du
+   sous-titre en dessous. */
+.login-admin-head .login-form-title { line-height: var(--taille-logo); }
 
 /* ── Bandeau du mode démo ── */
 .bandeau-demo {
@@ -913,86 +934,113 @@ table.data-table .td-muted { color: var(--color-text-muted); }
 }
 .bandeau-demo a:hover { opacity: 1; }
 
-/* Deux champs côte à côte dans un formulaire — prix et quantité, dates de
-   début et de fin. Remplace les styles en ligne qui traînaient dans les pages. */
-.form-duo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+/* ── Briques partagées par les pages d'administration ──
+   Ces règles remplacent les styles en ligne qui étaient recopiés d'une page
+   à l'autre : une même cellule « avatar + nom » y était écrite six fois. */
+.cellule-personne { display: flex; align-items: center; gap: 10px; }
+.avatar-grand { width: 56px; height: 56px; font-size: 1.2rem; }
+.entete-personne {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 1.25rem;
 }
-.form-hint {
-  font-size: 0.78rem;
+.entete-personne-nom { font-weight: 700; font-size: 1rem; }
+.entete-personne-email { color: var(--color-text-muted); font-size: 0.82rem; }
+.bloc-pagination { padding: 0.75rem 1.25rem; }
+
+/* Groupe de filtres dans l'en-tête d'une carte. */
+.groupe-filtres { display: flex; align-items: center; gap: 0.6rem; }
+.champ-filtre { width: auto; min-width: 160px; }
+/* Colonne de détails JSON — bornée pour ne pas étirer le tableau. */
+.cellule-details { max-width: 260px; }
+
+/* Texte libre saisi par un utilisateur : ses retours à la ligne font sens. */
+.texte-multiligne { white-space: pre-wrap; }
+/* Motif de signalement : tronqué en cellule, donc légèrement resserré. */
+.texte-motif { font-size: 0.88rem; }
+/* Raison d'un retour : tronquée, mais bornée pour ne pas étirer le tableau. */
+.cellule-raison { max-width: 320px; }
+/* Ligne unique d'un tableau vide, centrée et discrète. */
+.cellule-vide { text-align: center; color: var(--color-text-muted); padding: 1.5rem; }
+/* Code technique affiché en cellule (code de menu, clé de config). */
+.code-inline {
+  background: var(--color-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+/* Ligne secondaire sous le libellé principal d'une cellule (email, téléphone). */
+.td-meta { font-size: 0.78rem; }
+/* Pièce justificative affichée en grand dans une modale. */
+.apercu-piece {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+}
+/* Précision sous un contenu de modale. */
+.note-modale { margin-top: 12px; font-size: 0.82rem; color: var(--color-text-muted); }
+/* Aide sous un champ de formulaire. */
+.form-hint { font-size: 0.8rem; color: var(--color-text-muted); }
+/* Cartes de la page Configuration : bornées pour rester lisibles. */
+.carte-etroite { max-width: 560px; }
+.carte-large { max-width: 720px; }
+/* Astérisque des champs obligatoires. */
+.champ-requis { color: var(--color-danger); }
+/* Boutons alignés sous un formulaire. */
+.barre-actions { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+/* Valeur + bouton d'édition d'une ligne de configuration. */
+.config-list-item-actions { display: flex; align-items: center; gap: 1rem; }
+/* Vignette + nom du produit dans une cellule de tableau. */
+.cellule-produit { display: flex; align-items: center; gap: 10px; }
+.vignette-produit { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; }
+.vignette-vide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  font-size: 0.7rem;
   color: var(--color-text-muted);
 }
-@media (max-width: 480px) {
-  .form-duo { grid-template-columns: 1fr; }
-}
+/* Champ placé juste sous un autre contrôle du même groupe. */
+.champ-espace { margin-top: 0.5rem; }
+/* Grille de permissions sous les champs d'un formulaire d'administrateur. */
+.bloc-permissions { margin-top: 1.25rem; }
+.libelle-permissions { margin-bottom: 0.75rem; }
+/* Spinner posé sur un bouton plein : il doit rester visible sur fond coloré. */
+.spinner-clair { border-color: rgba(255, 255, 255, 0.3); border-top-color: #fff; }
+/* Question posée dans une modale de confirmation. */
+.message-confirmation { font-size: 0.95rem; color: var(--color-text); }
 
-/* Encart d'information au-dessus d'une liste — explique un bouton désactivé,
-   un état d'attente. Remplace les styles en ligne des pages. */
-.card-info { margin-bottom: 1.25rem; }
-.card-info .card-body p { margin: 0; color: var(--color-text-muted); }
+/* ── Catégories ── */
+.cat-aide { padding: 0 1.25rem 0.75rem; margin: 0; }
+.cat-aide-champ { margin: -0.5rem 0 0.75rem; }
+.cat-col-ordre { width: 88px; }
+.cat-col-nombre { text-align: right; width: 90px; }
+td.cat-col-nombre { font-variant-numeric: tabular-nums; }
+.cat-ordre { display: flex; gap: 4px; }
+.cat-ordre .btn { min-width: 30px; justify-content: center; }
+.cat-sous { font-size: 0.8rem; margin-top: 2px; }
+.cat-slug { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.75rem; }
+.cat-ligne-masquee td { opacity: 0.6; }
+.cat-ligne-masquee td:last-child { opacity: 1; }
+.cat-case { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; cursor: pointer; margin-top: 0.25rem; }
+.cat-table .table-actions { flex-wrap: nowrap; }
+.cat-table td:nth-child(3) { white-space: nowrap; }
 
-/* Tableau imbriqué dans une modale — les lignes d'une commande. */
-.table-imbriquee { margin-top: 16px; }
-/* Transitions de statut, sous le détail d'une commande. */
-.bloc-transitions { margin-top: 20px; }
-.bloc-transitions .form-label { margin-bottom: 8px; }
+/* ── Modale large ── */
+.modal.modal-large { max-width: 42rem; }
 
-/* Cartes empilées sur une même page — informations, disponibilité, vérification. */
-.carte-espacee { margin-top: 1.25rem; }
-/* Texte explicatif sous un titre de carte. */
-.texte-secondaire {
-  margin: 0 0 0.9rem;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-}
-.texte-refus {
-  margin: 0 0 0.6rem;
-  color: var(--color-danger);
-  font-size: 0.88rem;
-}
-/* Aperçu du logo actuel, au-dessus du sélecteur de fichier. */
-.apercu-logo {
-  height: 64px;
-  border-radius: 12px;
-  margin-bottom: 8px;
-  object-fit: cover;
-}
-
-/* Valeur qui appelle une action — jours restants avant échéance. */
-.valeur-alerte { color: var(--color-warning); }
-.texte-espace { margin-top: 16px; }
-/* Précision sous un bouton d'action. */
-.note-sous-bouton {
-  margin: 12px 0 0;
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-}
-
-/* ── Caractéristiques produit et catégories (puces) ── */
-.specs { border: 1px solid var(--color-border); border-radius: 10px; padding: 0.9rem 1rem 0.2rem; margin: 0.25rem 0 1rem; }
-.specs-titre { font-size: 0.82rem; font-weight: 700; padding: 0 0.35rem; color: var(--color-text); }
-.specs-puces { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.specs-puce {
-  border: 1px solid var(--color-border); background: var(--color-white); color: var(--color-text);
-  border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 0.8rem; font-weight: 500; cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-}
-.specs-puce:hover:not(:disabled) { border-color: var(--color-primary); }
-.specs-puce--on { background: #FEF3D6; border-color: #F2B705; font-weight: 600; }
-.specs-puce:disabled { opacity: 0.45; cursor: not-allowed; }
-.specs-ajout { display: flex; gap: 6px; margin-top: 8px; max-width: 320px; }
-.specs-nombre { display: flex; align-items: center; gap: 8px; }
-.specs-unite { font-size: 0.85rem; color: var(--color-text-muted); }
-.specs-case { display: inline-flex; align-items: center; gap: 8px; font-size: 0.875rem; cursor: pointer; }
-.specs-facultatif { font-weight: 500; color: var(--color-text-muted); }
-.specs-intro { margin: 0 0 0.75rem; }
-.specs-entete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.specs-retirer { background: none; border: none; color: var(--color-text-muted); font: inherit; font-size: 0.78rem; cursor: pointer; text-decoration: underline; }
-.specs-ajout { max-width: none; }
-.specs-nouvelle { display: flex; gap: 6px; margin: 0.25rem 0 0.9rem; }
-.specs-puce--on { background: #EEF3FC; border-color: #0D1B3D; }
+/* ── Spécifications produit (catégories) ── */
+.spec { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--color-border); display: flex; flex-direction: column; gap: 0.75rem; }
+.spec-entete { display: flex; flex-direction: column; gap: 2px; }
+.spec-vide { margin: 0; }
+.spec-ligne { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-md, 10px); background: var(--color-bg); }
+.spec-rang { display: flex; flex-direction: column; gap: 4px; }
+.spec-champs { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.spec-duo { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 0.5rem; }
+.spec-options { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; align-items: center; font-size: 0.82rem; }
+.spec-options label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.spec-retirer { flex-shrink: 0; }
+@media (max-width: 600px) { .spec-duo { grid-template-columns: minmax(0, 1fr); } }
 
 /* ── SweetAlert2 — alertes harmonisées avec la charte (comme Yobante) ── */
 .swal2-saambiz {
@@ -1016,3 +1064,341 @@ table.data-table .td-muted { color: var(--color-text-muted); }
     width: calc(100% - 2rem) !important;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Barre du haut de l'administration — style du dashboard Yobante Boutique.
+   Rubrique active : soulignement or et texte bleu marine, sans fond coloré.
+   ══════════════════════════════════════════════════════════════════════════ */
+.tn {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--color-white);
+  border-bottom: 1px solid #EEF1F6;
+}
+.tn-barre {
+  height: 64px;
+  display: flex; align-items: stretch; gap: 1rem;
+  padding: 0 1.25rem;
+}
+.tn-marque { display: flex; align-items: center; flex-shrink: 0; }
+.tn-marque img { height: 40px; width: auto; }
+
+.tn-rubriques { flex: 1; min-width: 0; display: flex; justify-content: center; }
+.tn-rubriques > ul { list-style: none; display: flex; align-items: stretch; gap: 2px; margin: 0; padding: 0; }
+.tn-rubriques > ul > li { display: flex; position: relative; }
+.tn-vide { align-self: center; font-size: 0.8rem; color: var(--color-text-muted); }
+
+.tn-onglet {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 10px;
+  border: none; background: none; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-family: inherit; font-size: 13.5px; font-weight: 500;
+  color: #6B7280; text-decoration: none; white-space: nowrap;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.tn-onglet:hover { background: #F9FAFB; color: var(--color-primary); }
+.tn-onglet.actif { border-bottom-color: var(--color-accent); color: var(--color-primary); font-weight: 600; }
+.tn-onglet.ouvert { color: var(--color-primary); }
+
+.tn-chevron { width: 12px; height: 12px; opacity: 0.6; transition: transform 0.15s ease; }
+.tn-chevron.ouvert { transform: rotate(180deg); }
+
+.tn-menu {
+  position: absolute; top: calc(100% + 4px); z-index: 250;
+  background: var(--color-white);
+  border: 1px solid #EEF1F6; border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(13, 27, 61, 0.10);
+  overflow: hidden;
+}
+.tn-menu-groupe { left: 0; width: 260px; }
+.tn-menu-page {
+  width: 100%; display: flex; align-items: flex-start; gap: 9px;
+  padding: 9px 12px; border: none; background: none; cursor: pointer;
+  font-family: inherit; text-align: left;
+}
+.tn-menu-page:hover { background: #F9FAFB; }
+.tn-menu-page.courant { background: #F1F5FD; }
+.tn-menu-icone { margin-top: 2px; color: #9CA3AF; display: flex; }
+.tn-menu-page.courant .tn-menu-icone { color: var(--color-primary); }
+.tn-menu-textes { min-width: 0; display: flex; flex-direction: column; }
+.tn-menu-titre { font-size: 14px; font-weight: 500; color: #1F2937; line-height: 1.35; }
+.tn-menu-page.courant .tn-menu-titre { color: var(--color-primary); font-weight: 600; }
+.tn-menu-aide { font-size: 12px; color: #9CA3AF; line-height: 1.3; }
+
+.tn-compte { position: relative; display: flex; align-items: center; flex-shrink: 0; }
+.tn-compte-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 8px 6px 6px; border: none; border-radius: 10px;
+  background: none; cursor: pointer; color: #9CA3AF;
+}
+.tn-compte-nom {
+  max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: inherit; font-size: 14.5px; font-weight: 500; color: #1F2937;
+}
+@media (max-width: 640px) { .tn-compte-nom { display: none; } }
+.tn-compte-btn:hover, .tn-compte-btn.ouvert { background: #F3F4F6; }
+.tn-avatar {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: #FEF6DC; color: #A86B00;
+  display: grid; place-items: center;
+  font-size: 12.5px; font-weight: 800; letter-spacing: 0.02em;
+}
+.tn-menu-compte { right: 0; width: 230px; }
+.tn-menu-entete { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border-bottom: 1px solid #F3F4F6; }
+.tn-menu-entete strong { font-size: 14px; color: #111827; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tn-menu-entete span { font-size: 12px; color: #9CA3AF; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tn-menu-lien {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border: none; background: none; cursor: pointer;
+  font-family: inherit; font-size: 14px; color: #374151; text-decoration: none;
+}
+.tn-menu-lien svg { color: #9CA3AF; }
+.tn-menu-lien:hover { background: #F9FAFB; }
+.tn-menu-lien.danger { color: #DC2626; border-top: 1px solid #F3F4F6; }
+.tn-menu-lien.danger svg { color: #DC2626; }
+.tn-menu-lien.danger:hover { background: #FEF2F2; }
+
+.tn-burger {
+  display: none; align-self: center;
+  border: none; background: none; cursor: pointer;
+  color: var(--color-primary); padding: 6px; border-radius: 8px;
+}
+.tn-tiroir {
+  display: none; flex-direction: column; gap: 2px;
+  padding: 8px 12px 14px; border-top: 1px solid #EEF1F6;
+  max-height: 75vh; overflow-y: auto;
+}
+.tn-tiroir-titre {
+  margin: 10px 0 4px; padding: 0 12px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: #9CA3AF;
+}
+.tn-tiroir-lien {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 9px;
+  font-size: 14px; font-weight: 500; color: #4B5563; text-decoration: none;
+}
+.tn-tiroir-lien:hover { background: #F9FAFB; }
+.tn-tiroir-lien.actif { color: var(--color-primary); font-weight: 600; background: #F1F5FD; }
+
+@media (max-width: 1024px) {
+  .tn-rubriques { display: none; }
+  .tn-burger { display: inline-flex; }
+  .tn-tiroir { display: flex; }
+  .tn-barre { gap: 0.5rem; padding: 0 0.75rem; }
+  .tn-marque { margin-right: auto; }
+}
+
+/* ── En-tête de liste : recherche à gauche, filtres ensuite ── */
+.card-header-recherche {
+  justify-content: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.card-header-recherche .search-wrap { flex: 1 1 260px; max-width: 380px; }
+.card-header-recherche .search-wrap + * { margin-left: auto; }
+@media (max-width: 640px) {
+  .card-header-recherche .search-wrap { max-width: none; }
+  .card-header-recherche .search-wrap + * { margin-left: 0; }
+}
+
+/* ── Filtres en pastilles (Tous / Actifs / Suspendus) ── */
+.filtres-statut { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.filtre-statut {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--color-border); border-radius: 999px;
+  background: var(--color-white); color: var(--color-text-muted);
+  font-family: var(--font); font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: var(--transition);
+}
+.filtre-statut:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.filtre-statut.actif {
+  background: rgba(13, 27, 61, 0.08);
+  border-color: var(--color-primary);
+  color: var(--color-primary); font-weight: 600;
+}
+.filtre-statut-nombre {
+  min-width: 1.4rem; padding: 0 0.35rem; border-radius: 999px;
+  background: var(--color-bg); font-size: 0.72rem; line-height: 1.3rem; text-align: center;
+}
+.filtre-statut.actif .filtre-statut-nombre { background: var(--color-primary); color: var(--color-white); }
+
+/* ── Formulaires de compte ── */
+.form-grille-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 1rem; }
+@media (max-width: 520px) { .form-grille-2 { grid-template-columns: 1fr; } }
+.form-hint { margin-top: 0.5rem; font-size: 0.8rem; color: var(--color-text-muted); }
+
+/* ── Compteurs cliquables du tableau de bord ── */
+.stat-card-lien { display: block; color: inherit; text-decoration: none; cursor: pointer; }
+.stat-card-lien:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.stat-card-lien-texte {
+  display: inline-block; margin-top: 0.5rem;
+  font-size: 0.75rem; font-weight: 600; color: var(--color-primary);
+  opacity: 0.7; transition: opacity 0.2s;
+}
+.stat-card-lien:hover .stat-card-lien-texte { opacity: 1; }
+.lien-voir-tout { font-size: 0.82rem; font-weight: 600; color: var(--color-primary); text-decoration: none; }
+.lien-voir-tout:hover { text-decoration: underline; }
+
+/* ── Produits et commandes (admin) ── */
+.td-petit { font-size: 0.75rem; }
+.prix-barre { text-decoration: line-through; font-weight: 400; }
+.entete-produit { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.25rem; }
+.image-produit { width: 88px; height: 88px; border-radius: 12px; object-fit: cover; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.entete-produit-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.entete-commande { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.apercu-image { margin-top: 0.5rem; width: 96px; height: 96px; border-radius: 10px; object-fit: cover; border: 1px solid var(--color-border); }
+.case-a-cocher { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; color: var(--color-text); cursor: pointer; align-self: center; }
+.case-a-cocher input { width: 16px; height: 16px; accent-color: var(--color-primary); }
+.ligne-article { display: grid; grid-template-columns: minmax(0, 1fr) 90px auto; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+.ligne-article-pied { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.25rem; }
+.lignes-commande { margin-top: 1.25rem; border: 1px solid var(--color-border); border-radius: var(--radius); }
+.totaux-commande { margin-top: 1rem; margin-left: auto; max-width: 280px; display: grid; gap: 0.35rem; font-size: 0.88rem; }
+.totaux-commande > div { display: flex; justify-content: space-between; color: var(--color-text-muted); }
+.totaux-commande .total { color: var(--color-text); font-weight: 700; border-top: 1px solid var(--color-border); padding-top: 0.4rem; }
+
+/* ── Accès d'un administrateur (style Yobante Boutique) ── */
+.acces-complet {
+  display: flex; align-items: flex-start; gap: 0.625rem;
+  padding: 0.75rem; border: 1px solid #E5E7EB; border-radius: 8px; cursor: pointer;
+  transition: var(--transition);
+}
+.acces-complet.actif { border-color: rgba(13, 27, 61, 0.35); background: rgba(13, 27, 61, 0.05); }
+.acces-complet input, .acces-page input { width: 16px; height: 16px; accent-color: var(--color-primary); cursor: pointer; flex-shrink: 0; }
+.acces-complet input { margin-top: 2px; }
+.acces-complet-titre { display: block; font-size: 0.875rem; font-weight: 500; color: #111827; }
+.acces-complet-aide { display: block; font-size: 0.75rem; color: #6B7280; margin-top: 1px; }
+.acces-groupes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+@media (max-width: 640px) { .acces-groupes { grid-template-columns: minmax(0, 1fr); } }
+.acces-groupe { border: 1px solid #F3F4F6; border-radius: 8px; padding: 0.75rem; }
+.acces-groupe-titre {
+  display: block; margin-bottom: 0.375rem; padding: 0; border: none; background: none; cursor: pointer;
+  font-family: inherit; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; color: #9CA3AF;
+}
+.acces-groupe-titre:hover { color: #374151; }
+.acces-page { padding: 0.25rem 0; }
+.acces-page + .acces-page { border-top: 1px dashed #F3F4F6; }
+.acces-page-nom { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: #1F2937; cursor: pointer; }
+.acces-droits { display: flex; flex-wrap: wrap; gap: 0.25rem; margin: 0.35rem 0 0.15rem 1.5rem; }
+.acces-droit {
+  display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; border-radius: 999px;
+  border: 1px solid #E5E7EB; background: #FFFFFF; cursor: pointer;
+  font-family: inherit; font-size: 0.6875rem; font-weight: 500; color: #6B7280; transition: var(--transition);
+}
+.acces-droit:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.acces-droit.actif { background: var(--color-primary); border-color: var(--color-primary); color: #FFFFFF; }
+.acces-section { margin-top: 0.5rem; }
+.acces-section-titre { font-size: 0.875rem; font-weight: 500; color: #374151; margin: 0 0 0.25rem; }
+.acces-section-aide { font-size: 0.75rem; color: #6B7280; margin: 0 0 0.5rem; }
+
+/* ── Activité des admins ── */
+.stats-grid.stats-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) { .stats-grid.stats-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.stat-card-aide { margin-top: 0.25rem; font-size: 0.72rem; color: var(--color-text-muted); }
+.ligne-cliquable { cursor: pointer; }
+.ligne-cliquable:hover td { background: #F9FAFB; }
+.ligne-choisie td { background: rgba(13, 27, 61, 0.05); }
+.bouton-lien { background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; }
+.texte-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78rem; word-break: break-all; }
+.page-header .filtres-statut { align-self: center; }
+.card + .card { margin-top: 1.25rem; }
+
+/* ════════════════════════════════════════════════════════════════════
+   Propre à l'espace vendeur (formulaires produit, caractéristiques…)
+   ════════════════════════════════════════════════════════════════════ */
+.form-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 480px) {
+  .form-duo { grid-template-columns: 1fr; }
+}
+.card-info { margin-bottom: 1.25rem; }
+.card-info .card-body p { margin: 0; color: var(--color-text-muted); }
+.table-imbriquee { margin-top: 16px; }
+.bloc-transitions { margin-top: 20px; }
+.bloc-transitions .form-label { margin-bottom: 8px; }
+.carte-espacee { margin-top: 1.25rem; }
+.texte-secondaire {
+  margin: 0 0 0.9rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+.texte-refus {
+  margin: 0 0 0.6rem;
+  color: var(--color-danger);
+  font-size: 0.88rem;
+}
+.apercu-logo {
+  height: 64px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  object-fit: cover;
+}
+.valeur-alerte { color: var(--color-warning); }
+.texte-espace { margin-top: 16px; }
+.note-sous-bouton {
+  margin: 12px 0 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+.specs { border: 1px solid var(--color-border); border-radius: 10px; padding: 0.9rem 1rem 0.2rem; margin: 0.25rem 0 1rem; }
+.specs-titre { font-size: 0.82rem; font-weight: 700; padding: 0 0.35rem; color: var(--color-text); }
+.specs-puces { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.specs-puce {
+  border: 1px solid var(--color-border); background: var(--color-white); color: var(--color-text);
+  border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 0.8rem; font-weight: 500; cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.specs-puce:hover:not(:disabled) { border-color: var(--color-primary); }
+.specs-puce--on { background: #FEF3D6; border-color: #F2B705; font-weight: 600; }
+.specs-puce:disabled { opacity: 0.45; cursor: not-allowed; }
+.specs-ajout { display: flex; gap: 6px; margin-top: 8px; max-width: 320px; }
+.specs-nombre { display: flex; align-items: center; gap: 8px; }
+.specs-unite { font-size: 0.85rem; color: var(--color-text-muted); }
+.specs-case { display: inline-flex; align-items: center; gap: 8px; font-size: 0.875rem; cursor: pointer; }
+.specs-facultatif { font-weight: 500; color: var(--color-text-muted); }
+.specs-intro { margin: 0 0 0.75rem; }
+.specs-entete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.specs-retirer { background: none; border: none; color: var(--color-text-muted); font: inherit; font-size: 0.78rem; cursor: pointer; text-decoration: underline; }
+.specs-ajout { max-width: none; }
+.specs-nouvelle { display: flex; gap: 6px; margin: 0.25rem 0 0.9rem; }
+.specs-puce--on { background: #EEF3FC; border-color: #0D1B3D; }
+
+/* ── Accueil vendeur : à faire, chiffres, abonnement ── */
+.actions-rapides { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.actions-rapides .btn { display: inline-flex; align-items: center; gap: 6px; }
+.bloc-taches { margin-bottom: 1.5rem; }
+.tache {
+  display: flex; align-items: center; gap: 0.875rem;
+  padding: 0.875rem 1.25rem; border-top: 1px solid var(--color-border);
+}
+.bloc-taches .card-header + .tache { border-top: none; }
+.tache-icone {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
+  display: grid; place-items: center;
+}
+.tache-urgent .tache-icone { background: rgba(201, 64, 48, 0.1); color: var(--color-danger); }
+.tache-attention .tache-icone { background: rgba(184, 134, 11, 0.12); color: var(--color-warning); }
+.tache-ok .tache-icone { background: rgba(5, 150, 105, 0.1); color: var(--color-success); }
+.tache-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.tache-texte strong { font-size: 0.92rem; color: var(--color-text); }
+.tache-texte span { font-size: 0.8rem; color: var(--color-text-muted); }
+.stats-grid.stats-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { .stats-grid.stats-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .stats-grid.stats-grid-3 { grid-template-columns: minmax(0, 1fr); } }
+.carte-abonnement { margin-top: 1.25rem; }
+.ligne-abonnement { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem; font-size: 0.9rem; }
+@media (max-width: 640px) {
+  .tache { flex-wrap: wrap; align-items: flex-start; }
+  .tache-texte { flex: 1 1 calc(100% - 40px - 0.875rem); }
+  .tache .btn { margin-left: calc(40px + 0.875rem); }
+}
+
+/* Liens présentés en bouton : jamais soulignés. */
+a.btn, a.btn:hover { text-decoration: none; }
+/* Dans une grille, les cartes s'alignent : pas de marge entre cartes voisines. */
+.dashboard-grid > .card + .card { margin-top: 0; }

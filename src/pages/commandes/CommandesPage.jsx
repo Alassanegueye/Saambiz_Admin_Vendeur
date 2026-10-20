@@ -5,7 +5,8 @@ import SearchInput from '../../components/common/SearchInput';
 import Pagination from '../../components/common/Pagination';
 import TableCommandes from './components/TableCommandes';
 import DetailCommande from './components/DetailCommande';
-import useCommandes, { STATUTS } from './useCommandes';
+import FiltresStatut from '../../components/common/FiltresStatut';
+import useCommandes, { FILTRES_COMMANDES } from './useCommandes';
 
 /** Commandes reçues par le vendeur, et leur avancement. */
 export default function CommandesPage() {
@@ -30,27 +31,17 @@ export default function CommandesPage() {
       </div>
 
       <div className="card">
-        <div className="toolbar">
-          <div className="toolbar-left">
-            <SearchInput
-              value={c.search}
-              onChange={c.rechercher}
-              placeholder="Rechercher une commande ou un client…"
-            />
-          </div>
-          <div className="toolbar-right">
-            <select
-              className="filter-select"
-              value={c.filtreStatut}
-              onChange={(e) => c.filtrerParStatut(e.target.value)}
-              aria-label="Filtrer par statut"
-            >
-              <option value="tous">Tous les statuts</option>
-              {STATUTS.map((s) => (
-                <option key={s.code} value={s.code}>{s.label}</option>
-              ))}
-            </select>
-          </div>
+        <div className="card-header card-header-recherche">
+          <SearchInput
+            value={c.search}
+            onChange={c.rechercher}
+            placeholder="Rechercher une commande ou un client…"
+          />
+          <FiltresStatut
+            options={FILTRES_COMMANDES.map((f) => ({ ...f, nombre: c.compteurs[f.valeur] }))}
+            valeur={c.filtreStatut}
+            onChange={c.filtrerParStatut}
+          />
         </div>
 
         <TableCommandes
@@ -60,13 +51,16 @@ export default function CommandesPage() {
         />
 
         {c.totalPages > 1 && (
-          <Pagination currentPage={c.page} totalPages={c.totalPages} onPageChange={c.setPage} />
+          <div className="bloc-pagination">
+            <Pagination currentPage={c.page} totalPages={c.totalPages} onPageChange={c.setPage} />
+          </div>
         )}
       </div>
 
       <Modal
         isOpen={c.detail !== null}
         onClose={() => c.setDetail(null)}
+        large
         title={`Commande ${c.detail?.reference || `#${String(c.detail?.id || '').slice(0, 8)}`}`}
       >
         <DetailCommande

@@ -3,35 +3,86 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { getDashboard } from '../../service/vendeur.service';
 import usePageData from '../../hooks/usePageData';
+import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import MiniBarChart from '../../components/common/MiniBarChart';
 import Badge from '../../components/common/Badge';
 import { formatMontant, formatDate } from '../../utils/formatters';
 import { ROUTES } from '../../constants/routes';
 
-const ICONS = {
+const ICONES = {
   ca: <><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></>,
   commandes: <><path d="M9 11V6a3 3 0 0 1 6 0v5" /><rect x="3" y="11" width="18" height="10" rx="2" /></>,
   attente: <><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15 14" /></>,
   produits: <><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /></>,
   vues: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>,
   abonnes: <><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></>,
+  message: <><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></>,
+  boutique: <><path d="M3 9l1.5-5h15L21 9" /><path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" /><path d="M9 21v-6h6v6" /></>,
+  alerte: <><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></>,
+  ok: <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></>,
+  site: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z" /></>,
+  plus: <><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></>,
 };
 
-function StatCard({ icon, tone, valeur, libelle }) {
-  return (
-    <div className="stat-card">
-      <div className={`stat-card-icon ${tone}`}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"
-             strokeLinecap="round" strokeLinejoin="round">{icon}</svg>
-      </div>
+const Icone = ({ children, taille = 20 }) => (
+  <svg viewBox="0 0 24 24" width={taille} height={taille} fill="none" stroke="currentColor"
+       strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+
+/** Chiffre clé ; avec `to`, la carte ouvre la liste concernée. */
+function CarteChiffre({ icone, ton, valeur, libelle, to }) {
+  const contenu = (
+    <>
+      <div className={`stat-card-icon ${ton}`}><Icone>{icone}</Icone></div>
       <div className="stat-card-value">{valeur}</div>
       <div className="stat-card-label">{libelle}</div>
-    </div>
+      {to && <span className="stat-card-lien-texte">Voir →</span>}
+    </>
   );
+  return to
+    ? <Link to={to} className="stat-card stat-card-lien">{contenu}</Link>
+    : <div className="stat-card">{contenu}</div>;
+}
+
+const pluriel = (n, mot, motPluriel = `${mot}s`) => `${n} ${n > 1 ? motPluriel : mot}`;
+
+/**
+ * Ce que le vendeur doit faire maintenant, du plus urgent au moins urgent.
+ * Une seule phrase et un seul bouton par ligne : pas de jargon.
+ */
+function tachesDuJour({ boutique, stats, abonnement, messagesNonLus }) {
+  const t = [];
+  if (!boutique) {
+    t.push({ ton: 'urgent', icone: ICONES.boutique, texte: 'Créez votre boutique pour commencer à vendre', bouton: 'Créer ma boutique', to: ROUTES.BOUTIQUE });
+    return t;
+  }
+  const attente = stats.commandesEnAttente ?? 0;
+  if (attente > 0) {
+    t.push({ ton: 'urgent', icone: ICONES.attente, texte: `${pluriel(attente, 'commande')} à confirmer`, aide: 'Vos clients attendent votre réponse', bouton: 'Voir', to: `${ROUTES.COMMANDES}?statut=en_attente` });
+  }
+  if (abonnement && abonnement.joursRestants <= 7) {
+    t.push({
+      ton: abonnement.joursRestants <= 2 ? 'urgent' : 'attention',
+      icone: ICONES.alerte,
+      texte: abonnement.joursRestants > 0
+        ? `Votre abonnement se termine dans ${pluriel(abonnement.joursRestants, 'jour')}`
+        : 'Votre abonnement est terminé',
+      aide: 'Sans abonnement, vous ne pouvez plus publier ni modifier vos produits',
+      bouton: 'Renouveler', to: ROUTES.ABONNEMENT,
+    });
+  }
+  if ((messagesNonLus ?? 0) > 0) {
+    t.push({ ton: 'attention', icone: ICONES.message, texte: `${pluriel(messagesNonLus, 'message non lu', 'messages non lus')}`, bouton: 'Lire', to: ROUTES.MESSAGES });
+  }
+  if ((stats.nombreProduits ?? 0) === 0) {
+    t.push({ ton: 'attention', icone: ICONES.produits, texte: 'Ajoutez votre premier produit', aide: 'Vos clients ne voient encore rien dans votre boutique', bouton: 'Ajouter', to: `${ROUTES.PRODUITS}?nouveau=1` });
+  }
+  return t;
 }
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const fetcher = useCallback(async () => {
     const res = await getDashboard();
     return res.data?.data || res.data || {};
@@ -46,150 +97,131 @@ export default function DashboardPage() {
   const abonnement = data?.abonnement;
   const revenus = data?.revenus7Jours || [];
   const topProduits = data?.topProduits || [];
+  const taches = tachesDuJour({ boutique, stats, abonnement, messagesNonLus: data?.messagesNonLus });
 
-  // Le graphe partagé lit les clés qu'on lui indique : on abrège la date.
   const donneesGraphe = revenus.map((r) => ({
     jour: new Date(r.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
     montant: Number(r.montant) || 0,
   }));
+  const totalSemaine = donneesGraphe.reduce((t, r) => t + r.montant, 0);
 
   return (
     <div>
-      <Helmet><title>Tableau de bord — SaamBiz Vendeur</title></Helmet>
+      <Helmet><title>Accueil — SaamBiz Vendeur</title></Helmet>
 
       <div className="page-header">
         <div className="page-header-left">
-          <h1>{boutique?.nom || 'Ma boutique'}</h1>
-          <p>{boutique?.localisation ? `Boutique à ${boutique.localisation}` : 'Votre activité en un coup d’œil'}</p>
+          <h1>Bonjour{user?.prenom ? ` ${user.prenom}` : ''}</h1>
+          <p>{boutique ? `Voici où en est ${boutique.nom}` : 'Bienvenue sur votre espace vendeur'}</p>
         </div>
-      </div>
-
-      {/* Sans boutique, rien d'autre n'a de sens : on renvoie d'abord la créer. */}
-      {!boutique && (
-        <div className="card" style={{ marginBottom: '1.25rem' }}>
-          <div className="card-body">
-            <h3 className="card-title">Vous n’avez pas encore de boutique</h3>
-            <p style={{ margin: '8px 0 16px', color: 'var(--color-text-muted)' }}>
-              Créez votre boutique pour publier vos produits et recevoir des commandes.
-            </p>
-            <Link className="btn btn-primary" to={ROUTES.BOUTIQUE}>
-              Créer ma boutique
+        {boutique && (
+          <div className="actions-rapides">
+            <Link className="btn btn-secondary" to={ROUTES.VITRINE}>
+              <Icone taille={16}>{ICONES.site}</Icone> Mon site
+            </Link>
+            <Link className="btn btn-primary" to={`${ROUTES.PRODUITS}?nouveau=1`}>
+              <Icone taille={16}>{ICONES.plus}</Icone> Ajouter un produit
             </Link>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {abonnement && abonnement.joursRestants <= 7 && (
-        <div className="card" style={{ marginBottom: '1.25rem', borderLeft: '4px solid var(--color-warning)' }}>
-          <div className="card-body" style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 240 }}>
-              <strong>Votre abonnement expire dans {abonnement.joursRestants} jour
-                {abonnement.joursRestants > 1 ? 's' : ''}</strong>
-              <p style={{ margin: '4px 0 0', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
-                Sans abonnement actif, vous ne pouvez plus publier ni modifier de produits.
-              </p>
+      {/* À faire : la première chose à regarder en arrivant. */}
+      <div className="card bloc-taches">
+        <div className="card-header"><span className="card-title">À faire</span></div>
+        {taches.length === 0 ? (
+          <div className="tache tache-ok">
+            <span className="tache-icone"><Icone>{ICONES.ok}</Icone></span>
+            <div className="tache-texte">
+              <strong>Tout est à jour</strong>
+              <span>Aucune commande à confirmer, aucun message en attente.</span>
             </div>
-            <Link className="btn btn-primary" to={ROUTES.ABONNEMENT}>Renouveler</Link>
           </div>
-        </div>
-      )}
-
-      <div className="stats-grid">
-        <StatCard icon={ICONS.ca}        tone="green" valeur={formatMontant(stats.chiffreAffaires)} libelle="Chiffre d'affaires" />
-        <StatCard icon={ICONS.commandes} tone="blue"  valeur={stats.nombreCommandes ?? 0}          libelle="Commandes reçues" />
-        <StatCard icon={ICONS.attente}   tone="gold"  valeur={stats.commandesEnAttente ?? 0}       libelle="En attente de traitement" />
-        <StatCard icon={ICONS.produits}  tone="blue"  valeur={stats.nombreProduits ?? 0}           libelle="Produits publiés" />
-        <StatCard icon={ICONS.vues}      tone="gray"  valeur={stats.totalVues ?? 0}                libelle="Vues cumulées" />
-        <StatCard icon={ICONS.abonnes}   tone="red"   valeur={stats.nombreAbonnes ?? 0}            libelle="Abonnés à la boutique" />
+        ) : taches.map((t) => (
+          <div className={`tache tache-${t.ton}`} key={t.texte}>
+            <span className="tache-icone"><Icone>{t.icone}</Icone></span>
+            <div className="tache-texte">
+              <strong>{t.texte}</strong>
+              {t.aide && <span>{t.aide}</span>}
+            </div>
+            <Link className="btn btn-primary btn-sm" to={t.to}>{t.bouton}</Link>
+          </div>
+        ))}
       </div>
 
-      <div className="dashboard-grid" style={{ marginTop: '1.25rem' }}>
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">Revenus des 7 derniers jours</h3>
+      {boutique && (
+        <>
+          <div className="stats-grid stats-grid-3">
+            <CarteChiffre icone={ICONES.ca} ton="green" valeur={formatMontant(stats.chiffreAffaires)} libelle="Ventes encaissées" to={`${ROUTES.COMMANDES}?statut=livree`} />
+            <CarteChiffre icone={ICONES.commandes} ton="blue" valeur={stats.nombreCommandes ?? 0} libelle="Commandes reçues" to={ROUTES.COMMANDES} />
+            <CarteChiffre icone={ICONES.attente} ton="gold" valeur={stats.commandesEnAttente ?? 0} libelle="Commandes à confirmer" to={`${ROUTES.COMMANDES}?statut=en_attente`} />
+            <CarteChiffre icone={ICONES.produits} ton="blue" valeur={stats.nombreProduits ?? 0} libelle="Produits en ligne" to={ROUTES.PRODUITS} />
+            <CarteChiffre icone={ICONES.vues} ton="gray" valeur={stats.totalVues ?? 0} libelle="Visites de vos produits" />
+            <CarteChiffre icone={ICONES.abonnes} ton="red" valeur={stats.nombreAbonnes ?? 0} libelle="Clients abonnés à votre boutique" />
           </div>
-          <div className="card-body">
-            <MiniBarChart
-              data={donneesGraphe}
-              labelKey="jour"
-              valueKey="montant"
-              formatValue={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)}
-            />
-          </div>
-        </div>
 
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">Produits les plus vus</h3>
-            <Link className="btn btn-ghost btn-sm" to={ROUTES.PRODUITS}>Tout voir</Link>
-          </div>
-          <div className="card-body">
-            {topProduits.length === 0 ? (
-              <div className="empty-state"><p>Aucun produit publié pour l’instant</p></div>
-            ) : (
-              <div className="table-wrap">
-                <table className="data-table">
-                  <thead>
-                    <tr><th>Produit</th><th>Prix</th><th>Vues</th></tr>
-                  </thead>
-                  <tbody>
-                    {topProduits.map((p) => (
-                      <tr key={p.id}>
-                        <td className="td-bold">{p.nom}</td>
-                        <td>{formatMontant(p.prix)}</td>
-                        <td className="td-muted">{p.vues ?? 0}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          <div className="dashboard-grid">
+            <div className="card">
+              <div className="card-header">
+                <span className="card-title">Ventes des 7 derniers jours</span>
+                <span className="td-bold">{formatMontant(totalSemaine)}</span>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
+              <div className="card-body">
+                <MiniBarChart
+                  data={donneesGraphe}
+                  labelKey="jour"
+                  valueKey="montant"
+                  formatValue={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)}
+                />
+              </div>
+            </div>
 
-      <div className="dashboard-grid" style={{ marginTop: '1.25rem' }}>
-        <div className="card">
-          <div className="card-header"><h3 className="card-title">Abonnement</h3></div>
-          <div className="card-body">
-            {abonnement ? (
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Statut</label>
-                  <Badge variant={abonnement.statut === 'actif' ? 'success' : 'warning'}>
-                    {abonnement.statut}
-                  </Badge>
+            <div className="card">
+              <div className="card-header">
+                <span className="card-title">Vos produits les plus regardés</span>
+                <Link className="lien-voir-tout" to={ROUTES.PRODUITS}>Voir tout</Link>
+              </div>
+              {topProduits.length === 0 ? (
+                <div className="empty-state"><p>Aucun produit publié pour l’instant</p></div>
+              ) : (
+                <div className="table-wrap">
+                  <table className="data-table">
+                    <thead><tr><th>Produit</th><th>Prix</th><th>Vues</th></tr></thead>
+                    <tbody>
+                      {topProduits.map((p) => (
+                        <tr key={p.id}>
+                          <td className="td-bold">{p.nom}</td>
+                          <td>{formatMontant(p.prix)}</td>
+                          <td className="td-muted">{p.vues ?? 0}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <div className="detail-item"><label>Formule</label><span>{abonnement.type || '—'}</span></div>
-                <div className="detail-item"><label>Échéance</label><span>{formatDate(abonnement.dateFin)}</span></div>
-                <div className="detail-item"><label>Jours restants</label><span>{abonnement.joursRestants}</span></div>
+              )}
+            </div>
+          </div>
+
+          <div className="card carte-abonnement">
+            <div className="card-header">
+              <span className="card-title">Mon abonnement</span>
+              <Link className="lien-voir-tout" to={ROUTES.ABONNEMENT}>Gérer</Link>
+            </div>
+            {abonnement ? (
+              <div className="ligne-abonnement">
+                <Badge variant={abonnement.statut === 'actif' ? 'success' : 'warning'}>
+                  {abonnement.statut === 'actif' ? 'Actif' : abonnement.statut}
+                </Badge>
+                <span>Formule <strong>{abonnement.type || '—'}</strong></span>
+                <span>Jusqu’au <strong>{formatDate(abonnement.dateFin)}</strong></span>
+                <span className="td-muted">{pluriel(abonnement.joursRestants ?? 0, 'jour restant', 'jours restants')}</span>
               </div>
             ) : (
               <div className="empty-state"><p>Aucun abonnement enregistré</p></div>
             )}
           </div>
-        </div>
-
-        <div className="card">
-          <div className="card-header"><h3 className="card-title">À traiter</h3></div>
-          <div className="card-body">
-            <div className="detail-grid">
-              <div className="detail-item">
-                <label>Commandes en attente</label>
-                <span><Link to={ROUTES.COMMANDES}>{stats.commandesEnAttente ?? 0}</Link></span>
-              </div>
-              <div className="detail-item">
-                <label>Messages non lus</label>
-                <span><Link to={ROUTES.MESSAGES}>{data?.messagesNonLus ?? 0}</Link></span>
-              </div>
-              <div className="detail-item">
-                <label>Notifications non lues</label>
-                <span>{data?.notificationsNonLues ?? 0}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

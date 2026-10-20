@@ -35,7 +35,7 @@
   --sidebar-width: 268px;
   --sidebar-closed: 80px;
   /* Barre de navigation horizontale : marque + rubriques + compte */
-  --topnav-height: 62px;
+  --topnav-height: 64px;
   --topbar-height: 62px;
   --transition: all 0.2s ease;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;

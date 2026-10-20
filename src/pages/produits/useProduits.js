@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from '../../utils/alert';
 import {
   getProduits,
@@ -36,7 +37,25 @@ export const CHAMPS_VIDES = {
   attributs: {},
 };
 
+/** Filtres en pastilles au-dessus de la liste. */
+export const FILTRES_PRODUITS = [
+  { valeur: '', libelle: 'Tous' },
+  { valeur: 'en_vente', libelle: 'En vente' },
+  { valeur: 'rupture', libelle: 'Rupture de stock' },
+  { valeur: 'retires', libelle: 'Retirés de la vente' },
+];
+
+const enVente = (p) => (p.disponible ?? true) && Number(p.quantite ?? 1) > 0;
+const enRupture = (p) => (p.disponible ?? true) && Number(p.quantite ?? 1) <= 0;
+const retire = (p) => p.disponible === false;
+const TESTS = { en_vente: enVente, rupture: enRupture, retires: retire };
+
 export default function useProduits() {
+  // ?filtre=rupture : ouverture depuis l'accueil ; ?nouveau=1 : le bouton
+  // « Ajouter un produit » de l'accueil ouvre directement le formulaire.
+  const [params, setParams] = useSearchParams();
+  const filtre = TESTS[params.get('filtre')] ? params.get('filtre') : '';
+
   const [produits, setProduits] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +67,7 @@ export default function useProduits() {
   // `edition` porte trois états : null = modale fermée, {} = création,
   // un produit = modification. Un seul champ plutôt que deux booléens qui
   // finiraient par se contredire.
-  const [edition, setEdition] = useState(null);
+  const [edition, setEdition] = useState(() => (params.get('nouveau') ? {} : null));
   const [valeurs, setValeurs] = useState(CHAMPS_VIDES);
   const [image, setImage] = useState(null);
   const [images, setImages] = useState([]);
@@ -88,12 +107,27 @@ export default function useProduits() {
   // ── Recherche et pagination ────────────────────────────────────────────────
   const filtres = useMemo(() => {
     const s = rechercheDifferee.toLowerCase();
-    if (!s) return produits;
-    return produits.filter(
-      (p) => (p.nom || '').toLowerCase().includes(s)
-        || (p.description || '').toLowerCase().includes(s)
-    );
-  }, [produits, rechercheDifferee]);
+    return produits.filter((p) => {
+      if (filtre && !TESTS[filtre](p)) return false;
+      if (!s) return true;
+      return (p.nom || '').toLowerCase().includes(s)
+        || (p.description || '').toLowerCase().includes(s);
+    });
+  }, [produits, rechercheDifferee, filtre]);
+
+  const compteurs = {
+    '': produits.length,
+    en_vente: produits.filter(enVente).length,
+    rupture: produits.filter(enRupture).length,
+    retires: produits.filter(retire).length,
+  };
+
+  const choisirFiltre = (valeur) => {
+    const suivants = new URLSearchParams(params);
+    if (valeur) suivants.set('filtre', valeur); else suivants.delete('filtre');
+    setParams(suivants, { replace: true });
+    setPage(1);
+  };
 
   const totalPages = Math.ceil(filtres.length / PAGE_SIZE);
   const pageCourante = filtres.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -131,7 +165,16 @@ export default function useProduits() {
     setEdition(produit);
   };
 
-  const fermer = () => setEdition(null);
+  const fermer = () => {
+    setEdition(null);
+    // Venu de l'accueil (?nouveau=1) : on retire le paramètre, sinon un
+    // rechargement rouvrirait le formulaire.
+    if (params.get('nouveau')) {
+      const suivants = new URLSearchParams(params);
+      suivants.delete('nouveau');
+      setParams(suivants, { replace: true });
+    }
+  };
 
   const valider = () => {
     const e = {};
@@ -220,6 +263,7 @@ export default function useProduits() {
     produits, categories, loading,
     pageCourante, page, totalPages, setPage,
     search, rechercher, rechercheDifferee,
+    filtre, choisirFiltre, compteurs,
 
     // Formulaire
     edition, valeurs, setValeurs, erreurs, saving,

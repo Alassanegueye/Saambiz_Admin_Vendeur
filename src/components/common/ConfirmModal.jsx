@@ -26,7 +26,7 @@ const ConfirmModal = memo(function ConfirmModal({
         </>
       }
     >
-      <p style={{ fontSize: '0.95rem', color: 'var(--color-text)' }}>{message}</p>
+      <p className="message-confirmation">{message}</p>
     </Modal>
   );
 });
