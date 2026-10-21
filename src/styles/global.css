@@ -1,4 +1,5 @@
 @import './variables.css';
+@import './connexion-vendeur.css';
 
 *, *::before, *::after {
   margin: 0;
@@ -1407,7 +1408,15 @@ a.btn, a.btn:hover { text-decoration: none; }
 /* ════════════════════════════════════════════════════════════════════
    Mobile : rien ne déborde, la page ne glisse ni à gauche ni à droite.
    ════════════════════════════════════════════════════════════════════ */
-html, body { max-width: 100%; overflow-x: hidden; }
+/* `clip` et non `hidden` : `hidden` sur html ET body fait de body un second
+   conteneur de défilement — la molette « refusait » alors parfois de faire
+   monter ou descendre la page, et les éléments collants (aperçu du site)
+   se comportaient mal. `clip` coupe le débordement sans rien de tout ça. */
+html, body { max-width: 100%; overflow-x: clip; }
+@supports not (overflow: clip) {
+  html { overflow-x: visible; }
+  body { overflow-x: hidden; }
+}
 .badge { white-space: nowrap; }
 body { overscroll-behavior-x: none; }
 img, svg, video, canvas { max-width: 100%; }

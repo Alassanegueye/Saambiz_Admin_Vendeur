@@ -13,6 +13,7 @@ export const ROUTES = {
   PROMOTIONS: '/promotions',
   BOUTIQUE:   '/boutique',
   VITRINE:    '/mon-site',
+  SECTIONS:   '/sections-du-site',
   MESSAGES:   '/messages',
   ABONNEMENT: '/abonnement',
   PROFIL:     '/profil',

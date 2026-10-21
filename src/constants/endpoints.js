@@ -48,6 +48,7 @@ export const ENDPOINTS = {
 
     // Vitrine : le site web public de la boutique (saambiz.com/b/<slug>)
     MA_VITRINE:       '/vendeur/ma-vitrine',
+    MA_VITRINE_APERCU:'/vendeur/ma-vitrine/apercu',
 
     // Abonnement
     MON_ABONNEMENT:   '/vendeur/mon-abonnement',

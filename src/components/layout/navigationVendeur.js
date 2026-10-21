@@ -11,7 +11,7 @@ export const GROUPES = [
   { codes: ['ACCUEIL'] },
   { codes: ['PRODUITS'] },
   { label: 'Ventes', icone: 'COMMANDES', codes: ['COMMANDES', 'PROMOTIONS'] },
-  { label: 'Ma boutique', icone: 'BOUTIQUE', codes: ['BOUTIQUE', 'VITRINE'] },
+  { label: 'Ma boutique', icone: 'BOUTIQUE', codes: ['BOUTIQUE', 'VITRINE', 'SECTIONS'] },
   { codes: ['MESSAGES'] },
   { codes: ['ABONNEMENT'] },
 ];
@@ -22,6 +22,7 @@ export const AIDES = {
   PROMOTIONS: 'Réductions sur vos produits',
   BOUTIQUE: 'Nom, logo, catégories et coordonnées',
   VITRINE: 'Votre site web, à partager à vos clients',
+  SECTIONS: 'Les produits affichés dans chaque section de votre site',
 };
 
 /**

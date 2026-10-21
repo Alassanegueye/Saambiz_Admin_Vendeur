@@ -15,6 +15,7 @@ const CommandesPage  = lazy(() => import('../pages/commandes/CommandesPage'));
 const PromotionsPage = lazy(() => import('../pages/promotions/PromotionsPage'));
 const BoutiquePage   = lazy(() => import('../pages/boutique/BoutiquePage'));
 const VitrinePage    = lazy(() => import('../pages/vitrine/VitrinePage'));
+const SectionsSitePage = lazy(() => import('../pages/vitrine/SectionsSitePage'));
 const MessagesPage   = lazy(() => import('../pages/messages/MessagesPage'));
 const AbonnementPage = lazy(() => import('../pages/abonnement/AbonnementPage'));
 const ProfilPage     = lazy(() => import('../pages/profil/ProfilPage'));
@@ -41,6 +42,7 @@ export default function AppRoutes() {
               <Route path={ROUTES.PROMOTIONS} element={<ErrorBoundary><PromotionsPage /></ErrorBoundary>} />
               <Route path={ROUTES.BOUTIQUE}   element={<ErrorBoundary><BoutiquePage /></ErrorBoundary>} />
               <Route path={ROUTES.VITRINE}    element={<ErrorBoundary><VitrinePage /></ErrorBoundary>} />
+              <Route path={ROUTES.SECTIONS}   element={<ErrorBoundary><SectionsSitePage /></ErrorBoundary>} />
               <Route path={ROUTES.MESSAGES}   element={<ErrorBoundary><MessagesPage /></ErrorBoundary>} />
               <Route path={ROUTES.ABONNEMENT} element={<ErrorBoundary><AbonnementPage /></ErrorBoundary>} />
               <Route path={ROUTES.PROFIL}     element={<ErrorBoundary><ProfilPage /></ErrorBoundary>} />

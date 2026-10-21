@@ -47,6 +47,12 @@ const ITEMS = [
     icon: <><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/></>,
   },
   {
+    code: 'SECTIONS',
+    to: ROUTES.SECTIONS,
+    label: 'Sections du site',
+    icon: <><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></>,
+  },
+  {
     code: 'MESSAGES',
     to: ROUTES.MESSAGES,
     label: 'Messages',

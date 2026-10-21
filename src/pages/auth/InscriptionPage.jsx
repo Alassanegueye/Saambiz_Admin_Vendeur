@@ -22,11 +22,12 @@ import {
  *
  *   1. Vous          prénom, nom, email, WhatsApp
  *   2. Sécurité      mot de passe
- *   3. Boutique      nom, catégories, ville
- *   4. Vérification  code reçu par email → compte + boutique créés → connexion
+ *   3. Boutique      nom de la boutique
+ *   4. Catégories    catégories, ville
+ *   5. Vérification  code reçu par email → compte + boutique créés → connexion
  */
 
-const ETAPES = ['Vous', 'Sécurité', 'Boutique', 'Vérification'];
+const ETAPES = ['Vous', 'Sécurité', 'Boutique', 'Catégories', 'Vérification'];
 const VILLES = ['Dakar', 'Thiès', 'Saint-Louis', 'Touba', 'Mbour', 'Ziguinchor', 'Kaolack', 'Rufisque', 'Diourbel', 'Autre'];
 const MAX_CATEGORIES = 3;
 const DELAI_RENVOI = 30;
@@ -119,6 +120,8 @@ export default function InscriptionPage() {
     if (etape === 2) {
       if (nomBoutique.trim().length < 2) return 'Donnez un nom à votre boutique.';
       if (!/^\p{L}/u.test(nomBoutique.trim())) return 'Le nom de la boutique doit commencer par une lettre.';
+    }
+    if (etape === 3) {
       if (choix.length === 0) return 'Choisissez au moins une catégorie.';
     }
     return '';
@@ -136,14 +139,14 @@ export default function InscriptionPage() {
     setErreur(probleme);
     if (probleme) return;
 
-    if (etape < 2) { setEtape(etape + 1); return; }
+    if (etape < 3) { setEtape(etape + 1); return; }
 
     // Fin de l'étape « Boutique » : le code part maintenant, pour ne pas
     // expirer pendant que la personne remplit le reste.
     setChargement(true);
     try {
       await envoyerCode();
-      setEtape(3);
+      setEtape(4);
       setTimeout(() => cases.current[0]?.focus(), 50);
     } catch (err) {
       setErreur(messageErreur(err, "Le code n'a pas pu être envoyé."));
@@ -236,7 +239,8 @@ export default function InscriptionPage() {
   const titres = [
     ['Créer votre boutique', 'Gratuit, en quelques minutes.'],
     ['Votre mot de passe', 'Il servira aussi dans l\'application.'],
-    ['Votre boutique', 'Tout reste modifiable ensuite.'],
+    ['Votre boutique', 'Le nom que verront vos clients.'],
+    ['Ce que vous vendez', 'Tout reste modifiable ensuite.'],
     ['Vérifiez votre email', <>Code envoyé à <strong>{emailPropre}</strong></>],
   ];
 
@@ -277,7 +281,7 @@ export default function InscriptionPage() {
 
             {erreur && <div className="ins-erreur" role="alert">{erreur}</div>}
 
-            {etape < 3 && (
+            {etape < 4 && (
               <form onSubmit={suivant} noValidate>
                 {etape === 0 && (
                   <>
@@ -328,7 +332,13 @@ export default function InscriptionPage() {
                   <>
                     <Champ id="boutique" label="Nom de la boutique" placeholder="Boutique Awa" value={nomBoutique}
                            onChange={(e) => setNomBoutique(e.target.value)} autoFocus
-                           icone={<><path d="M3 9l1.5-5h15L21 9" /><path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" /><path d="M9 21v-6h6v6" /></>} />
+                           icone={<><path d="M3 9l1.5-5h15L21 9" /><path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" /><path d="M9 21v-6h6v6" /></>}
+                           aide="Il doit commencer par une lettre. Vous pourrez le changer plus tard." />
+                  </>
+                )}
+
+                {etape === 3 && (
+                  <>
                     <div className="cnx-champ">
                       <span className="cnx-label">Catégories <small className="ins-discret">(1 à {MAX_CATEGORIES})</small></span>
                       <div className="ins-puces">
@@ -368,12 +378,12 @@ export default function InscriptionPage() {
 
                 <button className="cnx-bouton" type="submit" disabled={chargement}>
                   {chargement && <div className="spinner spinner-sm" style={{ borderTopColor: '#fff', borderColor: 'rgba(255,255,255,0.3)' }} />}
-                  {etape < 2 ? 'Continuer' : chargement ? 'Envoi du code…' : 'Recevoir mon code'}
+                  {etape < 3 ? 'Continuer' : chargement ? 'Envoi du code…' : 'Recevoir mon code'}
                 </button>
               </form>
             )}
 
-            {etape === 3 && (
+            {etape === 4 && (
               <form onSubmit={terminer} noValidate>
                 <div className="ins-code">
                   {code.map((c, i) => (

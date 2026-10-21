@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { toast, showConfirm } from '../../utils/alert';
-import { getMaVitrine, modifierVitrine } from '../../service/vendeur.service';
+import { getMaVitrine, modifierVitrine, supprimerVitrine, getApercuVitrine } from '../../service/vendeur.service';
 
 /**
  * Contrôleur de la page « Mon site ».
@@ -21,19 +21,19 @@ export const MODELES = [
   {
     cle: 'classique',
     nom: 'Classique',
-    resume: 'Bannière, rayons, puis les produits.',
+    resume: 'Des cartes produits équilibrées.',
     pourQui: 'Le choix sûr, quel que soit ce que vous vendez.',
   },
   {
     cle: 'galerie',
     nom: 'Galerie',
-    resume: 'De grandes images en premier.',
+    resume: 'Des cartes avec de grandes photos.',
     pourQui: 'Mode, décoration, bijoux — tout ce qui se vend par la photo.',
   },
   {
     cle: 'catalogue',
     nom: 'Catalogue',
-    resume: 'Une liste dense, rapide à parcourir.',
+    resume: 'Une liste compacte, rapide à parcourir.',
     pourQui: 'Gros stocks, pièces détachées, produits qui se comparent.',
   },
 ];
@@ -63,10 +63,12 @@ const CHAMPS_VIDES = {
   apropos: '',
   annonce: '',
   horaires: '',
-  reseaux: { facebook: '', instagram: '', tiktok: '', site: '' },
-  sections: { apropos: true, categories: true, avis: true, contact: true },
+  reseaux: { facebook: '', instagram: '', snapchat: '', tiktok: '', site: '' },
+  sections: { apropos: true, categories: true, avis: true, contact: true, nouveautes: true, meilleures: true },
   commande: true,
   paiementLivraison: true,
+  sectionsPerso: [],
+  blocs: { icones: {}, avantages: [] },
 };
 
 /** Le corps de réponse peut arriver sous `data` ou nu selon l'ancienneté de la route. */
@@ -78,6 +80,9 @@ export default function useVitrine() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [erreur, setErreur] = useState(null);
+  // Données de la boutique pour l'aperçu en direct et la liste des catégories.
+  const [version, setVersion] = useState(0);
+  const [apercu, setApercu] = useState(null);
 
   const appliquer = useCallback((charge) => {
     if (!charge?.vitrine) return;
@@ -94,14 +99,32 @@ export default function useVitrine() {
       reseaux: {
         facebook: v.reseaux?.facebook || '',
         instagram: v.reseaux?.instagram || '',
+        snapchat: v.reseaux?.snapchat || '',
         tiktok: v.reseaux?.tiktok || '',
         site: v.reseaux?.site || '',
       },
       sections: { ...CHAMPS_VIDES.sections, ...(v.sections || {}) },
       commande: v.commande !== false,
       paiementLivraison: v.paiementLivraison !== false,
+      sectionsPerso: Array.isArray(v.sectionsPerso) ? v.sectionsPerso : [],
+      blocs: {
+        icones: v.blocs?.icones || {},
+        avantages: (v.blocs?.avantages || []).map((a) => ({ icone: a.icone, titre: a.titre || '', texte: a.texte || '' })),
+      },
     });
+    // Les données de l'aperçu (catalogue, catégories) sont relues après
+    // chaque enregistrement.
+    setVersion((n) => n + 1);
   }, []);
+
+  useEffect(() => {
+    if (!version) return undefined;
+    let annule = false;
+    getApercuVitrine()
+      .then((r) => { if (!annule) setApercu(extraire(r)); })
+      .catch(() => { if (!annule) setApercu(null); });
+    return () => { annule = true; };
+  }, [version]);
 
   useEffect(() => {
     let annule = false;
@@ -127,10 +150,17 @@ export default function useVitrine() {
   const majReseau = (nom, url) =>
     setValeurs((v) => ({ ...v, reseaux: { ...v.reseaux, [nom]: url } }));
 
+  const majBloc = (nom, valeur) =>
+    setValeurs((v) => ({ ...v, blocs: { ...v.blocs, [nom]: valeur } }));
+
+  // Tant que le site n'a jamais été publié, « Enregistrer » garde le
+  // brouillon hors ligne : seule « Publier mon site » le met en ligne.
+  const jamaisPublie = donnees?.vitrine?.configuree !== true;
+
   const enregistrer = async () => {
     setSaving(true);
     try {
-      const r = await modifierVitrine(valeurs);
+      const r = await modifierVitrine(jamaisPublie ? { ...valeurs, active: false } : valeurs);
       appliquer(extraire(r));
       toast.success('Votre site a été mis à jour.');
     } catch (e) {
@@ -172,8 +202,59 @@ export default function useVitrine() {
     }
   };
 
+  /**
+   * Première publication : le vendeur a personnalisé son site (mise en page,
+   * couleur, textes) ; ses réglages sont enregistrés et le site passe en ligne.
+   */
+  const publier = async () => {
+    const ok = await showConfirm({
+      titre: 'Publier mon site',
+      message: 'Votre site sera visible par tous à son adresse. Vous pourrez encore le modifier ou le mettre hors ligne.',
+      confirmText: 'Publier',
+    });
+    if (!ok) return;
+    setSaving(true);
+    try {
+      const r = await modifierVitrine({ ...valeurs, active: true });
+      appliquer(extraire(r));
+      toast.success('Votre site est en ligne !');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      toast.error(e, 'La publication a échoué.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /**
+   * Supprimer le site : il disparaît d'Internet et ses réglages sont effacés.
+   * Les produits, les commandes et la boutique dans l'application restent.
+   */
+  const supprimerSite = async () => {
+    const ok = await showConfirm({
+      titre: 'Supprimer mon site',
+      message: "Votre site ne sera plus accessible et ses réglages (mise en page, couleur, textes) seront effacés. Vos produits restent dans l'application et dans votre tableau de bord.",
+      confirmText: 'Supprimer le site',
+      danger: true,
+    });
+    if (!ok) return;
+    setSaving(true);
+    try {
+      const r = await supprimerVitrine();
+      appliquer(extraire(r));
+      toast.success('Votre site a été supprimé. Vos produits sont toujours là.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      toast.error(e, 'La suppression a échoué.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return {
     donnees,
+    publier,
+    supprimerSite,
     basculerEnLigne,
     bascule,
     valeurs,
@@ -183,6 +264,8 @@ export default function useVitrine() {
     majChamp,
     majSection,
     majReseau,
+    majBloc,
+    apercu,
     enregistrer,
     url: donnees?.vitrine?.url || '',
     // Le site a-t-il déjà été créé (assistant de l'application, ou bouton

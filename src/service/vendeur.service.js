@@ -15,7 +15,7 @@ export const getStatistiques     = () => api.get(VENDEUR.STATISTIQUES);
 export const getStatistiquesVues = () => api.get(VENDEUR.STATISTIQUES_VUES);
 
 // ── Produits ────────────────────────────────────────────────────────────────
-export const getProduits    = () => api.get(VENDEUR.PRODUITS);
+export const getProduits    = (params) => api.get(VENDEUR.PRODUITS, { params });
 export const rechercherProduits = (q) => api.get(VENDEUR.RECHERCHE, { params: { q } });
 
 /**
@@ -74,6 +74,10 @@ export const reactiverBoutique     = () => api.patch(VENDEUR.BOUTIQUE_REACTIVER)
 // Boutique : ce sont des informations de la boutique, pas du site.
 export const getMaVitrine    = () => api.get(VENDEUR.MA_VITRINE);
 export const modifierVitrine = (payload) => api.put(VENDEUR.MA_VITRINE, payload);
+// Supprime le site (présence en ligne) ; les produits restent.
+export const supprimerVitrine = () => api.delete(VENDEUR.MA_VITRINE);
+// Aperçu du site, publié ou non.
+export const getApercuVitrine = () => api.get(VENDEUR.MA_VITRINE_APERCU);
 
 // ── Abonnement ──────────────────────────────────────────────────────────────
 export const getMonAbonnement       = () => api.get(VENDEUR.MON_ABONNEMENT);
