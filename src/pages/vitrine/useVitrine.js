@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { toast, showConfirm } from '../../utils/alert';
 import { getMaVitrine, modifierVitrine, supprimerVitrine, getApercuVitrine } from '../../service/vendeur.service';
+import { messageErreur } from './messageErreur';
 
 /**
  * Contrôleur de la page « Mon site ».
@@ -166,7 +167,7 @@ export default function useVitrine() {
     } catch (e) {
       // Le message du serveur est écrit pour le vendeur — « Cette adresse est
       // déjà prise par une autre boutique » — et vaut mieux qu'un texte générique.
-      toast.error(e?.response?.data?.message || 'La mise à jour a échoué.');
+      toast.error(messageErreur(e, 'La mise à jour a échoué.'));
     } finally {
       setSaving(false);
     }
@@ -196,7 +197,7 @@ export default function useVitrine() {
       appliquer(extraire(r));
       toast.success(active ? 'Votre site est en ligne.' : 'Votre site est hors ligne.');
     } catch (e) {
-      toast.error(e, 'Impossible de modifier votre site.');
+      toast.error(messageErreur(e, 'Impossible de modifier votre site.'));
     } finally {
       setBascule(false);
     }
@@ -220,7 +221,7 @@ export default function useVitrine() {
       toast.success('Votre site est en ligne !');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
-      toast.error(e, 'La publication a échoué.');
+      toast.error(messageErreur(e, 'La publication a échoué.'));
     } finally {
       setSaving(false);
     }
@@ -245,7 +246,7 @@ export default function useVitrine() {
       toast.success('Votre site a été supprimé. Vos produits sont toujours là.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
-      toast.error(e, 'La suppression a échoué.');
+      toast.error(messageErreur(e, 'La suppression a échoué.'));
     } finally {
       setSaving(false);
     }

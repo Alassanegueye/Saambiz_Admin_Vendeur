@@ -8,6 +8,7 @@ import { formatMontant } from '../../utils/formatters';
 import { getMaVitrine, modifierVitrine, getProduits, getApercuVitrine } from '../../service/vendeur.service';
 import ApercuSite from './components/ApercuSite';
 import '../../styles/vitrine.css';
+import { messageErreur } from './messageErreur';
 
 const extraire = (r) => r?.data?.data ?? r?.data ?? null;
 
@@ -73,7 +74,7 @@ export default function SectionsSitePage() {
       setInitiales(JSON.stringify(liste));
       toast.success('Vos sections sont à jour.');
     } catch (e) {
-      toast.error(e?.response?.data?.message || "L'enregistrement a échoué.");
+      toast.error(messageErreur(e, "L'enregistrement a échoué."));
     } finally {
       setEnregistrement(false);
     }
