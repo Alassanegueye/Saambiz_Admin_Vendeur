@@ -11,7 +11,7 @@ import {
 } from '../../service/vendeur.service';
 import { getCategories } from '../../service/categories.service';
 import useDebounce from '../../hooks/useDebounce';
-import { verifierSpecifications } from '../../components/forms/ChampsSpecifications';
+import { verifierSpecifications } from '../../components/forms/verifierSpecifications';
 
 /**
  * Contrôleur de la page Produits.

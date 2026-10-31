@@ -196,14 +196,8 @@ function Valeurs({ id, spec, valeurs, onChange }) {
   );
 }
 
-/** Erreurs des champs obligatoires (définis par l'admin), avant l'envoi. */
-export function verifierSpecifications(specifications = [], valeurs = {}) {
-  const erreurs = {};
-  for (const s of specifications) {
-    if (!s.obligatoire || s.type === 'oui_non') continue;
-    const v = valeurs[s.cle];
-    const vide = v == null || (typeof v === 'string' && !v.trim()) || (Array.isArray(v) && !v.length);
-    if (vide) erreurs[s.cle] = 'À renseigner';
-  }
-  return erreurs;
-}
+// `verifierSpecifications` vivait ici, à côté du composant qui affiche ces
+// champs. Elle est désormais dans ./verifierSpecifications.js : un fichier qui
+// exporte un composant ET une fonction casse le rafraîchissement à chaud de
+// Vite, et la règle react-refresh/only-export-components le refuse — le lint
+// échouait donc avant tout déploiement.
