@@ -1,0 +1,215 @@
+name: Build & Deploy Espace Vendeur
+
+# L'espace vendeur est construit puis déployé sur le VPS qui héberge déjà
+# l'API (api.saambiz.com), à chaque poussée sur main.
+#
+# Remplace l'envoi FTPS vers l'hébergement mutualisé : plus rien ne transite
+# par FTP, et l'application est servie par le même Nginx que l'API — un seul
+# serveur à surveiller, un seul mécanisme de certificats.
+#
+# Deux jobs, dans cet ordre : `build` doit réussir avant que `deploy` ne
+# démarre. Un lint rouge ou un build cassé n'atteint donc jamais le serveur.
+#
+# Secrets à configurer UNE FOIS dans ce dépôt
+# (Settings → Secrets and variables → Actions). Ils ne sont pas partagés
+# entre dépôts, même pour le même serveur :
+#
+#   VPS_HOST     adresse du serveur (IP ou nom de domaine)
+#   VPS_USER     utilisateur SSH
+#   VPS_SSH_KEY  clé privée SSH, dont la publique est dans
+#                ~/.ssh/authorized_keys de cet utilisateur sur le VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Deux déploiements simultanés construiraient dans le même dossier sur le VPS
+# et laisseraient un mélange des deux versions en ligne.
+#
+# `cancel-in-progress: false` est délibéré : interrompre un build en cours
+# laisserait l'application à moitié déployée — un index.html neuf réclamant
+# des fragments JS jamais écrits, donc une page blanche.
+concurrency:
+  group: deploiement-espace-vendeur
+  cancel-in-progress: false
+
+env:
+  URL_PUBLIQUE: https://app.saambiz.com
+  # Route servie uniquement grâce au try_files de deploy/nginx.conf.
+  ROUTE_PROFONDE: /connexion
+
+jobs:
+  # ── Vérification (lint + build) ───────────────────────────────────────────
+  build:
+    name: Lint & build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Construire
+        # Vite charge .env.production tout seul en mode production. Ce fichier
+        # est versionné : sans lui, le build part avec le chemin relatif du
+        # développement (`/saambiz/v1`), qui vise alors l'espace vendeur
+        # lui-même — chaque appel d'API tombe en 404 sans rien expliquer.
+        run: npm run build
+
+      - name: Vérifier ce qui a été produit
+        run: |
+          set -e
+          test -f dist/index.html || { echo "::error::dist/index.html absent"; exit 1; }
+          grep -rqF "api.saambiz.com" dist/assets/ || {
+            echo "::error::l'adresse de l'API n'apparaît pas dans le bundle — .env.production n'a pas été pris en compte"
+            exit 1
+          }
+          echo "Fichiers produits : $(find dist -type f | wc -l)"
+
+  # ── Déploiement (seulement si le job ci-dessus a réussi) ──────────────────
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Déployer par SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: "15m"
+          script: |
+            set -e
+
+            APP_DIR="/var/www/saambiz-vendeur"
+
+            # Le dépôt est cloné une première fois à la main sur le VPS. Ce
+            # workflow ne fait que le mettre à jour : cloner ici masquerait une
+            # erreur de chemin derrière un déploiement en apparence réussi,
+            # dans un dossier que Nginx ne sert à personne.
+            if [ ! -d "${APP_DIR}/.git" ]; then
+              echo "ERREUR : ${APP_DIR} n'est pas un dépôt git." >&2
+              echo "Premier déploiement : 'git clone <url> ${APP_DIR}' une fois, à la main." >&2
+              exit 1
+            fi
+
+            cd "${APP_DIR}"
+
+            # Un `git pull --rebase` refuse de tourner sur un arbre sale et
+            # s'arrête sur « cannot pull with rebase: You have unstaged
+            # changes », sans dire lesquelles. On le dit ici, avec la marche à
+            # suivre — plutôt que d'écraser en silence un travail laissé sur
+            # le serveur. Le cas le plus courant n'est pas une édition : un
+            # `chmod` suffit, git suivant le bit d'exécution.
+            if ! git diff --quiet || ! git diff --cached --quiet; then
+              echo "ERREUR : modifications non commitées dans ${APP_DIR} :" >&2
+              git status --short >&2
+              echo "" >&2
+              echo "Pour les abandonner : git -C ${APP_DIR} checkout -- ." >&2
+              echo "Si ce sont des changements de permissions seulement :" >&2
+              echo "  git -C ${APP_DIR} config core.fileMode false" >&2
+              exit 1
+            fi
+
+            git pull --rebase origin main
+
+            # Construction dans un conteneur jetable : ce VPS n'a pas Node
+            # installé sur l'hôte, tout y tourne en Docker. Effet identique à
+            # `npm ci && npm run build`, sans poser de chaîne de compilation
+            # sur un serveur qui sert plusieurs sites.
+            docker run --rm \
+              -v "${APP_DIR}":/app \
+              -w /app \
+              node:22-slim \
+              sh -c "npm ci --no-audit --no-fund && npm run build"
+
+            # dist/ est la cible finale de Nginx (`root` dans
+            # deploy/nginx.conf) : le build écrit directement dedans, il n'y a
+            # rien à synchroniser et aucun service à redémarrer — Nginx sert
+            # des fichiers statiques.
+            test -f "${APP_DIR}/dist/index.html" || {
+              echo "ERREUR : dist/index.html absent après le build." >&2
+              exit 1
+            }
+
+            echo "Build déposé dans ${APP_DIR}/dist :"
+            ls -la "${APP_DIR}/dist" | head -5
+
+            # ── Configuration Nginx ──────────────────────────────────────────
+            # Posée ici pour qu'une modification de deploy/nginx.conf prenne
+            # effet sans intervention manuelle. Sans cette étape, le fichier
+            # arrive bien sur le serveur par le `git pull` ci-dessus, mais
+            # Nginx ne lit que /etc/nginx — un correctif pourrait donc rester
+            # invisible en production alors que le déploiement passe au vert.
+            #
+            # Le danger est réel : ce serveur sert plusieurs domaines, et une
+            # configuration invalide empêche de recharger TOUS les sites de la
+            # machine, `certbot renew` compris. D'où la sauvegarde, le test, et
+            # la restauration AVANT d'échouer — Nginx n'est jamais rechargé
+            # avec une configuration qui n'a pas passé `nginx -t`.
+            SITE="saambiz-vendeur"
+            DOMAINE="app.saambiz.com"
+            DISPO="/etc/nginx/sites-available/${SITE}"
+            SAUVE="/root/${SITE}.nginx.avant-deploiement"
+
+            if [ ! -f "/etc/letsencrypt/live/${DOMAINE}/fullchain.pem" ]; then
+              # deploy/nginx.conf référence les certificats : les poser avant
+              # Certbot ferait échouer `nginx -t`. Le premier passage se fait
+              # donc à la main (nginx-http.conf puis certbot, voir le README).
+              echo "Certificat absent pour ${DOMAINE} — configuration Nginx laissée telle quelle."
+              echo "Premier déploiement : poser deploy/nginx-http.conf puis lancer certbot (voir README)."
+            else
+              [ -f "${DISPO}" ] && cp "${DISPO}" "${SAUVE}"
+
+              cp "${APP_DIR}/deploy/nginx.conf" "${DISPO}"
+              sed -i "s/YOUR_DOMAIN/${DOMAINE}/g" "${DISPO}"
+              ln -sf "${DISPO}" "/etc/nginx/sites-enabled/${SITE}"
+
+              if nginx -t; then
+                systemctl reload nginx
+                echo "Configuration Nginx à jour et rechargée."
+              else
+                echo "ERREUR : nginx -t a échoué avec la nouvelle configuration." >&2
+                if [ -f "${SAUVE}" ]; then
+                  cp "${SAUVE}" "${DISPO}"
+                  echo "Configuration précédente restaurée." >&2
+                else
+                  rm -f "/etc/nginx/sites-enabled/${SITE}"
+                  echo "Site désactivé (aucune version précédente à restaurer)." >&2
+                fi
+                nginx -t
+                exit 1
+              fi
+            fi
+
+      - name: Vérifier le site en ligne
+        # Le déploiement n'est acquis que si l'application répond réellement.
+        # Sans ce contrôle, un build déposé dans le mauvais dossier ou un Nginx
+        # mal configuré ressemblent trait pour trait à un succès.
+        run: |
+          set -e
+          code=$(curl -sS -m 30 -o /dev/null -w '%{http_code}' "$URL_PUBLIQUE/")
+          echo "Accueil        $URL_PUBLIQUE/ -> $code"
+          [ "$code" = "200" ] || { echo "::error::la page d'accueil répond $code"; exit 1; }
+
+          code=$(curl -sS -m 30 -o /dev/null -w '%{http_code}' "$URL_PUBLIQUE$ROUTE_PROFONDE")
+          echo "Route profonde $ROUTE_PROFONDE -> $code"
+          [ "$code" = "200" ] || {
+            echo "::error::la route profonde répond $code — le try_files de deploy/nginx.conf n'est pas actif"
+            exit 1
+          }
+
+          echo "Déploiement vérifié."
