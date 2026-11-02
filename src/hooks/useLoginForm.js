@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from '../utils/alert';
 import { useAuth } from './useAuth';
 
-const MAX_ATTEMPTS = 3;
 const FREEZE_SECONDS = 30;
+// Le serveur répond 400 à un mot de passe faux, 401 à un jeton refusé.
+const IDENTIFIANTS_REFUSES = [400, 401];
 
 const HTTP_ERRORS = {
   400: 'Données de connexion invalides.',
@@ -16,7 +17,12 @@ const HTTP_ERRORS = {
 
 /**
  * Mécanique commune aux deux écrans de connexion (administration et espace
- * vendeur) : saisie, gel après trois échecs, traduction des erreurs HTTP.
+ * vendeur) : saisie, gel optionnel, traduction des erreurs HTTP.
+ *
+ * Le serveur est la seule source de vérité sur les « trop de tentatives » :
+ * son message (avec le temps d'attente réel) est affiché tel quel. Le gel
+ * local n'existe que si l'écran le demande (`gelApres`), et seuls les mots de
+ * passe refusés le font avancer — pas une panne, ni un refus de rôle.
  *
  * Les deux écrans restent deux pages distinctes — publics, discours et
  * destinations n'ont rien à voir — mais rien ne justifie de dupliquer ce
@@ -26,7 +32,7 @@ const HTTP_ERRORS = {
  *                    d'erreur si son rôle n'a pas sa place sur cet écran,
  *                    sinon effectue la redirection et ne renvoie rien.
  */
-export default function useLoginForm(onConnecte) {
+export default function useLoginForm(onConnecte, { gelApres = null } = {}) {
   const { login } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -80,9 +86,10 @@ export default function useLoginForm(onConnecte) {
       }
       const status = err.response.status;
       toast.error(err.response.data?.message || HTTP_ERRORS[status] || 'Erreur de connexion.');
+      if (!IDENTIFIANTS_REFUSES.includes(status) || !gelApres) return;
       const essais = attempts + 1;
       setAttempts(essais);
-      if (essais >= MAX_ATTEMPTS) {
+      if (essais >= gelApres) {
         toast.warning(`Trop de tentatives. Attente de ${FREEZE_SECONDS} secondes.`);
         startFreeze();
       }
