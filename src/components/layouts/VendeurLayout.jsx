@@ -1,5 +1,8 @@
+import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import TopNav from '../layout/TopNav';
+import TransitionPage from './TransitionPage';
+import LoadingSpinner from '../common/LoadingSpinner';
 import { ROUTES } from '../../constants/routes';
 import useInactivityLogout from '../../hooks/useInactivityLogout';
 import { useAuth } from '../../hooks/useAuth';
@@ -66,6 +69,12 @@ const ITEMS = [
   },
 ];
 
+/** Nom affiché sous le logo pendant le changement de page. */
+const TITRES = {
+  ...Object.fromEntries(ITEMS.map((i) => [i.to, i.label])),
+  [ROUTES.PROFIL]: 'Mon profil',
+};
+
 export default function VendeurLayout() {
   const { logout } = useAuth();
   useInactivityLogout(logout);
@@ -77,7 +86,14 @@ export default function VendeurLayout() {
       <TopNav items={ITEMS} />
       <div className="admin-main">
         <div className="admin-content">
-          <Outlet />
+          {/* Le logo se dessine à chaque changement de page. L'attente d'une
+              page chargée à la demande se fait ici, sous la barre de
+              navigation, et non plus à la place de toute l'interface. */}
+          <TransitionPage titres={TITRES}>
+            <Suspense fallback={<LoadingSpinner fullPage />}>
+              <Outlet />
+            </Suspense>
+          </TransitionPage>
         </div>
       </div>
     </div>

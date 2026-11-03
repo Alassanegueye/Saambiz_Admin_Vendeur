@@ -6,6 +6,7 @@ import usePageData from '../../hooks/usePageData';
 import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import MiniBarChart from '../../components/common/MiniBarChart';
+import MiniBarres from '../../components/common/MiniBarres';
 import Badge from '../../components/common/Badge';
 import { formatMontant, formatDate, libelle } from '../../utils/formatters';
 import { ROUTES } from '../../constants/routes';
@@ -45,6 +46,12 @@ function CarteChiffre({ icone, ton, valeur, libelle, to }) {
 }
 
 const pluriel = (n, mot, motPluriel = `${mot}s`) => `${n} ${n > 1 ? motPluriel : mot}`;
+
+/** « Mardi 3 novembre » */
+function dateDuJour() {
+  const texte = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  return texte.charAt(0).toUpperCase() + texte.slice(1);
+}
 
 /**
  * Ce que le vendeur doit faire maintenant, du plus urgent au moins urgent.
@@ -108,22 +115,37 @@ export default function DashboardPage() {
     <div>
       <Helmet><title>Accueil — SaamBiz Vendeur</title></Helmet>
 
-      <div className="page-header">
-        <div className="page-header-left">
+      {/* Bandeau d'accueil : qui, quand, et la semaine en un chiffre. Les
+          petites barres or reprennent celles du logo, avec les vraies ventes
+          des sept derniers jours. */}
+      <section className="bandeau-accueil">
+        <div className="bandeau-accueil__texte">
+          <p className="bandeau-accueil__date">{dateDuJour()}</p>
           <h1>Bonjour{user?.prenom ? ` ${user.prenom}` : ''}</h1>
-          <p>{boutique ? `Voici où en est ${boutique.nom}` : 'Bienvenue sur votre espace vendeur'}</p>
+          <p>{boutique ? `Voici où en est ${boutique.nom}.` : 'Bienvenue sur votre espace vendeur.'}</p>
+          {boutique && (
+            <div className="bandeau-accueil__actions">
+              <Link className="btn btn-accent" to={`${ROUTES.PRODUITS}?nouveau=1`}>
+                <Icone taille={16}>{ICONES.plus}</Icone> Ajouter un produit
+              </Link>
+              <Link className="btn btn-clair" to={ROUTES.VITRINE}>
+                <Icone taille={16}>{ICONES.site}</Icone> Mon site
+              </Link>
+            </div>
+          )}
         </div>
+
         {boutique && (
-          <div className="actions-rapides">
-            <Link className="btn btn-secondary" to={ROUTES.VITRINE}>
-              <Icone taille={16}>{ICONES.site}</Icone> Mon site
-            </Link>
-            <Link className="btn btn-primary" to={`${ROUTES.PRODUITS}?nouveau=1`}>
-              <Icone taille={16}>{ICONES.plus}</Icone> Ajouter un produit
-            </Link>
+          <div className="bandeau-accueil__semaine">
+            <span className="bandeau-accueil__libelle">Ventes des 7 derniers jours</span>
+            <strong className="bandeau-accueil__montant">{formatMontant(totalSemaine)}</strong>
+            <MiniBarres
+              valeurs={donneesGraphe.map((r) => r.montant)}
+              libelle={`Ventes jour par jour : ${donneesGraphe.map((r) => `${r.jour} ${formatMontant(r.montant)}`).join(', ')}`}
+            />
           </div>
         )}
-      </div>
+      </section>
 
       {/* À faire : la première chose à regarder en arrivant. */}
       <div className="card bloc-taches">

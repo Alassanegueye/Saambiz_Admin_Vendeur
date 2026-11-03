@@ -1,0 +1,198 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Le logo SaamBiz en mouvement — pictogramme animé (LogoAnime), attentes,
+   transitions entre les pages.
+   L'état sans animation est le logo complet : si une animation ne se joue
+   pas (mouvement réduit, navigateur ancien), on voit le logo, jamais un
+   morceau de logo.
+   ══════════════════════════════════════════════════════════════════════════ */
+.logo-anime { display: block; overflow: visible; flex-shrink: 0; }
+
+/* Couleurs du fichier du logo (un peu plus vives que celles de l'interface). */
+.logo-anime--couleur { --la-sac: #021E54; --la-or: #FEB603; --la-fleche: #FFFFFF; }
+.logo-anime--clair   { --la-sac: #FFFFFF; --la-or: #FEB603; --la-fleche: #021E54; }
+
+.logo-anime .la-trait,
+.logo-anime .la-barre  { fill: var(--la-or); }
+.logo-anime .la-corps  { fill: var(--la-sac); }
+.logo-anime .la-anse   { fill: none; stroke: var(--la-sac); stroke-width: 32; }
+.logo-anime .la-fleche {
+  fill: none; stroke: var(--la-fleche); stroke-width: 21;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.logo-anime .la-pointe {
+  fill: var(--la-fleche); stroke: var(--la-fleche);
+  stroke-width: 6; stroke-linejoin: round;
+}
+
+.logo-anime .la-sac,
+.logo-anime .la-trait,
+.logo-anime .la-barre,
+.logo-anime .la-pointe { transform-box: fill-box; }
+.logo-anime .la-sac    { transform-origin: 50% 100%; }
+.logo-anime .la-barre  { transform-origin: 50% 100%; }
+.logo-anime .la-trait  { transform-origin: 100% 50%; }
+.logo-anime .la-pointe { transform-origin: 25% 75%; }
+
+/* ── Entrée : le sac arrive en filant, l'anse se trace, les barres montent
+      l'une après l'autre, puis la flèche s'élance. ── */
+.logo-anime--entree .la-sac { animation: la-sac-arrive 0.5s cubic-bezier(0.2, 0.8, 0.25, 1.15) both; }
+.logo-anime--entree .la-trait { animation: la-trait-file 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.logo-anime--entree .la-trait-2 { animation-delay: 0.04s; }
+.logo-anime--entree .la-trait-1 { animation-delay: 0.1s; }
+.logo-anime--entree .la-trait-3 { animation-delay: 0.16s; }
+.logo-anime--entree .la-anse { stroke-dasharray: 1 1; animation: la-trace 0.42s 0.2s ease-out both; }
+.logo-anime--entree .la-barre { animation: la-barre-monte 0.52s cubic-bezier(0.3, 1.45, 0.5, 1) both; }
+.logo-anime--entree .la-barre-1 { animation-delay: 0.36s; }
+.logo-anime--entree .la-barre-2 { animation-delay: 0.46s; }
+.logo-anime--entree .la-barre-3 { animation-delay: 0.56s; }
+.logo-anime--entree .la-fleche { stroke-dasharray: 1 1; animation: la-trace 0.42s 0.68s cubic-bezier(0.6, 0, 0.3, 1) both; }
+.logo-anime--entree .la-pointe { animation: la-pointe 0.34s 1.02s cubic-bezier(0.3, 1.6, 0.5, 1) both; }
+
+/* ── Rapide : la même entrée resserrée, pour les changements de page. ── */
+.logo-anime--rapide .la-sac { animation: la-sac-arrive 0.32s cubic-bezier(0.2, 0.8, 0.25, 1.15) both; }
+.logo-anime--rapide .la-trait { animation: la-trait-file 0.36s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.logo-anime--rapide .la-trait-1 { animation-delay: 0.05s; }
+.logo-anime--rapide .la-trait-3 { animation-delay: 0.1s; }
+.logo-anime--rapide .la-anse { stroke-dasharray: 1 1; animation: la-trace 0.26s 0.1s ease-out both; }
+.logo-anime--rapide .la-barre { animation: la-barre-monte 0.34s cubic-bezier(0.3, 1.45, 0.5, 1) both; }
+.logo-anime--rapide .la-barre-1 { animation-delay: 0.16s; }
+.logo-anime--rapide .la-barre-2 { animation-delay: 0.22s; }
+.logo-anime--rapide .la-barre-3 { animation-delay: 0.28s; }
+.logo-anime--rapide .la-fleche { stroke-dasharray: 1 1; animation: la-trace 0.26s 0.34s cubic-bezier(0.6, 0, 0.3, 1) both; }
+.logo-anime--rapide .la-pointe { animation: la-pointe 0.22s 0.54s cubic-bezier(0.3, 1.6, 0.5, 1) both; }
+
+/* ── Boucle : l'attente. Les barres montent et redescendent, la flèche se
+      trace puis s'efface. ── */
+.logo-anime--boucle .la-barre { animation: la-barre-boucle 1.8s cubic-bezier(0.45, 0, 0.3, 1) infinite both; }
+.logo-anime--boucle .la-barre-2 { animation-delay: 0.12s; }
+.logo-anime--boucle .la-barre-3 { animation-delay: 0.24s; }
+.logo-anime--boucle .la-fleche { stroke-dasharray: 1 1; animation: la-fleche-boucle 1.8s cubic-bezier(0.6, 0, 0.3, 1) infinite both; }
+.logo-anime--boucle .la-pointe { animation: la-pointe-boucle 1.8s ease infinite both; }
+.logo-anime--boucle .la-trait { animation: la-trait-boucle 1.8s ease-in-out infinite both; }
+.logo-anime--boucle .la-trait-1 { animation-delay: 0.1s; }
+.logo-anime--boucle .la-trait-3 { animation-delay: 0.2s; }
+
+/* ── Au survol d'un parent marqué .la-survol : les barres rebondissent. ── */
+.la-survol:hover .logo-anime .la-barre,
+.la-survol:focus-visible .logo-anime .la-barre { animation: la-barre-rebond 0.55s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+.la-survol:hover .logo-anime .la-barre-2,
+.la-survol:focus-visible .logo-anime .la-barre-2 { animation-delay: 0.06s; }
+.la-survol:hover .logo-anime .la-barre-3,
+.la-survol:focus-visible .logo-anime .la-barre-3 { animation-delay: 0.12s; }
+
+@keyframes la-sac-arrive {
+  from { opacity: 0; transform: translateX(-16%) scale(0.84); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes la-trait-file {
+  0%   { opacity: 0; transform: translateX(-40%) scaleX(0.2); }
+  60%  { opacity: 1; transform: translateX(6%) scaleX(1.25); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes la-trace {
+  0%   { stroke-dashoffset: 1; opacity: 0; }
+  8%   { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes la-barre-monte {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+@keyframes la-pointe {
+  from { opacity: 0; transform: scale(0); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes la-barre-boucle {
+  0%   { transform: scaleY(0.18); }
+  32%  { transform: scaleY(1.06); }
+  42%  { transform: scaleY(1); }
+  78%  { transform: scaleY(1); }
+  100% { transform: scaleY(0.18); }
+}
+@keyframes la-fleche-boucle {
+  0%, 18% { stroke-dashoffset: 1; opacity: 0; }
+  22%     { opacity: 1; }
+  52%     { stroke-dashoffset: 0; opacity: 1; }
+  82%     { stroke-dashoffset: 0; opacity: 1; }
+  100%    { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes la-pointe-boucle {
+  0%, 48% { opacity: 0; transform: scale(0); }
+  58%     { opacity: 1; transform: scale(1.18); }
+  64%     { transform: scale(1); }
+  82%     { opacity: 1; transform: scale(1); }
+  100%    { opacity: 0; transform: scale(1); }
+}
+@keyframes la-trait-boucle {
+  0%, 100% { transform: none; }
+  50%      { transform: translateX(-10%) scaleX(0.82); }
+}
+@keyframes la-barre-rebond {
+  0%   { transform: scaleY(1); }
+  35%  { transform: scaleY(0.3); }
+  100% { transform: scaleY(1); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Attente : le logo en boucle à la place de l'ancien cercle qui tourne.
+   ══════════════════════════════════════════════════════════════════════════ */
+.chargement-marque { display: grid; place-items: center; }
+/* Dans la page, le logo se pose au même endroit que celui de la transition
+   (centre de la zone sous la barre) : pas de saut entre les deux. */
+.admin-content .loading-full.chargement-marque {
+  min-height: calc(100vh - var(--topnav-height) - 3.5rem);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Changement de page (TransitionPage) : un voile clair couvre le contenu,
+   le logo s'y dessine avec le nom de la page, puis le voile se lève sur la
+   nouvelle page qui monte en fondu. La barre de navigation reste visible.
+   ══════════════════════════════════════════════════════════════════════════ */
+.transition-voile {
+  position: fixed; left: 0; right: 0; bottom: 0; top: var(--topnav-height);
+  z-index: 150;
+  display: grid; place-items: center;
+  background: rgba(244, 246, 251, 0.9);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s;
+}
+.transition-voile--visible {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transition-duration: 0.12s;
+}
+.transition-voile__centre { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.transition-voile__titre {
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 600; letter-spacing: -0.2px;
+  color: var(--color-primary);
+  animation: voile-titre 0.4s 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes voile-titre {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* La nouvelle page monte au moment où le voile se lève.
+   `backwards` et non `both` : une animation de transform qui reste « en
+   vigueur » après la fin ferait de ce bloc le repère des éléments fixes —
+   les fenêtres (.modal-overlay) s'y retrouveraient enfermées, sous la barre. */
+.page-entree { animation: page-entree 0.5s 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+@keyframes page-entree {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Texte réservé aux lecteurs d'écran. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-anime, .logo-anime * { animation: none !important; }
+  .transition-voile { display: none; }
+  .page-entree, .transition-voile__titre { animation: none; }
+}

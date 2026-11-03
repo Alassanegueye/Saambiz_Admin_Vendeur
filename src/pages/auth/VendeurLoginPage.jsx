@@ -6,6 +6,7 @@ import { ROUTES } from '../../constants/routes';
 import useLoginForm from '../../hooks/useLoginForm';
 import { Link } from 'react-router-dom';
 import PanneauMarque from '../../components/auth/PanneauMarque';
+import LogoAnime from '../../components/marque/LogoAnime';
 
 // Retour vers le site public, réglable pour les environnements de recette.
 const SITE_VITRINE = import.meta.env.VITE_SITE_URL || 'https://saambiz.com';
@@ -54,6 +55,12 @@ export default function VendeurLoginPage() {
           </a>
 
           <div className="cnx-carte">
+            {/* Sur téléphone, le panneau de la marque disparaît : le logo
+                passe ici. */}
+            <div className="cnx-carte-marque" aria-hidden="true">
+              <LogoAnime taille={42} mode="entree" />
+              <span>Saam<b>Biz</b></span>
+            </div>
             <h2 className="cnx-carte-titre">Espace vendeur</h2>
             <p className="cnx-carte-sous">Les mêmes identifiants que dans l'application SaamBiz</p>
 
@@ -130,6 +137,13 @@ export default function VendeurLoginPage() {
               <button className="cnx-bouton" type="submit" disabled={loading || frozen}>
                 {loading && <div className="spinner spinner-sm" style={{ borderTopColor: '#fff', borderColor: 'rgba(255,255,255,0.3)' }} />}
                 {loading ? 'Connexion…' : frozen ? `Attente ${countdown}s…` : 'Se connecter'}
+                {!loading && !frozen && (
+                  <svg className="cnx-bouton-fleche" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                )}
               </button>
             </form>
 

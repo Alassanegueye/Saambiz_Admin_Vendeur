@@ -1,6 +1,8 @@
-import PICTO from '../../assets/images/picto-saambiz.png';
+import LogoAnime from '../marque/LogoAnime';
 
 // Panneau bleu marine de gauche, commun à la connexion et à l'inscription.
+// Le logo s'y dessine à l'arrivée, puis le texte et les atouts montent un à
+// un (voir connexion-vendeur.css).
 const ATOUTS = [
   {
     titre: 'Gérez vos produits et stocks',
@@ -29,11 +31,11 @@ export default function PanneauMarque() {
     <aside className="cnx-panneau">
       <div className="cnx-panneau-contenu">
         <div className="cnx-marque">
-          <div className="cnx-marque-ligne">
-            <span className="cnx-picto"><img src={PICTO} alt="" /></span>
+          <LogoAnime taille={58} variante="clair" mode="entree" />
+          <div>
             <span className="cnx-mot">Saam<span>Biz</span></span>
+            <p className="cnx-signature">Gérez. Vendez. Développez.</p>
           </div>
-          <p className="cnx-signature">Gérez. Vendez. Développez.</p>
         </div>
 
         <h1 className="cnx-titre">

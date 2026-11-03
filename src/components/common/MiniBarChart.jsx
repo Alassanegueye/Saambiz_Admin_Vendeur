@@ -3,6 +3,9 @@ import { memo } from 'react';
 /**
  * Mini graphique en barres, en CSS pur (aucune dépendance externe).
  * data: tableau d'objets { [labelKey]: string, [valueKey]: number }
+ *
+ * Les barres montent l'une après l'autre à l'affichage, comme celles du
+ * logo ; la dernière — la période en cours — est en or.
  */
 const MiniBarChart = memo(function MiniBarChart({ data, labelKey, valueKey, formatValue }) {
   if (!data || data.length === 0) {
@@ -19,7 +22,11 @@ const MiniBarChart = memo(function MiniBarChart({ data, labelKey, valueKey, form
         return (
           <div className="mini-chart-col" key={d[labelKey] ?? i}>
             <span className="mini-chart-value">{formatValue ? formatValue(value) : value}</span>
-            <div className="mini-chart-bar" style={{ height: `${heightPct}%` }} title={String(value)} />
+            <div
+              className={`mini-chart-bar${i === data.length - 1 ? ' mini-chart-bar--recent' : ''}`}
+              style={{ height: `${heightPct}%`, '--i': i }}
+              title={String(value)}
+            />
             <span className="mini-chart-label">{d[labelKey] ?? '—'}</span>
           </div>
         );

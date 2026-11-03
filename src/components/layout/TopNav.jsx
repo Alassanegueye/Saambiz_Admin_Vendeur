@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import PICTO from '../../assets/images/picto-saambiz.png';
+import LogoAnime from '../marque/LogoAnime';
 import { ROUTES } from '../../constants/routes';
 import { useAuth } from '../../hooks/useAuth';
 import { AIDES, construireNavigation, estActif } from './navigationVendeur';
@@ -98,8 +98,12 @@ export default function TopNav({ items = [] }) {
           </Icone>
         </button>
 
-        <NavLink to={accueil} className="tn-marque" title="SaamBiz — Espace vendeur">
-          <img src={PICTO} alt="SaamBiz" />
+        {/* Tuile bleu marine du logo, comme sur le site : les barres
+            rebondissent au survol. */}
+        <NavLink to={accueil} className="tn-marque la-survol" title="SaamBiz — Espace vendeur">
+          <span className="tn-tuile">
+            <LogoAnime taille={30} variante="clair" mode="fixe" titre="SaamBiz" />
+          </span>
         </NavLink>
 
         <nav className="tn-rubriques" aria-label="Menu principal">
