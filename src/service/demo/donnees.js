@@ -155,6 +155,13 @@ export const CONVERSATIONS_DEMO = [
     dernierMessage: { contenu: 'Je passe récupérer la commande demain matin.', date: ilYA(2), lu: false }, nonLus: 1 },
 ];
 
+export const MESSAGES_SITE_DEMO = [
+  { id: 'ms1', nom: 'Aïssatou Ba', telephone: '+221771234567', lu: false, createdAt: ilYA(0),
+    contenu: 'Bonjour, livrez-vous à Thiès ? Je voudrais deux boubous pour la Tabaski.' },
+  { id: 'ms2', nom: null, telephone: '+221781112233', lu: true, createdAt: ilYA(3),
+    contenu: 'Le sac en cuir existe-t-il en marron ?' },
+];
+
 export const ABONNEMENT_DEMO = {
   abonnement: DASHBOARD_DEMO.abonnement,
   historique: [

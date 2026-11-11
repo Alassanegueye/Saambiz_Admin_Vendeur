@@ -1716,3 +1716,15 @@ img, svg, video, canvas { max-width: 100%; }
 @media (max-width: 380px) {
   .stats-grid, .stats-grid.stats-grid-3, .stats-grid.stats-grid-4 { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ── Messages reçus sur le site de la boutique ── */
+.msg-site { list-style: none; margin: 0; padding: 0; }
+.msg-site__item { padding: 1.1rem 1.35rem; border-top: 1px solid var(--color-border-soft); }
+.msg-site__item:first-child { border-top: 0; }
+.msg-site__item.est-nouveau { background: color-mix(in srgb, var(--color-primary) 5%, var(--color-white)); box-shadow: inset 3px 0 0 var(--color-accent); }
+.msg-site__tete { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.75rem; }
+.msg-site__tete strong { color: var(--color-text); }
+.msg-site__meta { font-size: 0.82rem; color: var(--color-text-muted); }
+.msg-site__texte { margin: 0.5rem 0 0.85rem; max-width: 72ch; line-height: 1.55; color: var(--color-text); white-space: pre-line; overflow-wrap: anywhere; }
+.msg-site__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.msg-site__supprimer { margin-left: auto; color: var(--color-danger); }

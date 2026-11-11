@@ -1,6 +1,6 @@
 import {
   VENDEUR_DEMO, BOUTIQUE_DEMO, DASHBOARD_DEMO, PRODUITS_DEMO, CATEGORIES_DEMO,
-  COMMANDES_DEMO, PROMOTIONS_DEMO, CONVERSATIONS_DEMO, ABONNEMENT_DEMO, VERIFICATION_DEMO,
+  COMMANDES_DEMO, PROMOTIONS_DEMO, CONVERSATIONS_DEMO, MESSAGES_SITE_DEMO, ABONNEMENT_DEMO, VERIFICATION_DEMO,
 } from './donnees';
 
 /**
@@ -170,6 +170,9 @@ const ROUTES = [
 
   // ── Divers ──
   ['GET', /\/vendeur\/mes-conversations$/, () => ({ conversations: CONVERSATIONS_DEMO })],
+  ['GET', /\/messages\/site$/, () => ({ messages: MESSAGES_SITE_DEMO, total: MESSAGES_SITE_DEMO.length })],
+  ['PUT', /\/messages\/site\/[^/]+\/lire$/, () => ({ success: true, message: 'Message marqué comme lu' })],
+  ['DELETE', /\/messages\/site\/[^/]+$/, () => ({ success: true, message: 'Message supprimé' })],
   ['GET', /\/vendeur\/mon-abonnement$/, () => ({ data: ABONNEMENT_DEMO })],
   ['GET', /\/vendeur\/historique-paiements$/, () => ({ data: ABONNEMENT_DEMO.historique })],
   ['POST',/\/vendeur\/initier-renouvellement$/, () => ({ message: 'Paiement simulé — mode démo', url: null })],

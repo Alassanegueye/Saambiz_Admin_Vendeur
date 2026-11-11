@@ -58,6 +58,11 @@ export const ENDPOINTS = {
     // Conversations
     CONVERSATIONS:    '/vendeur/mes-conversations',
 
+    // Messages laissés sur la page Contact du site de la boutique
+    MESSAGES_SITE:    '/messages/site',
+    MESSAGE_SITE_LU:  (id) => `/messages/site/${id}/lire`,
+    MESSAGE_SITE:     (id) => `/messages/site/${id}`,
+
     // Vérification du profil (pièce justificative examinée par un admin)
     SOUMETTRE_VERIFICATION: '/vendeur/soumettre-verification',
     STATUT_VERIFICATION:    '/vendeur/statut-verification',

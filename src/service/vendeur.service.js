@@ -99,6 +99,11 @@ export const supprimerPromotion = (id) => api.delete(PROMOTIONS.DELETE(id));
 // ── Conversations ───────────────────────────────────────────────────────────
 export const getConversations = () => api.get(VENDEUR.CONVERSATIONS);
 
+// ── Messages reçus via la page Contact du site ──────────────────────────────
+export const getMessagesSite = () => api.get(VENDEUR.MESSAGES_SITE);
+export const marquerMessageSiteLu = (id) => api.put(VENDEUR.MESSAGE_SITE_LU(id));
+export const supprimerMessageSite = (id) => api.delete(VENDEUR.MESSAGE_SITE(id));
+
 // ── Vérification du profil ──────────────────────────────────────────────────
 export const getStatutVerification = () => api.get(VENDEUR.STATUT_VERIFICATION);
 
