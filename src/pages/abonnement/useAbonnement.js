@@ -5,6 +5,8 @@ import {
   getHistoriquePaiements,
   initierRenouvellement,
 } from '../../service/vendeur.service';
+import logoWave from '../../assets/paiement/wave.webp';
+import logoOrangeMoney from '../../assets/paiement/orange-money.webp';
 
 /**
  * Contrôleur de la page Abonnement.
@@ -14,10 +16,18 @@ import {
  * `renouveler` peut ne jamais rendre la main.
  */
 
+/**
+ * Les opérateurs réellement branchés.
+ *
+ * Free Money figurait dans cette liste, mais le backend ne l'accepte pas :
+ * `METHODES_SUPPORTEES` vaut `['orange_money', 'wave']`, et toute autre
+ * valeur repart en 400 « Méthode de paiement non supportée ». Le vendeur
+ * pouvait donc le choisir et voir son renouvellement échouer. À remettre
+ * ici, avec son logo, le jour où la passerelle Free Money est branchée.
+ */
 export const MOYENS_PAIEMENT = [
-  { code: 'wave',         label: 'Wave' },
-  { code: 'orange_money', label: 'Orange Money' },
-  { code: 'free_money',   label: 'Free Money' },
+  { code: 'wave',         label: 'Wave',         logo: logoWave },
+  { code: 'orange_money', label: 'Orange Money', logo: logoOrangeMoney },
 ];
 
 export default function useAbonnement() {

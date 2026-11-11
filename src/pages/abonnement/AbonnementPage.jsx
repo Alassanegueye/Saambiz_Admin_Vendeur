@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet';
+import { Check } from 'lucide-react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Badge from '../../components/common/Badge';
 import { formatMontant, formatDate, libelle } from '../../utils/formatters';
@@ -70,19 +71,28 @@ export default function AbonnementPage() {
         <div className="card">
           <div className="card-header"><h3 className="card-title">Renouveler</h3></div>
           <div className="card-body">
-            <div className="form-field">
-              <label className="form-label" htmlFor="a-moyen">Moyen de paiement</label>
-              <select
-                id="a-moyen"
-                className="form-input"
-                value={a.moyen}
-                onChange={(e) => a.setMoyen(e.target.value)}
-              >
+            <fieldset className="form-field moyens-paiement">
+              <legend className="form-label">Moyen de paiement</legend>
+              <div className="moyens-paiement__liste">
                 {MOYENS_PAIEMENT.map((m) => (
-                  <option key={m.code} value={m.code}>{m.label}</option>
+                  <label
+                    key={m.code}
+                    className={`moyen${a.moyen === m.code ? ' moyen--actif' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="moyen-paiement"
+                      value={m.code}
+                      checked={a.moyen === m.code}
+                      onChange={() => a.setMoyen(m.code)}
+                    />
+                    <img src={m.logo} alt="" width="28" height="28" loading="lazy" decoding="async" />
+                    <span>{m.label}</span>
+                    {a.moyen === m.code && <Check size={15} strokeWidth={3} aria-hidden="true" />}
+                  </label>
                 ))}
-              </select>
-            </div>
+              </div>
+            </fieldset>
             <button className="btn btn-primary" onClick={a.renouveler} disabled={a.saving}>
               {a.saving ? 'Redirection…' : 'Renouveler mon abonnement'}
             </button>
