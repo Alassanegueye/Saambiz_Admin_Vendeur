@@ -130,22 +130,40 @@ jobs:
             # installé sur l'hôte, tout y tourne en Docker. Effet identique à
             # `npm ci && npm run build`, sans poser de chaîne de compilation
             # sur un serveur qui sert plusieurs sites.
+            # Construction dans dist-nouveau, À CÔTÉ du site en ligne : pendant
+            # les minutes du build, Nginx continue de servir la version en
+            # place. Construire directement dans dist/ le vidait d'abord, et
+            # toute visite pendant le build tombait sur une page blanche.
+            rm -rf "${APP_DIR}/dist-nouveau"
             docker run --rm \
               -v "${APP_DIR}":/app \
               -w /app \
               node:22-slim \
-              sh -c "npm ci --no-audit --no-fund && npm run build"
+              sh -c "npm ci --no-audit --no-fund && npm run build -- --outDir dist-nouveau --emptyOutDir"
 
-            # dist/ est la cible finale de Nginx (`root` dans
-            # deploy/nginx.conf) : le build écrit directement dedans, il n'y a
-            # rien à synchroniser et aucun service à redémarrer — Nginx sert
-            # des fichiers statiques.
-            test -f "${APP_DIR}/dist/index.html" || {
-              echo "ERREUR : dist/index.html absent après le build." >&2
+            test -f "${APP_DIR}/dist-nouveau/index.html" || {
+              echo "ERREUR : index.html absent après le build — la version en ligne est conservée." >&2
               exit 1
             }
 
-            echo "Build déposé dans ${APP_DIR}/dist :"
+            # Les fichiers de la version précédente restent servis 30 jours :
+            # un onglet ouvert avant ce déploiement les réclame encore, et
+            # sans eux il affiche « Failed to fetch dynamically imported
+            # module » sur chaque page. Leurs noms portent l'empreinte de leur
+            # contenu : aucun conflit avec les nouveaux. `-p` garde leur date,
+            # pour qu'ils finissent par partir.
+            if [ -d "${APP_DIR}/dist/assets" ]; then
+              find "${APP_DIR}/dist/assets" -type f -mtime -30 \
+                -exec cp -np {} "${APP_DIR}/dist-nouveau/assets/" \;
+            fi
+
+            # Bascule : deux renommages, quasi instantanés.
+            rm -rf "${APP_DIR}/dist-ancien"
+            if [ -d "${APP_DIR}/dist" ]; then mv "${APP_DIR}/dist" "${APP_DIR}/dist-ancien"; fi
+            mv "${APP_DIR}/dist-nouveau" "${APP_DIR}/dist"
+            rm -rf "${APP_DIR}/dist-ancien"
+
+            echo "Build en ligne dans ${APP_DIR}/dist :"
             ls -la "${APP_DIR}/dist" | head -5
 
             # ── Configuration Nginx ──────────────────────────────────────────

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { Suspense } from 'react';
+import { lazyFiable } from '../utils/nouvelleVersion';
 import VendeurRoute from './VendeurRoute';
 import GuestRoute from './GuestRoute';
 import VendeurLayout from '../components/layouts/VendeurLayout';
@@ -7,18 +8,18 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import { ROUTES } from '../constants/routes';
 
-const ConnexionPage  = lazy(() => import('../pages/auth/VendeurLoginPage'));
-const InscriptionPage = lazy(() => import('../pages/auth/InscriptionPage'));
-const DashboardPage  = lazy(() => import('../pages/tableau-de-bord/DashboardPage'));
-const ProduitsPage   = lazy(() => import('../pages/produits/ProduitsPage'));
-const CommandesPage  = lazy(() => import('../pages/commandes/CommandesPage'));
-const PromotionsPage = lazy(() => import('../pages/promotions/PromotionsPage'));
-const BoutiquePage   = lazy(() => import('../pages/boutique/BoutiquePage'));
-const VitrinePage    = lazy(() => import('../pages/vitrine/VitrinePage'));
-const SectionsSitePage = lazy(() => import('../pages/vitrine/SectionsSitePage'));
-const MessagesPage   = lazy(() => import('../pages/messages/MessagesPage'));
-const AbonnementPage = lazy(() => import('../pages/abonnement/AbonnementPage'));
-const ProfilPage     = lazy(() => import('../pages/profil/ProfilPage'));
+const ConnexionPage  = lazyFiable(() => import('../pages/auth/VendeurLoginPage'));
+const InscriptionPage = lazyFiable(() => import('../pages/auth/InscriptionPage'));
+const DashboardPage  = lazyFiable(() => import('../pages/tableau-de-bord/DashboardPage'));
+const ProduitsPage   = lazyFiable(() => import('../pages/produits/ProduitsPage'));
+const CommandesPage  = lazyFiable(() => import('../pages/commandes/CommandesPage'));
+const PromotionsPage = lazyFiable(() => import('../pages/promotions/PromotionsPage'));
+const BoutiquePage   = lazyFiable(() => import('../pages/boutique/BoutiquePage'));
+const VitrinePage    = lazyFiable(() => import('../pages/vitrine/VitrinePage'));
+const SectionsSitePage = lazyFiable(() => import('../pages/vitrine/SectionsSitePage'));
+const MessagesPage   = lazyFiable(() => import('../pages/messages/MessagesPage'));
+const AbonnementPage = lazyFiable(() => import('../pages/abonnement/AbonnementPage'));
+const ProfilPage     = lazyFiable(() => import('../pages/profil/ProfilPage'));
 
 export default function AppRoutes() {
   return (
