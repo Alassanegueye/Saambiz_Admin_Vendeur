@@ -1,12 +1,11 @@
 /**
  * Erreurs des champs obligatoires (définis par l'admin), avant l'envoi.
  *
- * Cette fonction vivait dans ChampsSpecifications.jsx, à côté du composant qui
- * affiche ces champs. Un fichier qui exporte un composant ET autre chose casse
+ * Cette fonction vit ici plutôt que dans ChampsSpecifications.jsx, qui
+ * affiche ces champs : un fichier qui exporte un composant ET autre chose casse
  * le rafraîchissement à chaud de Vite — modifier le composant recharge la page
  * entière au lieu de remplacer le module, et l'état du formulaire en cours de
- * saisie est perdu. La règle `react-refresh/only-export-components` le refuse,
- * et le lint échouait donc avant tout déploiement.
+ * saisie est perdu. La règle `react-refresh/only-export-components` le refuse.
  *
  * @param {Array}  specifications  suggestions de la catégorie
  * @param {object} valeurs         { cle: valeur }

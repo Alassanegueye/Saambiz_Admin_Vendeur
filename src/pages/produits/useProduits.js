@@ -20,9 +20,8 @@ import { verifierSpecifications } from '../../components/forms/verifierSpecifica
  * pagination, formulaire, mutations. La page n'en reçoit qu'un objet et se
  * contente de le rendre.
  *
- * L'intérêt n'est pas cosmétique : cette logique devient testable sans monter
- * le moindre composant, et la page redevient lisible d'un seul regard — elle
- * faisait 400 lignes où l'on ne distinguait plus la structure du contenu.
+ * L'intérêt n'est pas cosmétique : cette logique est testable sans monter
+ * le moindre composant, et la page se lit d'un seul regard.
  */
 
 const PAGE_SIZE = 10;

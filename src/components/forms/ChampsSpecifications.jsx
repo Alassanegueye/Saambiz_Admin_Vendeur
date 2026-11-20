@@ -196,8 +196,6 @@ function Valeurs({ id, spec, valeurs, onChange }) {
   );
 }
 
-// `verifierSpecifications` vivait ici, à côté du composant qui affiche ces
-// champs. Elle est désormais dans ./verifierSpecifications.js : un fichier qui
-// exporte un composant ET une fonction casse le rafraîchissement à chaud de
-// Vite, et la règle react-refresh/only-export-components le refuse — le lint
-// échouait donc avant tout déploiement.
+// `verifierSpecifications` est dans ./verifierSpecifications.js : un fichier
+// qui exporte un composant ET une fonction casse le rafraîchissement à chaud
+// de Vite, et la règle react-refresh/only-export-components le refuse.
