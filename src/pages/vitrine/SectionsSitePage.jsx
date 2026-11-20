@@ -45,7 +45,10 @@ export default function SectionsSitePage() {
       })
       .catch((e) => { if (!annule) setErreur(e?.response?.data?.message || "Vos sections n'ont pas pu être chargées."); })
       .finally(() => { if (!annule) setChargement(false); });
-    getApercuVitrine().then((r) => { if (!annule) setApercu(extraire(r)); }).catch(() => {});
+    // L'aperçu est facultatif : sans lui, les sections restent modifiables.
+    getApercuVitrine()
+      .then((r) => { if (!annule) setApercu(extraire(r)); })
+      .catch((err) => console.warn('Aperçu de la vitrine non chargé :', err?.message));
     return () => { annule = true; };
   }, []);
 
