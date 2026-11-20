@@ -8,12 +8,14 @@ import { useState } from 'react';
 import ApercuSite from './components/ApercuSite';
 import SectionsPerso from './components/SectionsPerso';
 import EtapeAvantages from './etapes/EtapeAvantages';
+import EtapePhotos from './etapes/EtapePhotos';
 import useVitrine, { MODELES, COULEURS } from './useVitrine';
 import '../../styles/vitrine.css';
 
 /** Les étapes de la personnalisation, dans l'ordre du site. */
 const ETAPES = [
   { cle: 'style', nom: 'Style' },
+  { cle: 'photos', nom: 'Photos' },
   { cle: 'sections', nom: 'Sections' },
   { cle: 'avantages', nom: 'Avantages' },
   { cle: 'infos', nom: 'Infos' },
@@ -101,7 +103,7 @@ export default function VitrinePage() {
           <div className="card-body">
             <strong>Personnalisez votre site avant de le publier</strong>
             <ol>
-              <li>Suivez les étapes : style, sections, avantages, infos.</li>
+              <li>Suivez les étapes : style, photos, sections, avantages, infos.</li>
               <li>Regardez le résultat dans l'aperçu, à droite, à chaque changement.</li>
               <li>À la dernière étape, cliquez sur <strong>« Publier mon site »</strong>.</li>
             </ol>
@@ -222,6 +224,17 @@ export default function VitrinePage() {
             </div>
 
             </>
+          )}
+
+          {cle === 'photos' && (
+            <EtapePhotos
+              photos={v.photos}
+              max={v.photosMax}
+              occupe={v.photosOccupe}
+              onAjouter={v.ajouterPhotos}
+              onRetirer={v.retirerPhoto}
+              onDeplacer={v.deplacerPhoto}
+            />
           )}
 
           {cle === 'sections' && (

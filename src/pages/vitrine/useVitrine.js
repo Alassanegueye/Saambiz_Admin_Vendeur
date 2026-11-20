@@ -1,6 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { toast, showConfirm } from '../../utils/alert';
-import { getMaVitrine, modifierVitrine, supprimerVitrine, getApercuVitrine } from '../../service/vendeur.service';
+import {
+  getMaVitrine, modifierVitrine, supprimerVitrine, getApercuVitrine,
+  ajouterPhotosVitrine, ordonnerPhotosVitrine, supprimerPhotoVitrine,
+} from '../../service/vendeur.service';
 import { messageErreur } from './messageErreur';
 
 /**
@@ -71,6 +74,9 @@ const CHAMPS_VIDES = {
   sectionsPerso: [],
   blocs: { icones: {}, avantages: [] },
 };
+
+/** Le serveur refuse les fichiers de plus de 5 Mo. */
+const TAILLE_MAX_PHOTO = 5 * 1024 * 1024;
 
 /** Le corps de réponse peut arriver sous `data` ou nu selon l'ancienneté de la route. */
 const extraire = (reponse) => reponse?.data?.data ?? reponse?.data ?? null;
@@ -227,6 +233,83 @@ export default function useVitrine() {
     }
   };
 
+  // ── Photos du haut du site ────────────────────────────────────────
+  // Enregistrées à chaque geste, sans passer par « Enregistrer » : seule la
+  // liste des photos est remplacée, le brouillon des autres réglages reste
+  // tel que le vendeur l'a laissé. L'aperçu est relu pour les montrer.
+  const [photosOccupe, setPhotosOccupe] = useState(false);
+  const appliquerPhotos = useCallback((charge) => {
+    if (!charge?.vitrine) return;
+    setDonnees((d) => (d ? {
+      ...d,
+      vitrine: { ...d.vitrine, photos: charge.vitrine.photos || [], photosMax: charge.vitrine.photosMax },
+    } : d));
+    setVersion((n) => n + 1);
+  }, []);
+
+  const ajouterPhotos = async (fichiers) => {
+    const choisies = [...(fichiers || [])];
+    const images = choisies.filter((f) => /^image\/(jpeg|png)$/.test(f.type));
+    const legeres = images.filter((f) => f.size <= TAILLE_MAX_PHOTO);
+    const place = Math.max(0, (donnees?.vitrine?.photosMax || 10) - (donnees?.vitrine?.photos?.length || 0));
+    const liste = legeres.slice(0, place);
+
+    // Ce qui n'est pas parti est dit tout de suite, avec la raison.
+    const ecarts = [];
+    if (images.length < choisies.length) ecarts.push('seules les photos JPEG ou PNG sont acceptées');
+    if (legeres.length < images.length) ecarts.push('une photo ne doit pas dépasser 5 Mo');
+    if (liste.length < legeres.length) ecarts.push(`votre site accepte ${donnees?.vitrine?.photosMax || 10} photos au plus`);
+    if (ecarts.length) toast.warning(`Certaines photos n'ont pas été ajoutées : ${ecarts.join(' ; ')}.`);
+    if (!liste.length) return;
+
+    setPhotosOccupe(true);
+    try {
+      const r = await ajouterPhotosVitrine(liste);
+      appliquerPhotos(extraire(r));
+      toast.success(r?.data?.message || 'Photos ajoutées à votre site.');
+    } catch (e) {
+      toast.error(messageErreur(e, "Les photos n'ont pas pu être ajoutées."));
+    } finally {
+      setPhotosOccupe(false);
+    }
+  };
+
+  const retirerPhoto = async (photo) => {
+    const ok = await showConfirm({
+      titre: 'Retirer cette photo ?',
+      message: 'Elle ne défilera plus en haut de votre site.',
+      confirmText: 'Retirer',
+      danger: true,
+    });
+    if (!ok) return;
+    setPhotosOccupe(true);
+    try {
+      appliquerPhotos(extraire(await supprimerPhotoVitrine(photo.id)));
+      toast.success('Photo retirée de votre site.');
+    } catch (e) {
+      toast.error(messageErreur(e, "La photo n'a pas pu être retirée."));
+    } finally {
+      setPhotosOccupe(false);
+    }
+  };
+
+  /** Avance (-1) ou recule (+1) une photo dans l'ordre du défilé. */
+  const deplacerPhoto = async (index, sens) => {
+    const photos = donnees?.vitrine?.photos || [];
+    const cible = index + sens;
+    if (cible < 0 || cible >= photos.length) return;
+    const ordre = photos.map((p) => p.id);
+    [ordre[index], ordre[cible]] = [ordre[cible], ordre[index]];
+    setPhotosOccupe(true);
+    try {
+      appliquerPhotos(extraire(await ordonnerPhotosVitrine(ordre)));
+    } catch (e) {
+      toast.error(messageErreur(e, "L'ordre des photos n'a pas pu être enregistré."));
+    } finally {
+      setPhotosOccupe(false);
+    }
+  };
+
   /**
    * Supprimer le site : il disparaît d'Internet et ses réglages sont effacés.
    * Les produits, les commandes et la boutique dans l'application restent.
@@ -275,5 +358,11 @@ export default function useVitrine() {
     nombreProduits: donnees?.nombreProduits ?? 0,
     vues: donnees?.vitrine?.vues ?? 0,
     boutique: donnees?.boutique || null,
+    photos: donnees?.vitrine?.photos || [],
+    photosMax: donnees?.vitrine?.photosMax || 10,
+    photosOccupe,
+    ajouterPhotos,
+    retirerPhoto,
+    deplacerPhoto,
   };
 }
