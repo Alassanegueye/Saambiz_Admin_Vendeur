@@ -18,10 +18,24 @@ export const getStatistiquesVues = () => api.get(VENDEUR.STATISTIQUES_VUES);
 export const getProduits    = (params) => api.get(VENDEUR.PRODUITS, { params });
 export const rechercherProduits = (q) => api.get(VENDEUR.RECHERCHE, { params: { q } });
 
+/** Huit fichiers au plus par envoi : c'est la limite posée par le backend. */
+export const MAX_IMAGES_SUPPLEMENTAIRES = 8;
+
+/** Cinq mégaoctets par fichier, limite du backend elle aussi. */
+export const TAILLE_MAX_IMAGE = 5 * 1024 * 1024;
+
+const ENTETES_MULTIPART = { headers: { 'Content-Type': 'multipart/form-data' } };
+
 /**
- * Création / modification : le backend attend du multipart (une image
- * principale + des images secondaires), on envoie donc un FormData même
- * lorsqu'aucun fichier n'est joint.
+ * Création / modification : le backend attend du multipart, on envoie donc un
+ * FormData même lorsqu'aucun fichier n'est joint.
+ *
+ * Une seule photo part avec le produit. Les deux routes sont déclarées
+ * `upload.single('image')` : tout autre champ de fichier fait rejeter la
+ * requête entière, et le produit n'est pas créé du tout. Les photos
+ * supplémentaires ont leur propre adresse, `POST /vendeur/produit/:id/images`,
+ * qui prend le champ « images » — c'est aussi ce que fait l'application
+ * mobile.
  */
 function toFormData(valeurs, fichiers = {}) {
   const form = new FormData();
@@ -32,19 +46,52 @@ function toFormData(valeurs, fichiers = {}) {
     form.append(cle, typeof valeur === 'object' ? JSON.stringify(valeur) : valeur);
   });
   if (fichiers.image) form.append('image', fichiers.image);
-  (fichiers.images || []).forEach((f) => form.append('images', f));
   return form;
 }
 
-export const creerProduit = (valeurs, fichiers) =>
-  api.post(VENDEUR.AJOUT_PRODUIT, toFormData(valeurs, fichiers), {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+/** Ajoute des photos à un produit existant. Les envoie toutes en une requête. */
+export const envoyerImagesProduit = (id, images = []) => {
+  const form = new FormData();
+  images.slice(0, MAX_IMAGES_SUPPLEMENTAIRES).forEach((f) => form.append('images', f));
+  return api.post(VENDEUR.IMAGES(id), form, ENTETES_MULTIPART);
+};
 
-export const modifierProduit = (id, valeurs, fichiers) =>
-  api.put(VENDEUR.MODIF_PRODUIT(id), toFormData(valeurs, fichiers), {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+/**
+ * Second temps de l'enregistrement. Un échec ici ne doit pas faire passer le
+ * produit pour non enregistré : il l'est, il lui manque des photos. On rend
+ * donc l'erreur à l'appelant au lieu de la lever, à lui de le dire.
+ */
+async function joindreImages(id, images) {
+  if (!id || !images?.length) return null;
+  try {
+    await envoyerImagesProduit(id, images);
+    return null;
+  } catch (err) {
+    return err;
+  }
+}
+
+export const creerProduit = async (valeurs, fichiers = {}) => {
+  const reponse = await api.post(
+    VENDEUR.AJOUT_PRODUIT,
+    toFormData(valeurs, fichiers),
+    ENTETES_MULTIPART,
+  );
+  const produit = reponse?.data?.produit;
+  return { produit, erreurImages: await joindreImages(produit?.id, fichiers.images) };
+};
+
+export const modifierProduit = async (id, valeurs, fichiers = {}) => {
+  const reponse = await api.put(
+    VENDEUR.MODIF_PRODUIT(id),
+    toFormData(valeurs, fichiers),
+    ENTETES_MULTIPART,
+  );
+  return {
+    produit: reponse?.data?.produit,
+    erreurImages: await joindreImages(id, fichiers.images),
+  };
+};
 
 export const supprimerProduit  = (id) => api.delete(VENDEUR.SUPPR_PRODUIT(id));
 export const dupliquerProduit  = (id) => api.post(VENDEUR.DUPLIQUER(id));

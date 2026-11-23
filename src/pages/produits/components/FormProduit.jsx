@@ -108,7 +108,7 @@ export default function FormProduit({
           id="p-img"
           className="form-input"
           type="file"
-          accept="image/*"
+          accept="image/png,image/jpeg"
           onChange={(e) => setImage(e.target.files?.[0] || null)}
         />
         {estModification && !image && (
@@ -122,10 +122,12 @@ export default function FormProduit({
           id="p-imgs"
           className="form-input"
           type="file"
-          accept="image/*"
+          accept="image/png,image/jpeg"
           multiple
           onChange={(e) => setImages(Array.from(e.target.files || []))}
         />
+        <span className="form-hint">8 photos au maximum, 5 Mo chacune, en JPEG ou PNG.</span>
+        {erreurs.images && <span className="form-error">{erreurs.images}</span>}
       </div>
     </>
   );

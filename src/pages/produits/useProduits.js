@@ -8,6 +8,8 @@ import {
   supprimerProduit,
   dupliquerProduit,
   basculerDisponibilite,
+  MAX_IMAGES_SUPPLEMENTAIRES,
+  TAILLE_MAX_IMAGE,
 } from '../../service/vendeur.service';
 import { getCategories } from '../../service/categories.service';
 import useDebounce from '../../hooks/useDebounce';
@@ -188,6 +190,14 @@ export default function useProduits() {
     const specs = categories.find((c) => c.id === valeurs.categorieId)?.specifications || [];
     const erreursSpecs = verifierSpecifications(specs, valeurs.attributs);
     if (Object.keys(erreursSpecs).length) e.attributs = erreursSpecs;
+    // Les deux limites du backend, dites ici plutôt que subies là-bas : refusée
+    // par le serveur, la requête ne rend qu'un « 413 » que personne ne sait lire.
+    if (images.length > MAX_IMAGES_SUPPLEMENTAIRES) {
+      e.images = `${MAX_IMAGES_SUPPLEMENTAIRES} photos supplémentaires au maximum (${images.length} choisies).`;
+    } else {
+      const tropLourde = [image, ...images].find((f) => f && f.size > TAILLE_MAX_IMAGE);
+      if (tropLourde) e.images = `« ${tropLourde.name} » dépasse 5 Mo.`;
+    }
     setErreurs(e);
     return Object.keys(e).length === 0;
   };
@@ -197,12 +207,20 @@ export default function useProduits() {
     setSaving(true);
     const estCreation = !edition?.id;
     try {
-      if (estCreation) {
-        await creerProduit(valeurs, { image, images });
-        toast.success('Produit publié');
+      const { erreurImages } = estCreation
+        ? await creerProduit(valeurs, { image, images })
+        : await modifierProduit(edition.id, valeurs, { image, images });
+
+      // Le produit est enregistré ; seules les photos supplémentaires ont
+      // échoué. Le dire tel quel : « erreur » tout court ferait recommencer
+      // la saisie et créerait un doublon.
+      if (erreurImages) {
+        toast.error(
+          `${estCreation ? 'Produit publié' : 'Produit mis à jour'}, mais les photos supplémentaires n'ont pas été envoyées : `
+          + `${erreurImages?.response?.data?.message || 'réessayez depuis la fiche du produit.'}`,
+        );
       } else {
-        await modifierProduit(edition.id, valeurs, { image, images });
-        toast.success('Produit mis à jour');
+        toast.success(estCreation ? 'Produit publié' : 'Produit mis à jour');
       }
       fermer();
       await charger();
