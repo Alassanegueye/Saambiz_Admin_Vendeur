@@ -5,8 +5,10 @@
  * sessions à ce changement, ce n'est pas la même conséquence que corriger
  * une faute de frappe dans son prénom.
  */
+import { AIDE_MOT_DE_PASSE } from '../../../utils/motDePasse';
+
 export default function FormMotDePasse({
-  mdp, majMdp, changementMdp, erreurMdp, longueurMin, onEnregistrer,
+  mdp, majMdp, changementMdp, erreurMdp, onEnregistrer,
 }) {
   return (
     <form className="card" onSubmit={onEnregistrer}>
@@ -34,10 +36,7 @@ export default function FormMotDePasse({
           />
           {erreurMdp && <span className="form-error">{erreurMdp}</span>}
         </div>
-        <p className="profil-aide">
-          {longueurMin} caractères minimum, avec majuscule, minuscule, chiffre et
-          caractère spécial.
-        </p>
+        <p className="profil-aide">{AIDE_MOT_DE_PASSE}</p>
         <button type="submit" className="btn btn-secondary" disabled={changementMdp}>
           {changementMdp ? 'Modification…' : 'Changer le mot de passe'}
         </button>

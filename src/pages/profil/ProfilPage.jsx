@@ -46,7 +46,6 @@ export default function ProfilPage() {
           majMdp={p.majMdp}
           changementMdp={p.changementMdp}
           erreurMdp={p.erreurMdp}
-          longueurMin={p.LONGUEUR_MIN_MDP}
           onEnregistrer={p.enregistrerMdp}
         />
       </div>

@@ -4,6 +4,7 @@ import { getMe } from '../../service/auth.service';
 import { modifierProfil } from '../../service/compte.service';
 import { changerMotDePasse } from '../../service/password.service';
 import { useAuth } from '../../hooks/useAuth';
+import { erreurMotDePasse } from '../../utils/motDePasse';
 
 /**
  * Contrôleur de la page Profil.
@@ -16,8 +17,7 @@ import { useAuth } from '../../hooks/useAuth';
 const PROFIL_VIDE = { nom: '', prenom: '', email: '', telephone: '', ville: '' };
 const MDP_VIDE = { ancien: '', nouveau: '', confirmation: '' };
 
-/** Longueur exigée par la politique du backend. */
-const LONGUEUR_MIN_MDP = 12;
+
 
 export default function useProfil() {
   const { user, majUtilisateur } = useAuth();
@@ -98,8 +98,12 @@ export default function useProfil() {
       setErreurMdp('La confirmation ne correspond pas au nouveau mot de passe.');
       return;
     }
-    if (mdp.nouveau.length < LONGUEUR_MIN_MDP) {
-      setErreurMdp(`Le nouveau mot de passe doit contenir au moins ${LONGUEUR_MIN_MDP} caractères.`);
+    // Les règles exactes du serveur, nommées une par une : « au moins 12
+    // caractères » était faux, et ne disait rien des majuscules ni des
+    // caractères spéciaux que le serveur exige pourtant.
+    const manque = erreurMotDePasse(mdp.nouveau);
+    if (manque) {
+      setErreurMdp(manque);
       return;
     }
 
@@ -127,6 +131,5 @@ export default function useProfil() {
     user, chargement, initiales,
     profil, majChamp, enregistrement, enregistrerProfil,
     mdp, majMdp, changementMdp, erreurMdp, enregistrerMdp,
-    LONGUEUR_MIN_MDP,
   };
 }
