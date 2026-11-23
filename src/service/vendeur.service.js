@@ -24,7 +24,13 @@ export const MAX_IMAGES_SUPPLEMENTAIRES = 8;
 /** Cinq mégaoctets par fichier, limite du backend elle aussi. */
 export const TAILLE_MAX_IMAGE = 5 * 1024 * 1024;
 
-const ENTETES_MULTIPART = { headers: { 'Content-Type': 'multipart/form-data' } };
+// Les dix secondes par défaut d'`api` conviennent à du JSON, pas à des photos :
+// huit fichiers de cinq mégaoctets sur une connexion mobile ne passent jamais
+// en dix secondes. Même délai que les photos de la vitrine.
+const ENTETES_MULTIPART = {
+  headers: { 'Content-Type': 'multipart/form-data' },
+  timeout: 120000,
+};
 
 /**
  * Création / modification : le backend attend du multipart, on envoie donc un
