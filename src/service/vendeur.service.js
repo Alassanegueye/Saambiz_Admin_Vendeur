@@ -126,6 +126,20 @@ export const supprimerVitrine = () => api.delete(VENDEUR.MA_VITRINE);
 // Aperçu du site, publié ou non.
 export const getApercuVitrine = () => api.get(VENDEUR.MA_VITRINE_APERCU);
 
+// Photos du haut du site : enregistrées dès l'envoi, hors du brouillon des
+// réglages. Chaque réponse renvoie la vitrine à jour, liste des photos comprise.
+export const ajouterPhotosVitrine = (fichiers) => {
+  const form = new FormData();
+  fichiers.forEach((f) => form.append('photos', f));
+  return api.post(VENDEUR.MA_VITRINE_PHOTOS, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    // Plusieurs photos sur une connexion mobile : on laisse le temps.
+    timeout: 120000,
+  });
+};
+export const ordonnerPhotosVitrine = (ids) => api.put(VENDEUR.MA_VITRINE_PHOTOS_ORDRE, { ids });
+export const supprimerPhotoVitrine = (id) => api.delete(VENDEUR.MA_VITRINE_PHOTO(id));
+
 // ── Abonnement ──────────────────────────────────────────────────────────────
 export const getMonAbonnement       = () => api.get(VENDEUR.MON_ABONNEMENT);
 export const initierRenouvellement  = (payload) => api.post(VENDEUR.RENOUVELER, payload);
