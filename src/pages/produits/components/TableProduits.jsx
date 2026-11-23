@@ -1,5 +1,6 @@
 import Badge from '../../../components/common/Badge';
 import { formatMontant } from '../../../utils/formatters';
+import { statutProduit, enModeration } from '../statutProduit';
 
 /**
  * Le tableau du catalogue. Purement présentationnel : il reçoit une liste et
@@ -57,12 +58,14 @@ export default function TableProduits({
                 <td className="td-muted">{p.quantite ?? '—'}</td>
                 <td className="td-muted">{p.vues ?? 0}</td>
                 <td>
-                  {!disponible ? (
-                    <Badge variant="default">Retiré</Badge>
-                  ) : Number(p.quantite ?? 1) <= 0 ? (
-                    <Badge variant="danger">Rupture</Badge>
-                  ) : (
-                    <Badge variant="success">En vente</Badge>
+                  {(() => {
+                    const st = statutProduit(p);
+                    return <Badge variant={st.variant}>{st.label}</Badge>;
+                  })()}
+                  {enModeration(p) && (
+                    <div className="td-muted" style={{ fontSize: '0.74rem', marginTop: 2 }}>
+                      Invisible pour vos clients
+                    </div>
                   )}
                 </td>
                 <td>

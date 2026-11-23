@@ -148,7 +148,22 @@ export const supprimerPhotoVitrine = (id) => api.delete(VENDEUR.MA_VITRINE_PHOTO
 
 // ── Abonnement ──────────────────────────────────────────────────────────────
 export const getMonAbonnement       = () => api.get(VENDEUR.MON_ABONNEMENT);
-export const initierRenouvellement  = (payload) => api.post(VENDEUR.RENOUVELER, payload);
+/**
+ * Premier temps du renouvellement : le serveur annonce le montant dû. Il ne
+ * prend aucun moyen de paiement et ne débite rien — c'est `payerAbonnement`
+ * qui déclenche la demande chez l'opérateur, en second temps, exactement
+ * comme le fait l'application mobile.
+ */
+export const initierRenouvellement  = () => api.post(VENDEUR.RENOUVELER);
+
+/**
+ * Second temps : la demande de paiement elle-même. Wave et Orange Money
+ * envoient une validation sur le téléphone du vendeur ; Orange renvoie en
+ * plus une adresse vers laquelle l'emmener.
+ */
+export const payerAbonnement = ({ montant, methode, numeroTelephone }) =>
+  api.post(ENDPOINTS.PAIEMENT.PAYER, { montant, methode, numeroTelephone });
+
 export const getHistoriquePaiements = () => api.get(VENDEUR.HISTORIQUE_PAIEMENTS);
 
 // ── Commandes reçues ────────────────────────────────────────────────────────

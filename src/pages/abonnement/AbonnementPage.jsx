@@ -27,9 +27,7 @@ export default function AbonnementPage() {
         <div className="card">
           <div className="card-header">
             <h3 className="card-title">Formule en cours</h3>
-            <Badge variant={a.actif ? 'success' : 'danger'}>
-              {a.actif ? 'Actif' : 'Expiré'}
-            </Badge>
+            <Badge variant={a.etat.variant}>{a.etat.label}</Badge>
           </div>
           <div className="card-body">
             {a.abonnement ? (
@@ -93,11 +91,28 @@ export default function AbonnementPage() {
                 ))}
               </div>
             </fieldset>
+            <div className="form-field">
+              <label className="form-label" htmlFor="tel-paiement">
+                Numéro à débiter
+              </label>
+              <input
+                id="tel-paiement"
+                className="form-input"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel"
+                placeholder="77 123 45 67"
+                value={a.telephone}
+                onChange={(e) => a.setTelephone(e.target.value)}
+              />
+              {a.erreurTelephone && <span className="form-error">{a.erreurTelephone}</span>}
+            </div>
             <button className="btn btn-primary" onClick={a.renouveler} disabled={a.saving}>
-              {a.saving ? 'Redirection…' : 'Renouveler mon abonnement'}
+              {a.saving ? 'Envoi en cours…' : 'Renouveler mon abonnement'}
             </button>
             <p className="note-sous-bouton">
-              Vous serez redirigé vers votre opérateur pour valider le paiement.
+              La demande de paiement arrive sur ce numéro : validez-la depuis
+              votre téléphone pour que l'abonnement reparte.
             </p>
           </div>
         </div>

@@ -1,12 +1,13 @@
 import { formatMontant, formatDateTime } from '../../../utils/formatters';
-import { STATUTS, nomAcheteur } from '../useCommandes';
+import { infoStatut, nomAcheteur, transitionsDepuis } from '../useCommandes';
 
 /**
  * Contenu de la modale de détail : informations, lignes de la commande, et
  * les transitions possibles.
  *
- * Le statut courant est retiré de la liste des boutons — proposer « passer en
- * En attente » à une commande déjà en attente n'a aucun sens.
+ * Les boutons suivent la table de transitions du backend : seules les suites
+ * qu'il accepte sont proposées. Un statut terminal n'en a aucune, et le dit
+ * plutôt que de laisser un bloc vide.
  */
 export default function DetailCommande({ commande, saving, onChangerStatut }) {
   if (!commande) return null;
@@ -55,21 +56,39 @@ export default function DetailCommande({ commande, saving, onChangerStatut }) {
         </div>
       )}
 
-      <div className="bloc-transitions">
-        <div className="form-label">Faire avancer la commande</div>
-        <div className="table-actions">
-          {STATUTS.filter((s) => s.code !== commande.statut).map((s) => (
-            <button
-              key={s.code}
-              className={`btn btn-sm ${s.code === 'annulee' ? 'btn-danger' : 'btn-secondary'}`}
-              disabled={saving}
-              onClick={() => onChangerStatut(commande, s.code)}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      {(() => {
+        // Seules les suites permises par le backend sont proposées : offrir les
+        // autres ne menait qu'à un refus du serveur, et laissait de côté les
+        // deux seules décisions possibles sur une commande en attente.
+        const suites = transitionsDepuis(commande.statut);
+        if (!suites.length) {
+          return (
+            <div className="bloc-transitions">
+              <div className="form-label">Faire avancer la commande</div>
+              <p className="form-hint">
+                {`Cette commande est ${infoStatut(commande.statut).label.toLowerCase()} : son parcours est terminé.`}
+              </p>
+            </div>
+          );
+        }
+        return (
+          <div className="bloc-transitions">
+            <div className="form-label">Faire avancer la commande</div>
+            <div className="table-actions">
+              {suites.map((s) => (
+                <button
+                  key={s.code}
+                  className={`btn btn-sm ${s.variant === 'danger' ? 'btn-danger' : 'btn-secondary'}`}
+                  disabled={saving}
+                  onClick={() => onChangerStatut(commande, s.code)}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 }

@@ -14,6 +14,7 @@ import {
 import { getCategories } from '../../service/categories.service';
 import useDebounce from '../../hooks/useDebounce';
 import { verifierSpecifications } from '../../components/forms/verifierSpecifications';
+import { visiblePourLesClients, enModeration } from './statutProduit';
 
 /**
  * Contrôleur de la page Produits.
@@ -44,12 +45,17 @@ export const FILTRES_PRODUITS = [
   { valeur: 'en_vente', libelle: 'En vente' },
   { valeur: 'rupture', libelle: 'Rupture de stock' },
   { valeur: 'retires', libelle: 'Retirés de la vente' },
+  { valeur: 'moderation', libelle: 'En attente ou refusés' },
 ];
 
-const enVente = (p) => (p.disponible ?? true) && Number(p.quantite ?? 1) > 0;
-const enRupture = (p) => (p.disponible ?? true) && Number(p.quantite ?? 1) <= 0;
-const retire = (p) => p.disponible === false;
-const TESTS = { en_vente: enVente, rupture: enRupture, retires: retire };
+// « En vente » veut dire vu par les clients : un produit refusé par la
+// modération ne l'est pas, même disponible et en stock.
+const enVente = visiblePourLesClients;
+const enRupture = (p) => !enModeration(p) && (p.disponible ?? true) && Number(p.quantite ?? 1) <= 0;
+const retire = (p) => !enModeration(p) && p.disponible === false;
+const TESTS = {
+  en_vente: enVente, rupture: enRupture, retires: retire, moderation: enModeration,
+};
 
 export default function useProduits() {
   // ?filtre=rupture : ouverture depuis l'accueil ; ?nouveau=1 : le bouton
@@ -121,6 +127,7 @@ export default function useProduits() {
     en_vente: produits.filter(enVente).length,
     rupture: produits.filter(enRupture).length,
     retires: produits.filter(retire).length,
+    moderation: produits.filter(enModeration).length,
   };
 
   const choisirFiltre = (valeur) => {

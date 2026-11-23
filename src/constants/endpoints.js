@@ -56,6 +56,8 @@ export const ENDPOINTS = {
 
     // Abonnement
     MON_ABONNEMENT:   '/vendeur/mon-abonnement',
+    // Ne fait qu'annoncer le montant dû : le paiement lui-même passe par
+    // PAIEMENT.PAYER, en second temps, comme dans l'application mobile.
     RENOUVELER:       '/vendeur/initier-renouvellement',
     HISTORIQUE_PAIEMENTS: '/vendeur/historique-paiements',
 
@@ -85,10 +87,17 @@ export const ENDPOINTS = {
     DELETE: (id) => `/promotions/${id}`,
   },
 
+  // Le catalogue des catégories est en lecture seule ici : les créer et les
+  // modifier est un geste d'administrateur, sur des routes `/admin/*` qu'un
+  // jeton de vendeur se voit refuser. Les garder déclarées ici ne pouvait que
+  // tromper : le jour où un bouton les aurait appelées, il aurait reçu un 403.
   CATEGORIES: {
-    LIST:   '/categories/',                         // GET public
-    CREATE: '/admin/ajout-categorie',               // POST (admin)
-    UPDATE: (id) => `/admin/categorie/${id}`,       // PUT (admin)
-    DELETE: (id) => `/admin/categorie/${id}`,       // DELETE (admin)
+    LIST: '/categories/', // GET public
+  },
+
+  PAIEMENT: {
+    // Le paiement réel, celui que l'application mobile appelle après
+    // l'initiation : { methode, montant, numeroTelephone }.
+    PAYER: '/paiement/payer',
   },
 };

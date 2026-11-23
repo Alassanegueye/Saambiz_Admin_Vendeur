@@ -1,5 +1,6 @@
 import Badge from '../../../components/common/Badge';
-import { formatMontant, formatDateTime, libelle } from '../../../utils/formatters';
+import { formatMontant, formatDateTime } from '../../../utils/formatters';
+import { infoPaiement, nomMoyen } from '../statutPaiement';
 
 /** Paiements passés de l'abonnement. Présentation seule. */
 export default function HistoriquePaiements({ paiements }) {
@@ -22,12 +23,10 @@ export default function HistoriquePaiements({ paiements }) {
               <tr key={p.id}>
                 <td className="td-muted">{formatDateTime(p.createdAt || p.datePaiement)}</td>
                 <td className="td-bold">{formatMontant(p.montant)}</td>
-                <td className="td-muted">{libelle(p.moyenPaiement || p.methode)}</td>
+                <td className="td-muted">{nomMoyen(p.methode || p.moyenPaiement)}</td>
                 <td>
-                  {/* Le backend emploie « reussi » ou « paye » selon la
-                      passerelle : les deux valent succès. */}
-                  <Badge variant={p.statut === 'reussi' || p.statut === 'paye' ? 'success' : 'default'}>
-                    {libelle(p.statut)}
+                  <Badge variant={infoPaiement(p.statut).variant}>
+                    {infoPaiement(p.statut).label}
                   </Badge>
                 </td>
               </tr>

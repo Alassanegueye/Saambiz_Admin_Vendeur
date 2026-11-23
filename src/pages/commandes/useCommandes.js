@@ -15,37 +15,14 @@ import useDebounce from '../../hooks/useDebounce';
 
 const PAGE_SIZE = 10;
 
-/** Repris du modèle backend, dans l'ordre où le vendeur avance la commande. */
-export const STATUTS = [
-  { code: 'en_attente',     label: 'En attente',     variant: 'warning' },
-  { code: 'confirmee',      label: 'Confirmée',      variant: 'info' },
-  { code: 'en_preparation', label: 'En préparation', variant: 'info' },
-  { code: 'prete',          label: 'Prête',          variant: 'info' },
-  { code: 'en_livraison',   label: 'En livraison',   variant: 'info' },
-  { code: 'livree',         label: 'Livrée',         variant: 'success' },
-  { code: 'annulee',        label: 'Annulée',        variant: 'danger' },
-];
+// Le vocabulaire des commandes vit dans son propre module, sans dépendance :
+// c'est ce qui permet de le comparer au backend dans un test. Réexporté ici,
+// les pages continuent de le lire au même endroit qu'avant.
+import { STATUTS, infoStatut, FILTRES_COMMANDES, correspond } from './statutsCommande';
 
-/** Statuts « en cours » : acceptée, en préparation, prête ou en route. */
-const EN_COURS = ['confirmee', 'en_preparation', 'prete', 'en_livraison'];
-
-/** Filtres en pastilles : les étapes qui comptent pour le vendeur. */
-export const FILTRES_COMMANDES = [
-  { valeur: 'tous', libelle: 'Toutes' },
-  { valeur: 'en_attente', libelle: 'À confirmer' },
-  { valeur: 'en_cours', libelle: 'En cours' },
-  { valeur: 'livree', libelle: 'Livrées' },
-  { valeur: 'annulee', libelle: 'Annulées' },
-];
-
-const correspond = (c, filtre) => {
-  if (filtre === 'tous') return true;
-  if (filtre === 'en_cours') return EN_COURS.includes(c.statut);
-  return c.statut === filtre;
-};
-
-export const infoStatut = (code) =>
-  STATUTS.find((s) => s.code === code) || { label: code || '—', variant: 'default' };
+export {
+  STATUTS, TRANSITIONS, transitionsDepuis, infoStatut, FILTRES_COMMANDES,
+} from './statutsCommande';
 
 /**
  * Le nom du client, qu'il ait un compte ou non.

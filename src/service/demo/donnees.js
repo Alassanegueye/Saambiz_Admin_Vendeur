@@ -86,22 +86,22 @@ export const DASHBOARD_DEMO = {
 export const PRODUITS_DEMO = [
   { id: 'p1', nom: 'Ensemble bazin brodé', prix: 45000, quantite: 6, disponible: true,
     categorie: { id: 'c1', nom: 'Mode' }, description: 'Bazin riche brodé main, coupe ajustée.',
-    statutValidation: 'approuve', vues: 842, createdAt: ilYA(41) },
+    statut: 'approuve', vues: 842, createdAt: ilYA(41) },
   { id: 'p2', nom: 'Robe wax cintrée', prix: 28000, quantite: 12, disponible: true,
     categorie: { id: 'c1', nom: 'Mode' }, description: 'Wax authentique, doublure coton.',
-    statutValidation: 'approuve', vues: 631, createdAt: ilYA(33) },
+    statut: 'approuve', vues: 631, createdAt: ilYA(33) },
   { id: 'p3', nom: 'Chemise lin homme', prix: 18500, quantite: 0, disponible: false,
     categorie: { id: 'c1', nom: 'Mode' }, description: 'Lin lavé, coupe droite. Rupture de stock.',
-    statutValidation: 'approuve', vues: 455, createdAt: ilYA(28) },
+    statut: 'approuve', vues: 455, createdAt: ilYA(28) },
   { id: 'p4', nom: 'Boubou grand modèle', prix: 62000, quantite: 3, disponible: true,
     categorie: { id: 'c1', nom: 'Mode' }, description: 'Grand boubou brodé, finitions dorées.',
-    statutValidation: 'approuve', vues: 389, createdAt: ilYA(19) },
+    statut: 'approuve', vues: 389, createdAt: ilYA(19) },
   { id: 'p5', nom: 'Jupe pagne tissé', prix: 15000, quantite: 9, disponible: true,
     categorie: { id: 'c1', nom: 'Mode' }, description: 'Pagne tissé Thiès, taille haute.',
-    statutValidation: 'en_attente', vues: 112, createdAt: ilYA(4) },
+    statut: 'en_attente', vues: 112, createdAt: ilYA(4) },
   { id: 'p6', nom: 'Sac à main cuir', prix: 34000, quantite: 4, disponible: true,
     categorie: { id: 'c2', nom: 'Accessoires' }, description: 'Cuir tanné, bandoulière amovible.',
-    statutValidation: 'approuve', vues: 267, createdAt: ilYA(12) },
+    statut: 'approuve', vues: 267, createdAt: ilYA(12) },
 ];
 
 export const CATEGORIES_DEMO = [
@@ -121,7 +121,7 @@ export const COMMANDES_DEMO = [
     montantTotal: 56000, acompte: 16800, createdAt: ilYA(1),
     acheteur: { id: 'a2', prenom: 'Fatou', nom: 'Diop', telephone: '+221 76 555 44 33' },
     lignes: [{ produit: { nom: 'Robe wax cintrée' }, quantite: 2, prix: 28000 }] },
-  { id: 'cmd-1022', reference: '#1022', statut: 'expediee', statutPaiement: 'paye',
+  { id: 'cmd-1022', reference: '#1022', statut: 'en_livraison', statutPaiement: 'paye',
     montantTotal: 62000, acompte: 62000, createdAt: ilYA(3),
     acheteur: { id: 'a3', prenom: 'Ibrahima', nom: 'Sarr', telephone: '+221 70 111 22 33' },
     lignes: [{ produit: { nom: 'Boubou grand modèle' }, quantite: 1, prix: 62000 }] },
@@ -165,9 +165,9 @@ export const MESSAGES_SITE_DEMO = [
 export const ABONNEMENT_DEMO = {
   abonnement: DASHBOARD_DEMO.abonnement,
   historique: [
-    { id: 'pay-3', montant: 3000, moyen: 'Wave', statut: 'paye', createdAt: ilYA(12) },
-    { id: 'pay-2', montant: 3000, moyen: 'Orange Money', statut: 'paye', createdAt: ilYA(42) },
-    { id: 'pay-1', montant: 3000, moyen: 'Wave', statut: 'paye', createdAt: ilYA(72) },
+    { id: 'pay-3', montant: 3000, methode: 'wave', statut: 'success', createdAt: ilYA(12) },
+    { id: 'pay-2', montant: 3000, methode: 'orange_money', statut: 'success', createdAt: ilYA(42) },
+    { id: 'pay-1', montant: 3000, methode: 'wave', statut: 'success', createdAt: ilYA(72) },
   ],
 };
 
