@@ -1,6 +1,6 @@
 import {
   VENDEUR_DEMO, BOUTIQUE_DEMO, DASHBOARD_DEMO, PRODUITS_DEMO, CATEGORIES_DEMO,
-  COMMANDES_DEMO, PROMOTIONS_DEMO, CONVERSATIONS_DEMO, MESSAGES_SITE_DEMO, ABONNEMENT_DEMO, VERIFICATION_DEMO,
+  COMMANDES_DEMO, PROMOTIONS_DEMO, CONVERSATIONS_DEMO, FILS_DEMO, MESSAGES_SITE_DEMO, ABONNEMENT_DEMO, VERIFICATION_DEMO,
 } from './donnees';
 
 /**
@@ -170,6 +170,12 @@ const ROUTES = [
 
   // ── Divers ──
   ['GET', /\/vendeur\/mes-conversations$/, () => ({ conversations: CONVERSATIONS_DEMO })],
+  // Le fil d'une conversation, et la réponse : le mode démo montre la
+  // messagerie entière, pas seulement la liste.
+  ['GET', /\/messages\/(?!site|conversations|non-lus)([^/]+)$/,
+    (c) => ({ messages: FILS_DEMO[(c.url || '').split('/').pop()] || [] })],
+  ['POST', /\/messages$/, () => ({ success: true, message: 'Message envoyé' })],
+  ['PUT', /\/messages\/(?!site)[^/]+\/lire$/, () => ({ success: true })],
   ['GET', /\/messages\/site$/, () => ({ messages: MESSAGES_SITE_DEMO, total: MESSAGES_SITE_DEMO.length })],
   ['PUT', /\/messages\/site\/[^/]+\/lire$/, () => ({ success: true, message: 'Message marqué comme lu' })],
   ['DELETE', /\/messages\/site\/[^/]+$/, () => ({ success: true, message: 'Message supprimé' })],
@@ -211,8 +217,21 @@ export function adaptateurDemo(config) {
         }));
         return;
       }
+      // Un gestionnaire qui lève laisserait la promesse sans suite : la
+      // page resterait en « Chargement… » pour toujours, sans message ni
+      // erreur. On le traite comme un échec ordinaire.
+      let donnees;
+      try {
+        donnees = route[2](config);
+      } catch (erreur) {
+        reject(Object.assign(erreur, {
+          config,
+          response: { status: 500, data: { message: '[démo] ' + erreur.message }, config },
+        }));
+        return;
+      }
       resolve({
-        data: route[2](config),
+        data: donnees,
         status: 200,
         statusText: 'OK',
         headers: {},

@@ -1728,3 +1728,35 @@ img, svg, video, canvas { max-width: 100%; }
 .msg-site__texte { margin: 0.5rem 0 0.85rem; max-width: 72ch; line-height: 1.55; color: var(--color-text); white-space: pre-line; overflow-wrap: anywhere; }
 .msg-site__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .msg-site__supprimer { margin-left: auto; color: var(--color-danger); }
+
+/* ── Fil de conversation (page Messages) ──────────────────────────────────
+   Les messages du vendeur à droite, ceux de l'acheteur à gauche, comme dans
+   l'application mobile. La hauteur est bornée : une conversation longue
+   défile dans la modale au lieu de la faire déborder. */
+.fil-messages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 42vh;
+  overflow-y: auto;
+}
+
+.fil-messages__item {
+  align-self: flex-start;
+  max-width: 78%;
+  padding: 8px 12px;
+  border-radius: 12px 12px 12px 2px;
+  background: var(--color-surface-muted, #f1f3f7);
+}
+
+.fil-messages__item.est-moi {
+  align-self: flex-end;
+  border-radius: 12px 12px 2px 12px;
+  background: var(--color-primary-soft, #e8eefc);
+}
+
+.fil-messages__item p { margin: 0 0 2px; white-space: pre-wrap; }
+.fil-messages__item span { font-size: 0.72rem; }

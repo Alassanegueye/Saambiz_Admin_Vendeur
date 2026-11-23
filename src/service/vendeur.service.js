@@ -181,6 +181,16 @@ export const supprimerPromotion = (id) => api.delete(PROMOTIONS.DELETE(id));
 // ── Conversations ───────────────────────────────────────────────────────────
 export const getConversations = () => api.get(VENDEUR.CONVERSATIONS);
 
+/** Le fil complet avec un acheteur, du plus ancien au plus récent. */
+export const getConversation = (userId) =>
+  api.get(ENDPOINTS.MESSAGES.CONVERSATION(userId));
+
+/** Répondre. L'acheteur le reçoit par la socket et par notification. */
+export const envoyerMessage = (destinataireId, contenu) =>
+  api.post(ENDPOINTS.MESSAGES.ENVOYER, { destinataireId, contenu });
+
+export const marquerMessageLu = (id) => api.put(ENDPOINTS.MESSAGES.LU(id));
+
 // ── Messages reçus via la page Contact du site ──────────────────────────────
 export const getMessagesSite = () => api.get(VENDEUR.MESSAGES_SITE);
 export const marquerMessageSiteLu = (id) => api.put(VENDEUR.MESSAGE_SITE_LU(id));

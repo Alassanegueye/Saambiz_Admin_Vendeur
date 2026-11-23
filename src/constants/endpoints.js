@@ -95,6 +95,14 @@ export const ENDPOINTS = {
     LIST: '/categories/', // GET public
   },
 
+  // Messagerie avec les acheteurs. L'application mobile s'appuie en plus sur
+  // une socket pour le temps réel ; ici on lit et on répond par ces routes.
+  MESSAGES: {
+    CONVERSATION: (userId) => `/messages/${userId}`,
+    ENVOYER:      '/messages',
+    LU:           (id) => `/messages/${id}/lire`,
+  },
+
   PAIEMENT: {
     // Le paiement réel, celui que l'application mobile appelle après
     // l'initiation : { methode, montant, numeroTelephone }.

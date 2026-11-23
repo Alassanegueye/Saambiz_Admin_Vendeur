@@ -155,6 +155,26 @@ export const CONVERSATIONS_DEMO = [
     dernierMessage: { contenu: 'Je passe récupérer la commande demain matin.', date: ilYA(2), lu: false }, nonLus: 1 },
 ];
 
+/**
+ * Les fils de discussion, pour que le mode démo montre aussi la réponse
+ * depuis le web. `expediteurId` vaut l'identifiant du vendeur quand c'est
+ * lui qui parle — c'est ce que regarde l'affichage pour placer la bulle.
+ */
+export const FILS_DEMO = {
+  a1: [
+    { id: 'm1', expediteurId: 'a1', contenu: 'Bonjour, le bazin est disponible en bleu ?', lu: false, createdAt: ilYA(0) },
+    { id: 'm2', expediteurId: 'a1', contenu: 'Et vous livrez à Mbour ?', lu: false, createdAt: ilYA(0) },
+  ],
+  a2: [
+    { id: 'm3', expediteurId: 'a2', contenu: 'Bonjour, j’ai bien reçu la robe.', lu: true, createdAt: ilYA(2) },
+    { id: 'm4', expediteurId: 'demo-vendeur', contenu: 'Merci à vous ! N’hésitez pas si vous voulez des retouches.', lu: true, createdAt: ilYA(1) },
+    { id: 'm5', expediteurId: 'a2', contenu: 'Merci beaucoup, la robe est parfaite !', lu: true, createdAt: ilYA(1) },
+  ],
+  a3: [
+    { id: 'm6', expediteurId: 'a3', contenu: 'Je passe récupérer la commande demain matin.', lu: false, createdAt: ilYA(2) },
+  ],
+};
+
 export const MESSAGES_SITE_DEMO = [
   { id: 'ms1', nom: 'Aïssatou Ba', telephone: '+221771234567', lu: false, createdAt: ilYA(0),
     contenu: 'Bonjour, livrez-vous à Thiès ? Je voudrais deux boubous pour la Tabaski.' },
