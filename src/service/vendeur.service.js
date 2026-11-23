@@ -222,3 +222,12 @@ export const soumettreVerification = (piece, typePiece) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+// ── Abonnés ─────────────────────────────────────────────────────────────────
+// Les clients qui suivent la boutique. L'application mobile en donne la liste
+// et la fiche de chacun ; le web n'en affichait que le nombre, sur l'accueil.
+export const getAbonnes     = () => api.get(ENDPOINTS.ABONNES.LIST);
+export const getAbonne      = (id) => api.get(ENDPOINTS.ABONNES.DETAIL(id));
+
+/** Répartition des produits par catégorie, pour la page des statistiques. */
+export const getProduitsParCategorie = () => api.get(VENDEUR.PRODUITS_PAR_CATEGORIE);

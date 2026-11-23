@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { toast } from '../../utils/alert';
+import { toast, showConfirm, demanderTexte } from '../../utils/alert';
 import { getMe } from '../../service/auth.service';
-import { modifierProfil } from '../../service/compte.service';
+import { modifierProfil, supprimerMonCompte } from '../../service/compte.service';
 import { changerMotDePasse } from '../../service/password.service';
 import { useAuth } from '../../hooks/useAuth';
 import { erreurMotDePasse } from '../../utils/motDePasse';
@@ -20,7 +20,7 @@ const MDP_VIDE = { ancien: '', nouveau: '', confirmation: '' };
 
 
 export default function useProfil() {
-  const { user, majUtilisateur } = useAuth();
+  const { user, majUtilisateur, logout } = useAuth();
 
   const [chargement, setChargement] = useState(true);
   const [profil, setProfil] = useState(PROFIL_VIDE);
@@ -28,6 +28,7 @@ export default function useProfil() {
 
   const [mdp, setMdp] = useState(MDP_VIDE);
   const [changementMdp, setChangementMdp] = useState(false);
+  const [suppression, setSuppression] = useState(false);
   const [erreurMdp, setErreurMdp] = useState(null);
 
   useEffect(() => {
@@ -127,8 +128,45 @@ export default function useProfil() {
   const initiales = `${(profil.prenom || '')[0] || ''}${(profil.nom || '')[0] || ''}`
     .toUpperCase() || 'V';
 
+  /**
+   * Suppression du compte. Deux confirmations plutôt qu'une : c'est définitif,
+   * et la seconde demande le motif que le serveur enregistre — l'application
+   * mobile procède de la même façon.
+   */
+  const supprimerCompte = async () => {
+    const certain = await showConfirm({
+      titre: 'Supprimer votre compte ?',
+      message: 'Votre compte, votre boutique et vos produits seront supprimés. Cette action est définitive.',
+      confirmText: 'Continuer',
+      danger: true,
+    });
+    if (!certain) return;
+
+    const motif = await demanderTexte({
+      titre: 'Pourquoi partez-vous ?',
+      message: 'Quelques mots nous aident à comprendre. Vous pouvez aussi laisser vide.',
+      placeholder: 'Ex. je ne vends plus en ligne.',
+      confirmText: 'Supprimer définitivement',
+      obligatoire: false,
+    });
+    if (motif === null) return;
+
+    setSuppression(true);
+    try {
+      await supprimerMonCompte(motif);
+      toast.success('Votre compte a été supprimé.');
+      await logout();
+    } catch (err) {
+      // 409 : une commande en cours empêche la suppression. Le message du
+      // serveur dit laquelle, il vaut mieux que le nôtre.
+      toast.error(err?.response?.data?.message || 'Suppression impossible pour le moment.');
+      setSuppression(false);
+    }
+  };
+
   return {
     user, chargement, initiales,
+    suppression, supprimerCompte,
     profil, majChamp, enregistrement, enregistrerProfil,
     mdp, majMdp, changementMdp, erreurMdp, enregistrerMdp,
   };

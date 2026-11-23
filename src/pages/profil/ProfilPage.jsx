@@ -3,6 +3,7 @@ import { libelle } from '../../utils/formatters';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import FormIdentite from './components/FormIdentite';
 import FormMotDePasse from './components/FormMotDePasse';
+import SupprimerCompte from './components/SupprimerCompte';
 import useProfil from './useProfil';
 
 /**
@@ -49,6 +50,8 @@ export default function ProfilPage() {
           onEnregistrer={p.enregistrerMdp}
         />
       </div>
+
+      <SupprimerCompte suppression={p.suppression} onSupprimer={p.supprimerCompte} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import {
   VENDEUR_DEMO, BOUTIQUE_DEMO, DASHBOARD_DEMO, PRODUITS_DEMO, CATEGORIES_DEMO,
-  COMMANDES_DEMO, PROMOTIONS_DEMO, CONVERSATIONS_DEMO, FILS_DEMO, MESSAGES_SITE_DEMO, ABONNEMENT_DEMO, VERIFICATION_DEMO,
+  COMMANDES_DEMO, PROMOTIONS_DEMO, CONVERSATIONS_DEMO, FILS_DEMO, MESSAGES_SITE_DEMO,
+  NOTIFICATIONS_DEMO, ABONNES_DEMO, CENTRE_AIDE_DEMO, ABONNEMENT_DEMO, VERIFICATION_DEMO,
 } from './donnees';
 
 /**
@@ -176,6 +177,31 @@ const ROUTES = [
     (c) => ({ messages: FILS_DEMO[(c.url || '').split('/').pop()] || [] })],
   ['POST', /\/messages$/, () => ({ success: true, message: 'Message envoyé' })],
   ['PUT', /\/messages\/(?!site)[^/]+\/lire$/, () => ({ success: true })],
+  // Notifications, abonnés et centre d'aide : les trois écrans portés depuis
+  // l'application mobile.
+  ['GET', /\/notifications$/, () => ({ notifications: NOTIFICATIONS_DEMO, total: NOTIFICATIONS_DEMO.length })],
+  ['GET', /\/notifications\/non-lues$/, () => ({ nonLues: NOTIFICATIONS_DEMO.filter((n) => !n.lue).length })],
+  ['PUT', /\/notifications\/toutes-lues$/, () => ({ success: true })],
+  ['PUT', /\/notifications\/[^/]+\/lire$/, () => ({ success: true })],
+  ['GET', /\/vendeur\/abonnes$/, () => ({
+    total: ABONNES_DEMO.length,
+    avecCloche: ABONNES_DEMO.filter((a) => a.clocheActive).length,
+    abonnes: ABONNES_DEMO,
+  })],
+  ['GET', /\/vendeur\/abonnes\/[^/]+$/, (c) => {
+    const id = (c.url || '').split('/').pop();
+    return {
+      abonne: ABONNES_DEMO.find((a) => a.id === id) || ABONNES_DEMO[0],
+      activite: {
+        commandes: 4,
+        produitsCommandes: 7,
+        derniereCommande: new Date(Date.now() - 3 * 86400000).toISOString(),
+      },
+      fidelite: 'Client fidèle',
+    };
+  }],
+  ['GET', /\/centre-aide$/, () => CENTRE_AIDE_DEMO],
+  ['GET', /\/prix-abonnement$/, () => ({ prix: 2000, devise: 'FCFA' })],
   ['GET', /\/messages\/site$/, () => ({ messages: MESSAGES_SITE_DEMO, total: MESSAGES_SITE_DEMO.length })],
   ['PUT', /\/messages\/site\/[^/]+\/lire$/, () => ({ success: true, message: 'Message marqué comme lu' })],
   ['DELETE', /\/messages\/site\/[^/]+$/, () => ({ success: true, message: 'Message supprimé' })],

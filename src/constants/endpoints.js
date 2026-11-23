@@ -21,6 +21,10 @@ export const ENDPOINTS = {
 
   COMPTE: {
     MODIFIER_PROFIL: '/account/modifier-profil',
+    // Suppression du compte par son propriétaire. L'application mobile la
+    // propose — Google Play l'exige de toute application qui crée des
+    // comptes — et le web ne l'offrait pas.
+    SUPPRIMER:       '/account/me',
   },
 
   VENDEUR: {
@@ -32,6 +36,7 @@ export const ENDPOINTS = {
     PRODUITS:         '/vendeur/liste-produits',
     RECHERCHE:        '/vendeur/recherche-produits',
     NOMBRE_PRODUITS:  '/vendeur/nombre-produit',
+    PRODUITS_PAR_CATEGORIE: '/vendeur/nombre-produit-categorie',
     AJOUT_PRODUIT:    '/vendeur/ajout-produit',
     MODIF_PRODUIT:    (id) => `/vendeur/modifier-produit/${id}`,
     SUPPR_PRODUIT:    (id) => `/vendeur/supprimer-produit/${id}`,
@@ -105,11 +110,38 @@ export const ENDPOINTS = {
     CONVERSATION: (userId) => `/messages/${userId}`,
     ENVOYER:      '/messages',
     LU:           (id) => `/messages/${id}/lire`,
+    // Le compte de messages non lus, pour une pastille dans la navigation.
+    NON_LUS:      '/messages/non-lus',
   },
 
   PAIEMENT: {
     // Le paiement réel, celui que l'application mobile appelle après
     // l'initiation : { methode, montant, numeroTelephone }.
     PAYER: '/paiement/payer',
+  },
+
+  // Les alertes du compte : commande reçue, abonnement qui approche de son
+  // terme, produit modéré. L'application mobile les affiche depuis toujours ;
+  // le tableau de bord web n'en montrait aucune, alors que son accueil reçoit
+  // déjà le compte des non-lues du serveur.
+  NOTIFICATIONS: {
+    LIST:        '/notifications',
+    NON_LUES:    '/notifications/non-lues',
+    TOUTES_LUES: '/notifications/toutes-lues',
+    LUE:         (id) => `/notifications/${id}/lire`,
+  },
+
+  // Les clients qui suivent la boutique. Le web n'en donnait que le nombre.
+  ABONNES: {
+    LIST:   '/vendeur/abonnes',
+    DETAIL: (id) => `/vendeur/abonnes/${id}`,
+  },
+
+  // Réglages publics, servis sans authentification.
+  CONFIG: {
+    // Contacts et questions fréquentes, rédigés depuis le back-office.
+    CENTRE_AIDE:     '/centre-aide',
+    // { prix, devise } — le tarif affiché avant de renouveler.
+    PRIX_ABONNEMENT: '/prix-abonnement',
   },
 };

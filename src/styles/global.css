@@ -1885,3 +1885,39 @@ img, svg, video, canvas { max-width: 100%; }
   border-radius: 10px;
   border: 1px solid var(--color-border);
 }
+
+/* ── Notifications ───────────────────────────────────────────────────────
+   Une liste qu'on parcourt : la non-lue se distingue d'un coup d'œil, et
+   cliquer dessus la marque comme lue. */
+.liste-notifications { list-style: none; margin: 0; padding: 0; }
+
+.notif {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+}
+.notif:last-child { border-bottom: none; }
+.notif:hover { background: var(--color-surface-muted, #f7f9fc); }
+.notif.est-nouvelle { border-left: 3px solid var(--color-primary, #0d1b3d); }
+
+.notif-entete { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.notif p { margin: 4px 0 2px; }
+.notif span { font-size: 0.74rem; }
+
+/* ── Centre d'aide ───────────────────────────────────────────────────── */
+.liste-questions { list-style: none; margin: 0; padding: 0; }
+.liste-questions li { border-bottom: 1px solid var(--color-border); }
+.liste-questions li:last-child { border-bottom: none; }
+
+.question-titre {
+  width: 100%;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 16px;
+  background: none; border: none; font: inherit; text-align: left;
+  cursor: pointer; color: var(--color-text);
+}
+.question-titre:hover { background: var(--color-surface-muted, #f7f9fc); }
+.question-reponse { margin: 0; padding: 0 16px 14px; color: var(--color-text-muted); }
+
+/* ── Zone de suppression du compte ───────────────────────────────────── */
+.carte-danger { border: 1px solid var(--color-danger-border, #f3c9c3); margin-top: 16px; }

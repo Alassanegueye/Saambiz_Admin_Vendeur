@@ -189,6 +189,41 @@ export const FILS_DEMO = {
   ],
 };
 
+/** Les alertes du compte, pour montrer la page Notifications sans serveur. */
+export const NOTIFICATIONS_DEMO = [
+  { id: 'n1', type: 'commande', titre: 'Nouvelle commande',
+    message: 'Moussa Fall a commandé 2 articles pour 45 000 FCFA.', lue: false, createdAt: ilYA(0) },
+  { id: 'n2', type: 'abonnement', titre: 'Abonnement bientôt échu',
+    message: 'Il reste 18 jours avant la fin de votre formule Premium.', lue: false, createdAt: ilYA(1) },
+  { id: 'n3', type: 'nouveau_produit', titre: 'Produit en attente',
+    message: '« Jupe pagne tissé » attend la validation de la modération.', lue: true, createdAt: ilYA(4) },
+  { id: 'n4', type: 'systeme', titre: 'Votre site est en ligne',
+    message: 'saambiz.com/b/sanse-couture est visible par vos clients.', lue: true, createdAt: ilYA(9) },
+];
+
+/** Les clients qui suivent la boutique. */
+export const ABONNES_DEMO = [
+  { id: 'a1', prenom: 'Moussa', nom: 'Fall', email: 'moussa.fall@exemple.sn',
+    telephone: '+221771112233', photo: null, clocheActive: true, depuis: ilYA(42) },
+  { id: 'a2', prenom: 'Fatou', nom: 'Diop', email: 'fatou.diop@exemple.sn',
+    telephone: '+221772223344', photo: null, clocheActive: true, depuis: ilYA(28) },
+  { id: 'a3', prenom: 'Ibrahima', nom: 'Sarr', email: 'ibrahima.sarr@exemple.sn',
+    telephone: '+221773334455', photo: null, clocheActive: false, depuis: ilYA(11) },
+];
+
+/** Contacts et questions du centre d'aide, rédigés depuis le back-office. */
+export const CENTRE_AIDE_DEMO = {
+  contacts: { whatsapp: '+221771234567', telephone: '+221338201020', email: 'aide@saambiz.com' },
+  questions: [
+    { id: 'q1', question: 'Comment publier mon premier produit ?',
+      reponse: 'Allez dans « Mes produits », cliquez sur « Ajouter un produit », remplissez le nom, le prix et la photo, puis publiez. Votre produit est visible par vos clients aussitôt.' },
+    { id: 'q2', question: 'Quand suis-je payé pour une commande ?',
+      reponse: 'Le paiement en ligne vous est reversé une fois la commande livrée. Pour un paiement à la livraison, vous encaissez directement votre client.' },
+    { id: 'q3', question: 'Que se passe-t-il si mon abonnement expire ?',
+      reponse: 'Votre boutique et vos commandes restent accessibles, mais vous ne pouvez plus publier ni modifier de produits tant que l\'abonnement n\'est pas renouvelé.' },
+  ],
+};
+
 export const MESSAGES_SITE_DEMO = [
   { id: 'ms1', nom: 'Aïssatou Ba', telephone: '+221771234567', lu: false, createdAt: ilYA(0),
     contenu: 'Bonjour, livrez-vous à Thiès ? Je voudrais deux boubous pour la Tabaski.' },

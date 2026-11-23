@@ -20,6 +20,9 @@ const SectionsSitePage = lazyFiable(() => import('../pages/vitrine/SectionsSiteP
 const MessagesPage   = lazyFiable(() => import('../pages/messages/MessagesPage'));
 const AbonnementPage = lazyFiable(() => import('../pages/abonnement/AbonnementPage'));
 const ProfilPage     = lazyFiable(() => import('../pages/profil/ProfilPage'));
+const NotificationsPage = lazyFiable(() => import('../pages/notifications/NotificationsPage'));
+const AbonnesPage    = lazyFiable(() => import('../pages/abonnes/AbonnesPage'));
+const AidePage       = lazyFiable(() => import('../pages/aide/AidePage'));
 
 export default function AppRoutes() {
   return (
@@ -47,6 +50,9 @@ export default function AppRoutes() {
               <Route path={ROUTES.MESSAGES}   element={<ErrorBoundary><MessagesPage /></ErrorBoundary>} />
               <Route path={ROUTES.ABONNEMENT} element={<ErrorBoundary><AbonnementPage /></ErrorBoundary>} />
               <Route path={ROUTES.PROFIL}     element={<ErrorBoundary><ProfilPage /></ErrorBoundary>} />
+              <Route path={ROUTES.NOTIFICATIONS} element={<ErrorBoundary><NotificationsPage /></ErrorBoundary>} />
+              <Route path={ROUTES.ABONNES}    element={<ErrorBoundary><AbonnesPage /></ErrorBoundary>} />
+              <Route path={ROUTES.AIDE}       element={<ErrorBoundary><AidePage /></ErrorBoundary>} />
             </Route>
           </Route>
 

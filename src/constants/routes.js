@@ -17,6 +17,10 @@ export const ROUTES = {
   MESSAGES:   '/messages',
   ABONNEMENT: '/abonnement',
   PROFIL:     '/profil',
+  // Portés depuis l'application mobile, où le vendeur les avait déjà.
+  NOTIFICATIONS: '/notifications',
+  ABONNES:       '/abonnes',
+  AIDE:          '/aide',
 };
 
 // Ancien nom, conservé le temps que les pages reprises de l'administration
