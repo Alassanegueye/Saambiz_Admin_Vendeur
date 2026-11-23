@@ -55,23 +55,29 @@ const ITEMS = [
     label: 'Sections du site',
     icon: <><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></>,
   },
-  {
-    code: 'MESSAGES',
-    to: ROUTES.MESSAGES,
-    label: 'Messages',
-    icon: <><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></>,
-  },
-  {
-    code: 'ABONNEMENT',
-    to: ROUTES.ABONNEMENT,
-    label: 'Abonnement',
-    icon: <><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></>,
-  },
 ];
+
+/**
+ * Messages et Abonnement vivent dans le menu du compte, pas dans la barre.
+ *
+ * La barre porte ce dont on se sert pour vendre — produits, commandes,
+ * boutique. Ces deux rubriques-là se consultent de temps en temps : elles
+ * encombraient une barre déjà pleine. Un message non lu reste visible, la
+ * pastille du compte l'annonce (voir TopNav).
+ *
+ * Leur titre doit rester connu de l'écran de transition, d'où ces deux
+ * lignes : `TITRES` se construit à partir de `ITEMS`, dont elles sont
+ * sorties.
+ */
+const HORS_BARRE = {
+  [ROUTES.MESSAGES]: 'Messages',
+  [ROUTES.ABONNEMENT]: 'Abonnement',
+};
 
 /** Nom affiché sous le logo pendant le changement de page. */
 const TITRES = {
   ...Object.fromEntries(ITEMS.map((i) => [i.to, i.label])),
+  ...HORS_BARRE,
   [ROUTES.PROFIL]: 'Mon profil',
 };
 
@@ -82,7 +88,7 @@ export default function VendeurLayout() {
   return (
     <div className="admin-layout">
       {/* Rubriques regroupées comme dans l'administration : Accueil, Mes
-          produits, Ventes ▾, Ma boutique ▾, Messages, Abonnement. */}
+          produits, Ventes ▾, Ma boutique ▾. */}
       <TopNav items={ITEMS} />
       <div className="admin-main">
         <div className="admin-content">

@@ -1230,6 +1230,27 @@ td.cat-col-nombre { font-variant-numeric: tabular-nums; }
 .tn-menu-aide { font-size: 12px; color: #8592AD; line-height: 1.35; }
 
 .tn-compte { position: relative; display: flex; align-items: center; flex-shrink: 0; }
+
+/* Pastille des messages non lus.
+   Messages a quitté la barre pour le menu du compte : sans elle, un message
+   arrivé pendant que le vendeur travaille ne se verrait qu'en ouvrant le
+   menu. Elle se pose sur l'avatar quand le menu est fermé, et au bout de la
+   ligne « Messages » quand il est ouvert. */
+.tn-pastille {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 999px;
+  background: var(--color-danger, #DC2626); color: #FFFFFF;
+  font-size: 11px; font-weight: 700; line-height: 1;
+}
+.tn-menu-lien .tn-pastille,
+.tn-tiroir-lien .tn-pastille { margin-left: auto; }
+.tn-pastille--avatar {
+  position: absolute; top: -4px; right: -5px;
+  /* Un liseré de la couleur de la barre : la pastille se détache de
+     l'avatar, qui est sombre. */
+  box-shadow: 0 0 0 2px var(--color-white, #FFFFFF);
+}
 .tn-compte-btn {
   display: flex; align-items: center; gap: 10px;
   padding: 5px 10px 5px 5px; border: 1px solid transparent; border-radius: 12px;
@@ -1245,6 +1266,8 @@ td.cat-col-nombre { font-variant-numeric: tabular-nums; }
 .tn-compte-btn:focus-visible { outline: none; box-shadow: var(--ring); }
 /* Initiales sur une tuile bleu marine, comme le logo. */
 .tn-avatar {
+  /* Repère de la pastille des messages non lus (.tn-pastille--avatar). */
+  position: relative;
   width: 34px; height: 34px; border-radius: 10px;
   background: var(--color-primary); color: var(--color-accent);
   display: grid; place-items: center;

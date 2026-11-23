@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import LogoAnime from '../marque/LogoAnime';
 import { ROUTES } from '../../constants/routes';
+import useMessagesNonLus from '../../hooks/useMessagesNonLus';
 import { useAuth } from '../../hooks/useAuth';
 import { AIDES, construireNavigation, estActif } from './navigationVendeur';
 
@@ -41,6 +42,9 @@ export default function TopNav({ items = [] }) {
 
   const [groupeOuvert, setGroupeOuvert] = useState(null);
   const [menuCompte, setMenuCompte] = useState(false);
+  // Messages n'est plus dans la barre : la pastille est le seul signal qu'un
+  // message est arrivé.
+  const nonLus = useMessagesNonLus();
   const [tiroir, setTiroir] = useState(false);
   const barreRef = useRef(null);
 
@@ -173,9 +177,14 @@ export default function TopNav({ items = [] }) {
             onClick={() => { setGroupeOuvert(null); setTiroir(false); setMenuCompte((o) => !o); }}
             aria-haspopup="menu"
             aria-expanded={menuCompte}
-            title={nomComplet}
+            title={nonLus > 0
+              ? `${nomComplet} — ${nonLus} message${nonLus > 1 ? 's' : ''} non lu${nonLus > 1 ? 's' : ''}`
+              : nomComplet}
           >
-            <span className="tn-avatar" aria-hidden="true">{initiales}</span>
+            <span className="tn-avatar" aria-hidden="true">
+              {initiales}
+              {nonLus > 0 && <span className="tn-pastille tn-pastille--avatar">{nonLus}</span>}
+            </span>
             <span className="tn-compte-nom">{nomComplet}</span>
             <Chevron ouvert={menuCompte} />
           </button>
@@ -189,6 +198,17 @@ export default function TopNav({ items = [] }) {
               <NavLink to={ROUTES.PROFIL} className="tn-menu-lien" role="menuitem">
                 <Icone><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></Icone>
                 Mon profil
+              </NavLink>
+              {/* Messages et Abonnement ont quitté la barre : ce sont des
+                  rubriques qu'on consulte, pas des outils de vente. */}
+              <NavLink to={ROUTES.MESSAGES} className="tn-menu-lien" role="menuitem">
+                <Icone><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></Icone>
+                Messages
+                {nonLus > 0 && <span className="tn-pastille">{nonLus}</span>}
+              </NavLink>
+              <NavLink to={ROUTES.ABONNEMENT} className="tn-menu-lien" role="menuitem">
+                <Icone><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></Icone>
+                Abonnement
               </NavLink>
               <button type="button" className="tn-menu-lien danger" onClick={logout} role="menuitem">
                 <Icone><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></Icone>
@@ -225,6 +245,29 @@ export default function TopNav({ items = [] }) {
               </div>
             )
           )}
+
+          {/* Messages et Abonnement ne sont plus dans la barre : sans cette
+              section, le tiroir — la seule navigation sur petit écran — ne
+              permettrait plus d'y aller. */}
+          <div className="tn-tiroir-groupe">
+            <p className="tn-tiroir-titre">Compte</p>
+            <NavLink to={ROUTES.MESSAGES}
+                     className={() => `tn-tiroir-lien${pathname === ROUTES.MESSAGES ? ' actif' : ''}`}>
+              <Icone><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></Icone>
+              Messages
+              {nonLus > 0 && <span className="tn-pastille">{nonLus}</span>}
+            </NavLink>
+            <NavLink to={ROUTES.ABONNEMENT}
+                     className={() => `tn-tiroir-lien${pathname === ROUTES.ABONNEMENT ? ' actif' : ''}`}>
+              <Icone><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></Icone>
+              Abonnement
+            </NavLink>
+            <NavLink to={ROUTES.PROFIL}
+                     className={() => `tn-tiroir-lien${pathname === ROUTES.PROFIL ? ' actif' : ''}`}>
+              <Icone><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></Icone>
+              Mon profil
+            </NavLink>
+          </div>
         </div>
       )}
     </header>
