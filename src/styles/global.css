@@ -1540,6 +1540,58 @@ td.cat-col-nombre { font-variant-numeric: tabular-nums; }
 .specs-nouvelle { display: flex; gap: 6px; margin: 0.25rem 0 0.9rem; }
 .specs-puce--on { background: #EEF3FC; border-color: #0D1B3D; }
 
+/* ── Option repliée ──
+   Rien ne s'ouvre avant d'être demandé : un vendeur de gâteaux n'a pas à
+   voir « Tissu », ni un vendeur de tissu à voir « Tailles ». */
+.specs-repli {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 0.65rem 0.8rem; margin-bottom: 0.5rem;
+  border: 1px solid var(--color-border); border-radius: 10px;
+  background: var(--color-white);
+}
+.specs-repli-nom { display: block; font-size: 0.875rem; font-weight: 500; color: var(--color-text); }
+.specs-repli-aide { display: block; font-size: 0.75rem; color: var(--color-text-muted); margin-top: 2px; }
+
+/* ── Couleurs d'un produit ── */
+.couleurs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 6px; }
+.couleurs-puce {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 4px 6px 4px 5px;
+  border: 1px solid var(--color-border); border-radius: 10px;
+  background: var(--color-white);
+}
+.couleurs-pastille {
+  width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
+  border: 1px solid rgba(13, 27, 61, 0.16);
+}
+/* Couleur héritée d'un ancien champ texte : la teinte est inconnue. */
+.couleurs-pastille[data-sans-code] {
+  background: repeating-linear-gradient(45deg, #E6EAF2 0 5px, #F7F9FC 5px 10px);
+}
+.couleurs-nom {
+  width: 7.5rem; border: none; background: none; font: inherit;
+  font-size: 0.82rem; color: var(--color-text); padding: 2px 0;
+}
+.couleurs-nom:focus { outline: none; border-bottom: 1px solid var(--color-primary); }
+.couleurs-retirer {
+  border: none; background: none; cursor: pointer; line-height: 1;
+  font-size: 1rem; color: var(--color-text-muted); padding: 0 2px;
+}
+.couleurs-retirer:hover { color: var(--color-danger, #B91C1C); }
+/* Le « + » cache l'input natif : c'est lui qui ouvre le nuancier. */
+.couleurs-plus {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; cursor: pointer;
+  border: 1px dashed var(--color-border-strong, #CFD9EC); border-radius: 10px;
+  background: var(--color-surface-2, #F7F9FC);
+  font-size: 1.1rem; color: var(--color-text-muted);
+}
+.couleurs-plus:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.couleurs-plus input[type="color"] {
+  position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%;
+  border: none; padding: 0; cursor: pointer;
+}
+
 /* ── Accueil vendeur : à faire, chiffres, abonnement ── */
 .actions-rapides { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .actions-rapides .btn { display: inline-flex; align-items: center; gap: 6px; }
@@ -1760,3 +1812,16 @@ img, svg, video, canvas { max-width: 100%; }
 
 .fil-messages__item p { margin: 0 0 2px; white-space: pre-wrap; }
 .fil-messages__item span { font-size: 0.72rem; }
+
+/* ── Demande d'annulation (détail d'une commande) ─────────────────────────
+   Une décision à prendre : le bloc se distingue du reste de la fiche. */
+.bloc-annulation {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-danger-border, #f3c9c3);
+  border-left-width: 3px;
+  border-radius: 10px;
+  background: var(--color-danger-soft, #fdf3f1);
+}
+
+.bloc-annulation .form-hint { margin: 2px 0 10px; }

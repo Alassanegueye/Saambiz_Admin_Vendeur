@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { enCouleurs, nomSuggere, dejaChoisie } from './couleurs';
 
 /**
  * Options et caractéristiques du produit, remplies par le vendeur lui-même.
@@ -18,13 +19,28 @@ import { useState } from 'react';
  */
 export default function ChampsSpecifications({ specifications = [], valeurs = {}, onChange, erreurs = {} }) {
   const [nouveauNom, setNouveauNom] = useState('');
+  // Blocs que le vendeur a ouverts lui-même pendant cette saisie.
+  const [ouverts, setOuverts] = useState(() => new Set());
 
   const maj = (cle, valeur) => onChange({ ...valeurs, [cle]: valeur });
   const retirer = (cle) => {
     const copie = { ...valeurs };
     delete copie[cle];
     onChange(copie);
+    setOuverts((o) => { const s = new Set(o); s.delete(cle); return s; });
   };
+  const ouvrir = (cle) => setOuverts((o) => new Set(o).add(cle));
+
+  /**
+   * Un bloc ne s'affiche que s'il concerne le produit.
+   *
+   * Tout s'affichait d'un coup : un vendeur de gâteaux voyait « Tissu », un
+   * vendeur de tissu voyait « Tailles », et la page suggérait de remplir des
+   * cases qui n'avaient rien à voir avec ce qu'il vend. Un bloc s'ouvre donc
+   * sur demande — sauf s'il est obligatoire, ou s'il porte déjà une valeur
+   * (produit en cours de modification).
+   */
+  const estOuvert = (s) => s.obligatoire || ouverts.has(s.cle) || !estVide(valeurs[s.cle]);
 
   // Caractéristiques ajoutées par le vendeur : tout ce qui n'est pas suggéré.
   const connues = new Set(specifications.map((s) => s.cle));
@@ -45,6 +61,9 @@ export default function ChampsSpecifications({ specifications = [], valeurs = {}
     if (!nom || champs.some((c) => c.cle.toLowerCase() === nom.toLowerCase()
       || c.libelle.toLowerCase() === nom.toLowerCase())) return;
     onChange({ ...valeurs, [nom]: [] });
+    // Ouvert tout de suite : une option qu'on vient de nommer et qui
+    // apparaîtrait repliée donnerait l'impression de n'avoir rien ajouté.
+    ouvrir(nom);
     setNouveauNom('');
   };
 
@@ -56,13 +75,13 @@ export default function ChampsSpecifications({ specifications = [], valeurs = {}
         Tapez une valeur puis Entrée.
       </p>
 
-      {champs.map((s) => (
+      {champs.map((s) => (estOuvert(s) ? (
         <div className="form-field" key={s.cle}>
           <div className="specs-entete">
             <label className="form-label" htmlFor={`spec-${s.cle}`}>
               {s.libelle}{s.obligatoire && <span className="champ-requis"> *</span>}
             </label>
-            {s.ajoutee && (
+            {!s.obligatoire && (
               <button type="button" className="specs-retirer" onClick={() => retirer(s.cle)}>
                 Retirer
               </button>
@@ -71,7 +90,17 @@ export default function ChampsSpecifications({ specifications = [], valeurs = {}
           <Champ spec={s} valeur={valeurs[s.cle]} onChange={(v) => maj(s.cle, v)} />
           {erreurs[s.cle] && <span className="form-error">{erreurs[s.cle]}</span>}
         </div>
-      ))}
+      ) : (
+        <div className="specs-repli" key={s.cle}>
+          <div>
+            <span className="specs-repli-nom">{s.libelle}</span>
+            <span className="specs-repli-aide">{resume(s)}</span>
+          </div>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => ouvrir(s.cle)}>
+            + Ajouter
+          </button>
+        </div>
+      )))}
 
       <div className="specs-nouvelle">
         <input
@@ -88,6 +117,77 @@ export default function ChampsSpecifications({ specifications = [], valeurs = {}
   );
 }
 
+/** Une valeur absente, vide, ou une liste sans élément. */
+const estVide = (v) => v == null
+  || (typeof v === 'string' && !v.trim())
+  || (Array.isArray(v) && v.length === 0);
+
+/** Ce que le bloc replié annonce, pour qu'on sache s'il nous concerne. */
+function resume(spec) {
+  if (spec.type === 'couleurs') return 'Palette';
+  if (spec.options?.length) {
+    const debut = spec.options.slice(0, 3).join(' · ');
+    return spec.options.length > 3 ? `${debut}…` : debut;
+  }
+  return spec.aide || '';
+}
+
+/**
+ * Couleurs d'un produit : une pastille par teinte, autant qu'on veut.
+ *
+ * Le « + » ouvre le nuancier du système — celui du téléphone ou du
+ * navigateur, que le vendeur connaît déjà. Un nom est proposé d'après la
+ * teinte choisie, et il reste modifiable : c'est ce nom que le client lira.
+ */
+function Couleurs({ id, valeurs, onChange }) {
+  const [enCours, setEnCours] = useState('#0d1b3d');
+
+  const ajouter = (code) => {
+    if (dejaChoisie(valeurs, code)) return;
+    onChange([...valeurs, { code, nom: nomSuggere(code) || code }]);
+  };
+  const renommer = (i, nom) => onChange(valeurs.map((c, j) => (j === i ? { ...c, nom } : c)));
+  const enlever = (i) => onChange(valeurs.filter((_, j) => j !== i));
+
+  return (
+    <div className="couleurs">
+      {valeurs.map((c, i) => (
+        <span className="couleurs-puce" key={c.code || c.nom}>
+          <span
+            className="couleurs-pastille"
+            style={c.code ? { background: c.code } : undefined}
+            // Sans code, la teinte est inconnue : une pastille rayée le dit
+            // mieux qu'une pastille grise, qui passerait pour du gris.
+            data-sans-code={c.code ? undefined : 'true'}
+            aria-hidden="true"
+          />
+          <input
+            className="couleurs-nom" value={c.nom} maxLength={40}
+            aria-label={`Nom de la couleur ${i + 1}`}
+            onChange={(e) => renommer(i, e.target.value)}
+          />
+          <button
+            type="button" className="couleurs-retirer"
+            aria-label={`Retirer ${c.nom}`}
+            onClick={() => enlever(i)}
+          >
+            ×
+          </button>
+        </span>
+      ))}
+
+      <label className="couleurs-plus" title="Ajouter une couleur">
+        <span aria-hidden="true">+</span>
+        <input
+          id={id} type="color" value={enCours}
+          aria-label="Choisir une couleur à ajouter"
+          onChange={(e) => { setEnCours(e.target.value); ajouter(e.target.value); }}
+        />
+      </label>
+    </div>
+  );
+}
+
 /** Valeur stockée → tableau (une « liste » revient en texte « a, b »). */
 const enTableau = (v) => {
   if (Array.isArray(v)) return v;
@@ -98,6 +198,8 @@ const enTableau = (v) => {
 function Champ({ spec, valeur, onChange }) {
   const id = `spec-${spec.cle}`;
   switch (spec.type) {
+    case 'couleurs':
+      return <Couleurs id={id} valeurs={enCouleurs(valeur)} onChange={onChange} />;
     case 'variantes':
     case 'liste':
       return <Valeurs id={id} spec={spec} valeurs={enTableau(valeur)} onChange={onChange} />;
