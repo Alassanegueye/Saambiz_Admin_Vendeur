@@ -1,5 +1,5 @@
 import { formatMontant, formatDateTime } from '../../../utils/formatters';
-import { infoStatut, nomAcheteur, transitionsDepuis } from '../useCommandes';
+import { infoStatut, nomAcheteur, telephoneClient, transitionsDepuis } from '../useCommandes';
 
 /**
  * Contenu de la modale de détail : informations, lignes de la commande, et
@@ -9,8 +9,18 @@ import { infoStatut, nomAcheteur, transitionsDepuis } from '../useCommandes';
  * qu'il accepte sont proposées. Un statut terminal n'en a aucune, et le dit
  * plutôt que de laisser un bloc vide.
  */
-export default function DetailCommande({ commande, saving, onChangerStatut }) {
+export default function DetailCommande({
+  commande, saving, onChangerStatut, onRepondreAnnulation,
+}) {
   if (!commande) return null;
+
+  // L'acheteur ne peut plus annuler seul une commande déjà engagée : il la
+  // demande, et le vendeur tranche. L'application mobile le propose depuis
+  // toujours ; le web ne montrait pas même qu'une demande existait, si bien
+  // qu'un acheteur pouvait attendre indéfiniment une réponse.
+  const annulationEnAttente = Boolean(commande.annulationDemandeeLe)
+    && commande.statut !== 'annulee'
+    && !commande.annulationRefusMotif;
 
   return (
     <>
@@ -19,15 +29,32 @@ export default function DetailCommande({ commande, saving, onChangerStatut }) {
           <label>Client</label><span>{nomAcheteur(commande)}</span>
         </div>
         <div className="detail-item">
-          <label>Montant</label><span>{formatMontant(commande.montantTotal)}</span>
+          {/* Le téléphone du client : c'est par là qu'un vendeur confirme une
+              commande au Sénégal. Il était dans la réponse du serveur, et
+              nulle part à l'écran. */}
+          <label>Téléphone</label>
+          <span>
+            {telephoneClient(commande)
+              ? <a href={`tel:${telephoneClient(commande)}`}>{telephoneClient(commande)}</a>
+              : '—'}
+          </span>
         </div>
         <div className="detail-item">
-          <label>Acompte</label>
-          <span>{commande.montantAcompte ? formatMontant(commande.montantAcompte) : '—'}</span>
+          <label>Produits</label><span>{formatMontant(commande.montantProduits)}</span>
         </div>
         <div className="detail-item">
           <label>Livraison</label>
-          <span>{commande.modeLivraison === 'retrait' ? 'Retrait' : 'Livraison'}</span>
+          <span>
+            {commande.modeLivraison === 'retrait'
+              ? 'Retrait en boutique'
+              : formatMontant(commande.fraisLivraison || 0)}
+          </span>
+        </div>
+        <div className="detail-item">
+          {/* « Acompte » n'existe pas dans le modèle : ce champ affichait un
+              tiret pour toutes les commandes. Le total, lui, se lit enfin
+              avec son détail au-dessus. */}
+          <label>Total</label><span>{formatMontant(commande.montantTotal)}</span>
         </div>
         <div className="detail-item">
           <label>Adresse</label><span>{commande.adresseLivraison || '—'}</span>
@@ -53,6 +80,32 @@ export default function DetailCommande({ commande, saving, onChangerStatut }) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {annulationEnAttente && (
+        <div className="bloc-annulation">
+          <div className="form-label">Annulation demandée par le client</div>
+          <p className="form-hint">
+            {`Demandée le ${formatDateTime(commande.annulationDemandeeLe)}.`}
+            {commande.annulationMotif ? ` Motif : « ${commande.annulationMotif} »` : ' Aucun motif donné.'}
+          </p>
+          <div className="table-actions">
+            <button
+              className="btn btn-sm btn-danger"
+              disabled={saving}
+              onClick={() => onRepondreAnnulation(commande, { accepte: true })}
+            >
+              Accepter l’annulation
+            </button>
+            <button
+              className="btn btn-sm btn-secondary"
+              disabled={saving}
+              onClick={() => onRepondreAnnulation(commande, { accepte: false })}
+            >
+              Refuser
+            </button>
+          </div>
         </div>
       )}
 

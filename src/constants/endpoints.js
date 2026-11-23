@@ -78,6 +78,9 @@ export const ENDPOINTS = {
     LIST:    '/commandes/vendeur',
     DETAIL:  (id) => `/commandes/${id}`,
     STATUT:  (id) => `/commandes/${id}/statut`,
+    // L'acheteur demande l'annulation d'une commande déjà engagée ; le
+    // vendeur accepte ou refuse. PATCH, là où le POST est celui de l'acheteur.
+    DEMANDE_ANNULATION: (id) => `/commandes/${id}/demande-annulation`,
   },
 
   PROMOTIONS: {

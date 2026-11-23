@@ -67,6 +67,7 @@ export default function CommandesPage() {
           commande={c.detail}
           saving={c.saving}
           onChangerStatut={c.changerStatut}
+          onRepondreAnnulation={c.repondreAnnulation}
         />
       </Modal>
     </div>

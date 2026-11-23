@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { toast } from '../../utils/alert';
-import { getCommandes, changerStatutCommande } from '../../service/vendeur.service';
+import { toast, demanderTexte } from '../../utils/alert';
+import {
+  getCommandes, changerStatutCommande, repondreDemandeAnnulation,
+} from '../../service/vendeur.service';
 import useDebounce from '../../hooks/useDebounce';
 
 /**
@@ -48,6 +50,9 @@ export const nomAcheteur = (commande) => {
 export const telephoneClient = (commande) =>
   commande.client?.telephone
   || commande.acheteur?.telephone
+  // Le champ du modèle pour une commande passée sans compte, depuis le site
+  // de la boutique : c'est le seul numéro qu'on ait dans ce cas.
+  || commande.clientTelephone
   || commande.numeroTelephone
   || null;
 
@@ -117,6 +122,34 @@ export default function useCommandes() {
     }
   };
 
+  /**
+   * Accepter ou refuser l'annulation demandée par l'acheteur. Un refus se
+   * motive : c'est ce que le client lira, et le serveur garde ce motif.
+   */
+  const repondreAnnulation = async (commande, { accepte }) => {
+    let motif;
+    if (!accepte) {
+      motif = await demanderTexte({
+        titre: 'Refuser l’annulation',
+        message: 'Expliquez au client pourquoi la commande ne peut plus être annulée.',
+        placeholder: 'Ex. la commande est déjà partie en livraison.',
+      });
+      // Boîte fermée : on ne refuse rien sans que le vendeur l'ait voulu.
+      if (motif === null) return;
+    }
+    setSaving(true);
+    try {
+      await repondreDemandeAnnulation(commande.id, { accepte, motif });
+      toast.success(accepte ? 'Annulation acceptée' : 'Annulation refusée');
+      setDetail(null);
+      await charger();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Réponse impossible pour le moment');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const enAttente = commandes.filter((c) => c.statut === 'en_attente').length;
   const compteurs = Object.fromEntries(
     FILTRES_COMMANDES.map((f) => [f.valeur, commandes.filter((c) => correspond(c, f.valeur)).length]),
@@ -127,6 +160,6 @@ export default function useCommandes() {
     pageCourante, page, totalPages, setPage,
     search, rechercher, rechercheDifferee,
     filtreStatut, filtrerParStatut, compteurs,
-    detail, setDetail, saving, changerStatut,
+    detail, setDetail, saving, changerStatut, repondreAnnulation,
   };
 }

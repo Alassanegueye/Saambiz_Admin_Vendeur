@@ -94,6 +94,37 @@ export const showConfirm = ({
     showCloseButton: true,
   }).then((r) => r.isConfirmed);
 
+/**
+ * Modale qui demande une phrase : résout le texte saisi, ou `null` si le
+ * vendeur ferme sans répondre. Distinguer les deux compte — fermer la boîte
+ * ne doit pas valoir « refuser sans motif ».
+ */
+export const demanderTexte = ({
+  titre = 'Précisez',
+  message,
+  placeholder = '',
+  confirmText = 'Valider',
+  cancelText = 'Annuler',
+  obligatoire = true,
+}) =>
+  Swal.fire({
+    ...BASE,
+    icon: 'question',
+    title: titre,
+    text: message,
+    input: 'textarea',
+    inputPlaceholder: placeholder,
+    inputAttributes: { maxlength: 500 },
+    showCancelButton: true,
+    confirmButtonText: confirmText,
+    cancelButtonText: cancelText,
+    confirmButtonColor: COULEURS.confirm,
+    showCloseButton: true,
+    inputValidator: (valeur) => (obligatoire && !String(valeur || '').trim()
+      ? 'Écrivez quelques mots : c’est ce que votre client lira.'
+      : undefined),
+  }).then((r) => (r.isConfirmed ? String(r.value || '').trim() : null));
+
 /** Compatibilité avec l'API de react-toastify utilisée dans les écrans. */
 export const toast = {
   success: (m, options) => showSuccess(m, undefined, options),

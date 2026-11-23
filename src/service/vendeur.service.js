@@ -172,6 +172,13 @@ export const getCommande       = (id) => api.get(COMMANDES_VENDEUR.DETAIL(id));
 export const changerStatutCommande = (id, statut) =>
   api.patch(COMMANDES_VENDEUR.STATUT(id), { statut });
 
+/**
+ * Répondre à une demande d'annulation de l'acheteur. Le motif n'est utile
+ * qu'au refus : c'est lui que l'acheteur lira pour comprendre.
+ */
+export const repondreDemandeAnnulation = (id, { accepte, motif }) =>
+  api.patch(COMMANDES_VENDEUR.DEMANDE_ANNULATION(id), { accepte, motif });
+
 // ── Promotions ──────────────────────────────────────────────────────────────
 export const getPromotions      = () => api.get(PROMOTIONS.LIST);
 export const creerPromotion     = (payload) => api.post(PROMOTIONS.CREATE, payload);
