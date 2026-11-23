@@ -210,6 +210,21 @@ export default function TopNav({ items = [] }) {
                 <Icone><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></Icone>
                 Abonnement
               </NavLink>
+              {/* Trois rubriques portées depuis l'application mobile, où le
+                  vendeur les avait déjà : ses alertes, ses clients abonnés,
+                  et de quoi joindre SaamBiz quand il est bloqué. */}
+              <NavLink to={ROUTES.NOTIFICATIONS} className="tn-menu-lien" role="menuitem">
+                <Icone><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></Icone>
+                Notifications
+              </NavLink>
+              <NavLink to={ROUTES.ABONNES} className="tn-menu-lien" role="menuitem">
+                <Icone><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /></Icone>
+                Abonnés
+              </NavLink>
+              <NavLink to={ROUTES.AIDE} className="tn-menu-lien" role="menuitem">
+                <Icone><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></Icone>
+                Aide
+              </NavLink>
               <button type="button" className="tn-menu-lien danger" onClick={logout} role="menuitem">
                 <Icone><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></Icone>
                 Déconnexion
@@ -266,6 +281,24 @@ export default function TopNav({ items = [] }) {
                      className={() => `tn-tiroir-lien${pathname === ROUTES.PROFIL ? ' actif' : ''}`}>
               <Icone><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></Icone>
               Mon profil
+            </NavLink>
+            {/* Les trois rubriques venues du mobile figurent ici aussi : le
+                tiroir est la seule navigation sur petit écran, un écran qui
+                n'y est pas est inatteignable. */}
+            <NavLink to={ROUTES.NOTIFICATIONS}
+                     className={() => `tn-tiroir-lien${pathname === ROUTES.NOTIFICATIONS ? ' actif' : ''}`}>
+              <Icone><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></Icone>
+              Notifications
+            </NavLink>
+            <NavLink to={ROUTES.ABONNES}
+                     className={() => `tn-tiroir-lien${pathname === ROUTES.ABONNES ? ' actif' : ''}`}>
+              <Icone><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /></Icone>
+              Abonnés
+            </NavLink>
+            <NavLink to={ROUTES.AIDE}
+                     className={() => `tn-tiroir-lien${pathname === ROUTES.AIDE ? ' actif' : ''}`}>
+              <Icone><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></Icone>
+              Aide
             </NavLink>
           </div>
         </div>

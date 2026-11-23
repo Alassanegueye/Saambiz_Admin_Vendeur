@@ -72,6 +72,11 @@ const ITEMS = [
 const HORS_BARRE = {
   [ROUTES.MESSAGES]: 'Messages',
   [ROUTES.ABONNEMENT]: 'Abonnement',
+  // Portées depuis l'application mobile. Sans leur titre ici, l'écran de
+  // transition changerait de page sans dire laquelle.
+  [ROUTES.NOTIFICATIONS]: 'Notifications',
+  [ROUTES.ABONNES]: 'Abonnés',
+  [ROUTES.AIDE]: 'Aide',
 };
 
 /** Nom affiché sous le logo pendant le changement de page. */
