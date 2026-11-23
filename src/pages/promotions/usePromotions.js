@@ -86,7 +86,9 @@ export default function usePromotions() {
       prixPromo: promo.prixPromo ?? '',
       dateDebut: versInputDate(promo.dateDebut),
       dateFin: versInputDate(promo.dateFin),
-      produitId: promo.produitId || promo.produit?.id || '',
+      // `Produit` avec une majuscule : l'association du backend n'a pas
+      // d'alias, Sequelize la nomme d'après le modèle.
+      produitId: promo.produitId || promo.Produit?.id || promo.produit?.id || '',
     });
     setErreurs({});
     setEdition(promo);

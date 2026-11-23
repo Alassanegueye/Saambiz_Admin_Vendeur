@@ -54,10 +54,17 @@ export const BOUTIQUE_DEMO = {
 
 export const DASHBOARD_DEMO = {
   boutique: BOUTIQUE_DEMO,
+  // Les champs du modèle `abonnement` du backend : type, dateDebut, dateFin,
+  // statut, montant. Sans `statut`, la page Abonnement concluait « Expiré »
+  // sur une formule pourtant en cours — le mode démo montrait un écran que
+  // le vendeur ne verra jamais ainsi.
   abonnement: {
     actif: true,
     formule: 'Premium',
+    type: 'mensuel',
+    statut: 'actif',
     montant: 3000,
+    dateDebut: (() => { const d = new Date(); d.setDate(d.getDate() - 12); return d.toISOString(); })(),
     dateFin: (() => { const d = new Date(); d.setDate(d.getDate() + 18); return d.toISOString(); })(),
     joursRestants: 18,
   },
@@ -136,14 +143,21 @@ export const COMMANDES_DEMO = [
 ];
 
 export const PROMOTIONS_DEMO = [
+  // Les champs du modèle `promotion` : prixPromo et produitId, et le produit
+  // inclus sous « Produit » — avec la majuscule, comme Sequelize le nomme
+  // faute d'alias sur l'association. Le jeu de démonstration portait un
+  // `pourcentage` qui n'existe nulle part côté serveur.
   { id: 'promo-1', titre: 'Tabaski −20 %', description: 'Sur tout le bazin brodé.',
-    pourcentage: 20, active: true, dateDebut: ilYA(5),
+    prixPromo: 36000, produitId: 'p1', Produit: { id: 'p1', nom: 'Ensemble bazin brodé', prix: 45000 },
+    active: true, dateDebut: ilYA(5),
     dateFin: (() => { const d = new Date(); d.setDate(d.getDate() + 9); return d.toISOString(); })() },
   { id: 'promo-2', titre: 'Nouvelle collection', description: 'Wax et pagne tissé, −10 %.',
-    pourcentage: 10, active: true, dateDebut: ilYA(2),
+    prixPromo: 25200, produitId: 'p2', Produit: { id: 'p2', nom: 'Robe wax cintrée', prix: 28000 },
+    active: true, dateDebut: ilYA(2),
     dateFin: (() => { const d = new Date(); d.setDate(d.getDate() + 21); return d.toISOString(); })() },
-  { id: 'promo-3', titre: 'Déstockage lin', description: 'Terminée.',
-    pourcentage: 30, active: false, dateDebut: ilYA(40), dateFin: ilYA(12) },
+  { id: 'promo-3', titre: 'Déstockage lin', description: 'Fin de série sur la chemise en lin.',
+    prixPromo: 14800, produitId: 'p3', Produit: { id: 'p3', nom: 'Chemise lin homme', prix: 18500 },
+    active: false, dateDebut: ilYA(40), dateFin: ilYA(12) },
 ];
 
 export const CONVERSATIONS_DEMO = [

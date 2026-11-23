@@ -27,7 +27,12 @@ export default function TablePromotions({ promotions, onModifier, onSupprimer })
           ) : promotions.map((p) => (
             <tr key={p.id}>
               <td className="td-bold">{p.titre}</td>
-              <td className="td-muted">{p.produit?.nom || '—'}</td>
+              {/* L'association n'a pas d'alias côté backend
+                  (`Promotion.belongsTo(Produit, { foreignKey: 'produitId' })`) :
+                  Sequelize nomme donc l'objet inclus d'après le modèle,
+                  « Produit » avec une majuscule. En ne lisant que `produit`,
+                  la colonne restait vide pour toutes les promotions. */}
+              <td className="td-muted">{p.Produit?.nom || p.produit?.nom || '—'}</td>
               <td>{formatMontant(p.prixPromo)}</td>
               <td className="td-muted">
                 {formatDate(p.dateDebut)} → {formatDate(p.dateFin)}
