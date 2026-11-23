@@ -94,6 +94,9 @@ export default function ProduitsPage() {
           setImage={p.setImage}
           setImages={p.setImages}
           estModification={Boolean(p.edition?.id)}
+          produit={p.edition}
+          onSupprimerImage={p.supprimerImage}
+          suppressionImageId={p.suppressionImageId}
         />
       </Modal>
 

@@ -8,6 +8,7 @@ import {
   supprimerProduit,
   dupliquerProduit,
   basculerDisponibilite,
+  supprimerImageProduit,
   MAX_IMAGES_SUPPLEMENTAIRES,
   TAILLE_MAX_IMAGE,
 } from '../../service/vendeur.service';
@@ -64,6 +65,7 @@ export default function useProduits() {
   const filtre = TESTS[params.get('filtre')] ? params.get('filtre') : '';
 
   const [produits, setProduits] = useState([]);
+  const [suppressionImageId, setSuppressionImageId] = useState(null);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -270,6 +272,26 @@ export default function useProduits() {
     }
   };
 
+  /**
+   * Retirer une photo supplémentaire du produit en cours de modification.
+   * La fiche ouverte est mise à jour sans refermer la modale : le vendeur
+   * voit disparaître la photo qu'il vient de retirer.
+   */
+  const supprimerImage = async (img) => {
+    if (!edition?.id) return;
+    setSuppressionImageId(img.id);
+    try {
+      await supprimerImageProduit(edition.id, img.id);
+      setEdition((p) => (p ? { ...p, images: (p.images || []).filter((i) => i.id !== img.id) } : p));
+      await charger();
+      toast.success('Photo retirée');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Photo non retirée. Réessayez.');
+    } finally {
+      setSuppressionImageId(null);
+    }
+  };
+
   const confirmerSuppression = async () => {
     if (!suppression) return;
     try {
@@ -296,6 +318,7 @@ export default function useProduits() {
 
     // Actions
     basculer, dupliquer,
+    supprimerImage, suppressionImageId,
     suppression, setSuppression, confirmerSuppression,
   };
 }

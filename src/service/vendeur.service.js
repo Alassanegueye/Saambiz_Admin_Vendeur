@@ -55,6 +55,14 @@ function toFormData(valeurs, fichiers = {}) {
   return form;
 }
 
+/**
+ * Retire une photo supplémentaire. L'adresse existait côté API et dans
+ * l'application mobile ; le web n'avait aucun moyen d'en enlever une, si bien
+ * qu'une photo ratée restait sur la fiche pour toujours.
+ */
+export const supprimerImageProduit = (id, imageId) =>
+  api.delete(VENDEUR.IMAGE(id, imageId));
+
 /** Ajoute des photos à un produit existant. Les envoie toutes en une requête. */
 export const envoyerImagesProduit = (id, images = []) => {
   const form = new FormData();

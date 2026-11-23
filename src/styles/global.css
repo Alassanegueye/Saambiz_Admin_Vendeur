@@ -1825,3 +1825,40 @@ img, svg, video, canvas { max-width: 100%; }
 }
 
 .bloc-annulation .form-hint { margin: 2px 0 10px; }
+
+/* ── Photos d'un produit dans le formulaire ──────────────────────────────
+   La photo actuelle et les photos supplémentaires, pour que le vendeur voie
+   ce qu'il garde et puisse en retirer une. */
+.apercu-photo {
+  display: block;
+  width: 84px;
+  height: 84px;
+  margin-top: 8px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+}
+
+.photos-existantes {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.photos-existantes li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.photos-existantes img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+}

@@ -38,6 +38,7 @@ export const ENDPOINTS = {
     DISPONIBILITE:    (id) => `/vendeur/produit/${id}/disponibilite`,
     DUPLIQUER:        (id) => `/vendeur/produit/${id}/dupliquer`,
     IMAGES:           (id) => `/vendeur/produit/${id}/images`,
+    IMAGE:            (id, imageId) => `/vendeur/produit/${id}/images/${imageId}`,
 
     // Boutique
     MA_BOUTIQUE:      '/vendeur/ma-boutique',
