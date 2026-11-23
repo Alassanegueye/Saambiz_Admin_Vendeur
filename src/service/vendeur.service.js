@@ -206,6 +206,17 @@ export const envoyerMessage = (destinataireId, contenu) =>
 
 export const marquerMessageLu = (id) => api.put(ENDPOINTS.MESSAGES.LU(id));
 
+/**
+ * Le nombre de messages non lus, les deux sources confondues.
+ *
+ * L'API additionne les messages reçus dans l'application et ceux laissés sur
+ * le site de la boutique — `{ nonLus, messages, site }` — et son propre
+ * commentaire dit que `nonLus` est « le total : c'est lui qu'affiche la
+ * pastille ». Compter nous-mêmes à partir de la liste des messages du site
+ * revenait à ignorer la moitié de la question posée au vendeur.
+ */
+export const getNombreMessagesNonLus = () => api.get(ENDPOINTS.MESSAGES.NON_LUS);
+
 // ── Messages reçus via la page Contact du site ──────────────────────────────
 export const getMessagesSite = () => api.get(VENDEUR.MESSAGES_SITE);
 export const marquerMessageSiteLu = (id) => api.put(VENDEUR.MESSAGE_SITE_LU(id));
