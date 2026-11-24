@@ -46,6 +46,14 @@ const ITEMS = [
     label: 'Ma boutique',
     icon: <><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M9 21v-6h6v6"/></>,
   },
+  {
+    // Les clients qui suivent la boutique : ceux qu'on prévient d'une
+    // nouveauté ou d'une promotion.
+    code: 'ABONNES',
+    to: ROUTES.ABONNES,
+    label: 'Abonnés',
+    icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>,
+  },
 ];
 
 /**
@@ -66,7 +74,6 @@ const HORS_BARRE = {
   // Portées depuis l'application mobile. Sans leur titre ici, l'écran de
   // transition changerait de page sans dire laquelle.
   [ROUTES.NOTIFICATIONS]: 'Notifications',
-  [ROUTES.ABONNES]: 'Abonnés',
   [ROUTES.AIDE]: 'Aide',
 };
 

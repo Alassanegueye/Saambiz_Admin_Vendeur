@@ -18,6 +18,7 @@ export const GROUPES = [
   { codes: ['COMMANDES'] },
   { codes: ['PROMOTIONS'] },
   { codes: ['BOUTIQUE'] },
+  { codes: ['ABONNES'] },
   { codes: ['MESSAGES'] },
   { codes: ['ABONNEMENT'] },
 ];
@@ -31,6 +32,7 @@ export const AIDES = {
   COMMANDES: 'Les commandes de vos clients, à préparer et livrer',
   PROMOTIONS: 'Réductions sur vos produits',
   BOUTIQUE: 'Votre site web, ses produits et les infos de votre boutique',
+  ABONNES: 'Les clients qui suivent votre boutique',
 };
 
 /**

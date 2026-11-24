@@ -17,6 +17,11 @@ import { formatDate, formatDateTime } from '../../utils/formatters';
  * d'une nouveauté, et ceux à qui une promotion est envoyée.
  */
 
+// L'API répond { success, message, data } : les abonnés sont sous `data`.
+// La page lisait `res.data.abonnes`, toujours vide — d'où une liste qui
+// restait à « Personne ne suit encore votre boutique ».
+const corps = (res) => res?.data?.data ?? res?.data ?? {};
+
 const nomComplet = (a) => `${a.prenom || ''} ${a.nom || ''}`.trim() || a.email || 'Client';
 
 function FicheAbonne({ id, nom, onFerme }) {
@@ -25,7 +30,7 @@ function FicheAbonne({ id, nom, onFerme }) {
   useEffect(() => {
     let vivant = true;
     getAbonne(id)
-      .then((res) => { if (vivant) setFiche(res.data || {}); })
+      .then((res) => { if (vivant) setFiche(corps(res)); })
       .catch(() => {
         if (!vivant) return;
         setFiche({});
@@ -76,11 +81,12 @@ function FicheAbonne({ id, nom, onFerme }) {
 
 export default function AbonnesPage() {
   const fetcher = useCallback(async () => {
-    const res = await getAbonnes();
+    const d = corps(await getAbonnes());
+    const abonnes = Array.isArray(d.abonnes) ? d.abonnes : [];
     return {
-      abonnes: res.data?.abonnes || [],
-      total: res.data?.total ?? 0,
-      avecCloche: res.data?.avecCloche ?? 0,
+      abonnes,
+      total: d.total ?? abonnes.length,
+      avecCloche: d.avecCloche ?? abonnes.filter((a) => a.clocheActive).length,
     };
   }, []);
 

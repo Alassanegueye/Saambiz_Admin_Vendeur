@@ -210,16 +210,12 @@ export default function TopNav({ items = [] }) {
                 <Icone><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></Icone>
                 Abonnement
               </NavLink>
-              {/* Trois rubriques portées depuis l'application mobile, où le
-                  vendeur les avait déjà : ses alertes, ses clients abonnés,
-                  et de quoi joindre SaamBiz quand il est bloqué. */}
+              {/* Deux rubriques portées depuis l'application mobile : ses
+                  alertes, et de quoi joindre SaamBiz quand il est bloqué.
+                  Les abonnés ont leur onglet dans la barre. */}
               <NavLink to={ROUTES.NOTIFICATIONS} className="tn-menu-lien" role="menuitem">
                 <Icone><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></Icone>
                 Notifications
-              </NavLink>
-              <NavLink to={ROUTES.ABONNES} className="tn-menu-lien" role="menuitem">
-                <Icone><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /></Icone>
-                Abonnés
               </NavLink>
               <NavLink to={ROUTES.AIDE} className="tn-menu-lien" role="menuitem">
                 <Icone><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></Icone>
@@ -289,11 +285,6 @@ export default function TopNav({ items = [] }) {
                      className={() => `tn-tiroir-lien${pathname === ROUTES.NOTIFICATIONS ? ' actif' : ''}`}>
               <Icone><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></Icone>
               Notifications
-            </NavLink>
-            <NavLink to={ROUTES.ABONNES}
-                     className={() => `tn-tiroir-lien${pathname === ROUTES.ABONNES ? ' actif' : ''}`}>
-              <Icone><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /></Icone>
-              Abonnés
             </NavLink>
             <NavLink to={ROUTES.AIDE}
                      className={() => `tn-tiroir-lien${pathname === ROUTES.AIDE ? ' actif' : ''}`}>
