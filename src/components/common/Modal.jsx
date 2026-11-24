@@ -14,7 +14,12 @@ const Modal = memo(function Modal({
 }) {
   useEffect(() => {
     if (!isOpen) return undefined;
-    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    // Une confirmation ouverte par-dessus (SweetAlert) traite sa propre touche
+    // Échap : sans cette garde, la même touche fermait aussi la fenêtre du
+    // dessous, et avec elle la saisie que la confirmation protégeait.
+    const confirmationOuverte = () => document.body.classList.contains('swal2-shown')
+      && !document.body.classList.contains('swal2-toast-shown');
+    const handler = (e) => { if (e.key === 'Escape' && !confirmationOuverte()) onClose(); };
     document.addEventListener('keydown', handler);
     const precedent = document.body.style.overflow;
     document.body.style.overflow = 'hidden';

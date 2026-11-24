@@ -47,6 +47,56 @@ let promotions = [...PROMOTIONS_DEMO];
 let commandes = [...COMMANDES_DEMO];
 let boutique = { ...BOUTIQUE_DEMO };
 
+// Le site de la boutique, réglé comme celui d'un vendeur qui l'a déjà
+// publié. « Supprimer mon site » le remet à zéro : on voit alors l'écran
+// d'un site jamais publié.
+const SITE_VIERGE = {
+  slug: BOUTIQUE_DEMO.slug, active: false, configuree: false, modele: 'classique', accent: '#0D1B3D',
+  apropos: '', annonce: '', horaires: '', reseaux: {},
+  sections: { apropos: true, categories: true, avis: true, contact: true, nouveautes: true, meilleures: true },
+  commande: true, paiementLivraison: true, vues: 0, sectionsPerso: [], blocs: { icones: {}, avantages: [] },
+  photos: [], photosMax: 10,
+};
+let site = {
+  ...SITE_VIERGE,
+  active: true,
+  configuree: true,
+  modele: 'galerie',
+  apropos: 'Atelier de couture à Sacré-Cœur depuis 2015 : prêt-à-porter et sur-mesure en wax, bazin et lin.',
+  horaires: 'Lundi à samedi, 9h — 20h',
+  reseaux: { instagram: 'https://instagram.com/sanse.couture' },
+  vues: 1240,
+  sectionsPerso: [
+    { id: 'snouveautes', titre: 'Nouveautés', produitIds: ['p5', 'p6', 'p2'] },
+    { id: 'spromos', titre: 'Promotions', produitIds: [] },
+  ],
+  blocs: { icones: {}, avantages: [{ icone: 'livraison', titre: 'Livraison rapide', texte: 'Partout au Sénégal' }] },
+};
+
+/** Même forme que GET /vendeur/ma-vitrine : `{ data: { vitrine, boutique, nombreProduits } }`. */
+const reponseSite = () => ({
+  data: {
+    vitrine: { ...site, url: `https://saambiz.com/b/${site.slug}` },
+    boutique: {
+      nom: boutique.nom, slogan: boutique.slogan, logo: boutique.logo, banniere: boutique.banniere,
+      ville: boutique.ville, telephone: boutique.telephone, whatsapp: boutique.whatsapp,
+    },
+    nombreProduits: produits.filter((p) => (p.statut || 'approuve') === 'approuve').length,
+    modelesDisponibles: ['classique', 'galerie', 'catalogue'],
+  },
+});
+
+/** Les catégories de la boutique telles que l'API les rend, à partir des valeurs du formulaire. */
+const categoriesDe = (valeur) => {
+  let liste = valeur;
+  try { liste = typeof valeur === 'string' ? JSON.parse(valeur) : valeur; } catch { liste = [valeur]; }
+  return (Array.isArray(liste) ? liste : [])
+    .map((v) => CATEGORIES_DEMO.find((c) => [c.id, c.slug, c.nom].includes(v)))
+    .filter(Boolean);
+};
+
+const erreurDemo = (status, message) => Object.assign(new Error(message), { status, message });
+
 const nouvelId = () => `demo-${Math.random().toString(36).slice(2, 9)}`;
 
 /** Lit un FormData ou un corps JSON indifféremment. */
@@ -128,19 +178,92 @@ const ROUTES = [
   }],
 
   // ── Boutique ──
-  ['GET', /\/vendeur\/ma-boutique$/, () => ({ boutique })],
+  // Avec ses produits et ses catégories, comme l'API : la page en déduit la
+  // pause (aucun produit disponible) et affiche les catégories.
+  ['GET', /\/vendeur\/ma-boutique$/, () => ({
+    boutique: { ...boutique, produits, categories: boutique.categories || categoriesDe([CATEGORIES_DEMO[0].id]) },
+  })],
   ['PUT', /\/vendeur\/modifier-boutique$/, (c) => {
-    boutique = { ...boutique, ...corps(c) };
+    const { categories, logo, ...champs } = corps(c);
+    boutique = { ...boutique, ...champs };
+    if (categories) boutique.categories = categoriesDe(categories);
+    // Le logo choisi s'affiche le temps de la session.
+    if (logo instanceof Blob) boutique.logo = URL.createObjectURL(logo);
     return { message: 'Boutique mise à jour', boutique };
   }],
-  ['PUT', /\/vendeur\/boutique\/pause$/, () => { boutique = { ...boutique, statut: 'inactif' }; return { message: 'Boutique en pause' }; }],
-  ['PUT', /\/vendeur\/boutique\/reactiver$/, () => { boutique = { ...boutique, statut: 'actif' }; return { message: 'Boutique réactivée' }; }],
+  ['POST', /\/vendeur\/creer-boutique$/, (c) => {
+    const { categories, ...champs } = corps(c);
+    boutique = { ...BOUTIQUE_DEMO, ...champs, categories: categoriesDe(categories) };
+    return { message: 'Boutique créée', boutique };
+  }],
+  // PATCH, comme l'API : la pause rend tous les produits indisponibles, la
+  // réactivation les rend tous disponibles.
+  ['PATCH', /\/vendeur\/boutique\/pause$/, () => {
+    produits = produits.map((p) => ({ ...p, disponible: false }));
+    return { message: 'Boutique mise en pause' };
+  }],
+  ['PATCH', /\/vendeur\/boutique\/reactiver$/, () => {
+    produits = produits.map((p) => ({ ...p, disponible: true }));
+    return { message: 'Boutique réactivée' };
+  }],
+
+  // ── Le site de la boutique ──
+  ['GET', /\/vendeur\/ma-vitrine$/, reponseSite],
+  ['GET', /\/vendeur\/ma-vitrine\/apercu$/, () => ({
+    data: { boutique: { ...boutique }, catalogue: produits.filter((p) => (p.statut || 'approuve') === 'approuve') },
+  })],
+  ['PUT', /\/vendeur\/ma-vitrine$/, (c) => {
+    const v = corps(c);
+    if (v.slug !== undefined && !/^[a-z0-9](?:[a-z0-9-]{1,58}[a-z0-9])$/.test(v.slug)) {
+      throw erreurDemo(400, "L'adresse doit faire entre 3 et 60 caractères : lettres sans accent, chiffres et tirets.");
+    }
+    site = { ...site, ...v };
+    if (v.active && !site.configuree) site.configuree = true;
+    return reponseSite();
+  }],
+  ['DELETE', /\/vendeur\/ma-vitrine$/, () => { site = { ...SITE_VIERGE }; return reponseSite(); }],
+  ['POST', /\/vendeur\/ma-vitrine\/photos$/, (c) => {
+    const fichiers = c.data instanceof FormData ? c.data.getAll('photos') : [];
+    const nouvelles = fichiers.map((f) => ({ id: nouvelId(), url: URL.createObjectURL(f) }));
+    site = { ...site, photos: [...site.photos, ...nouvelles].slice(0, site.photosMax) };
+    return { ...reponseSite(), message: nouvelles.length > 1 ? `${nouvelles.length} photos ajoutées à votre site.` : 'Photo ajoutée à votre site.' };
+  }],
+  ['PUT', /\/vendeur\/ma-vitrine\/photos\/ordre$/, (c) => {
+    const { ids = [] } = corps(c);
+    const parId = new Map(site.photos.map((p) => [p.id, p]));
+    const enTete = ids.map((id) => parId.get(id)).filter(Boolean);
+    site = { ...site, photos: [...enTete, ...site.photos.filter((p) => !enTete.includes(p))] };
+    return reponseSite();
+  }],
+  ['DELETE', /\/vendeur\/ma-vitrine\/photos\/[^/]+$/, (c) => {
+    const id = (c.url || '').split('/').pop();
+    site = { ...site, photos: site.photos.filter((p) => p.id !== id) };
+    return reponseSite();
+  }],
   ['GET', /\/vendeur\/statut-verification$/, () => ({ verification: VERIFICATION_DEMO })],
   ['POST',/\/vendeur\/soumettre-verification$/, () => ({ message: 'Pièce transmise', verification: { ...VERIFICATION_DEMO, statutValidation: 'en_attente' } })],
 
   // ── Commandes ──
   ['GET', /\/commandes\/vendeur$/, () => ({ commandes })],
-  ['PUT', /\/commandes\/.+\/statut$/, (c) => {
+  // Commande saisie par le vendeur : enregistrée confirmée, comme le serveur.
+  ['POST', /\/commandes\/vendeur$/, (c) => {
+    const { client, items } = corps(c);
+    const lignes = items.map((i) => {
+      const p = produits.find((x) => x.id === i.produitId) || {};
+      return { produit: { nom: p.nom }, quantite: i.quantite, prix: p.prix || 0, options: i.options || null };
+    });
+    const montantTotal = lignes.reduce((s, l) => s + l.prix * l.quantite, 0);
+    const reference = `#${1025 + commandes.length - 5}`;
+    const commande = {
+      id: `cmd-${Date.now()}`, reference, statut: 'confirmee', statutPaiement: 'en_attente',
+      montantTotal, acompte: 0, createdAt: new Date().toISOString(), origine: 'dashboard',
+      client: { prenom: client.prenom, nom: client.nom, telephone: client.telephone }, lignes,
+    };
+    commandes = [commande, ...commandes];
+    return { commande };
+  }],
+  // Le service passe le statut en PATCH (voir changerStatutCommande).
+  ['PATCH', /\/commandes\/.+\/statut$/, (c) => {
     const id = c.url.split('/')[2];
     const { statut } = corps(c);
     commandes = commandes.map((o) => (o.id === id ? { ...o, statut } : o));
@@ -250,9 +373,16 @@ export function adaptateurDemo(config) {
       try {
         donnees = route[2](config);
       } catch (erreur) {
+        // Une erreur prévue (erreurDemo) garde son statut et son message,
+        // écrit pour le vendeur ; une autre est une panne de la démo.
+        const prevue = Boolean(erreur.status);
         reject(Object.assign(erreur, {
           config,
-          response: { status: 500, data: { message: '[démo] ' + erreur.message }, config },
+          response: {
+            status: erreur.status || 500,
+            data: { message: prevue ? erreur.message : '[démo] ' + erreur.message },
+            config,
+          },
         }));
         return;
       }

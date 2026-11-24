@@ -1,8 +1,13 @@
 /**
- * Rubriques de l'espace vendeur, rangées comme celles de l'administration :
- * les pages d'un même sujet vivent derrière un menu dépliant, avec une
- * phrase d'aide sous chaque page pour qu'un vendeur sache où cliquer sans
- * avoir à deviner.
+ * Rubriques de l'espace vendeur, dans l'ordre de la barre.
+ *
+ * Chaque page a désormais son propre onglet : Commandes et Promotions ne
+ * sont plus rangées derrière un menu « Ventes », et « Ma boutique » est une
+ * seule page (le site, ses produits et les infos de la boutique). Un vendeur
+ * voit tout d'un coup d'œil, sans menu à ouvrir pour trouver où cliquer.
+ *
+ * Le regroupement reste possible : une entrée avec `label` et plusieurs
+ * `codes` redevient un menu dépliant (voir construireNavigation).
  *
  * Module séparé du composant : un fichier qui exporte à la fois un
  * composant et des constantes désactive le Fast Refresh de Vite.
@@ -10,19 +15,22 @@
 export const GROUPES = [
   { codes: ['ACCUEIL'] },
   { codes: ['PRODUITS'] },
-  { label: 'Ventes', icone: 'COMMANDES', codes: ['COMMANDES', 'PROMOTIONS'] },
-  { label: 'Ma boutique', icone: 'BOUTIQUE', codes: ['BOUTIQUE', 'VITRINE', 'SECTIONS'] },
+  { codes: ['COMMANDES'] },
+  { codes: ['PROMOTIONS'] },
+  { codes: ['BOUTIQUE'] },
   { codes: ['MESSAGES'] },
   { codes: ['ABONNEMENT'] },
 ];
 
-/** Phrase d'aide sous chaque page dans les menus dépliants. */
+/**
+ * Phrase d'aide de chaque rubrique : sous la page dans un menu dépliant, en
+ * info-bulle sur un onglet de la barre.
+ */
 export const AIDES = {
+  PRODUITS: 'Ajouter, modifier et retirer vos produits',
   COMMANDES: 'Les commandes de vos clients, à préparer et livrer',
   PROMOTIONS: 'Réductions sur vos produits',
-  BOUTIQUE: 'Nom, logo, catégories et coordonnées',
-  VITRINE: 'Votre site web, à partager à vos clients',
-  SECTIONS: 'Les produits affichés dans chaque section de votre site',
+  BOUTIQUE: 'Votre site web, ses produits et les infos de votre boutique',
 };
 
 /**

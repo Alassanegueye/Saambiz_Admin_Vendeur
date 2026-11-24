@@ -24,7 +24,32 @@ const REFERENCES = [
   ['#2980b9', 'Bleu'], ['#0d1b3d', 'Bleu nuit'], ['#8e44ad', 'Violet'],
   ['#ff9ff3', 'Rose'], ['#795548', 'Marron'], ['#d2b48c', 'Beige'],
   ['#f5f0e1', 'Écru'], ['#b8860b', 'Doré'], ['#aaa9ad', 'Argenté'],
+  ['#7b1e2b', 'Bordeaux'], ['#5dade2', 'Bleu ciel'],
 ];
+
+/**
+ * Les pastilles proposées d'un clic dans le formulaire produit, dans l'ordre
+ * où un vendeur les cherche. Une teinte qui n'y est pas se choisit dans la
+ * grande palette, juste après.
+ */
+export const NUANCIER = [
+  ['#000000', 'Noir'], ['#ffffff', 'Blanc'], ['#808080', 'Gris'], ['#aaa9ad', 'Argenté'],
+  ['#c0392b', 'Rouge'], ['#7b1e2b', 'Bordeaux'], ['#ff9ff3', 'Rose'], ['#e67e22', 'Orange'],
+  ['#f1c40f', 'Jaune'], ['#b8860b', 'Doré'], ['#27ae60', 'Vert'], ['#145a32', 'Vert foncé'],
+  ['#5dade2', 'Bleu ciel'], ['#2980b9', 'Bleu'], ['#0d1b3d', 'Bleu nuit'], ['#8e44ad', 'Violet'],
+  ['#795548', 'Marron'], ['#d2b48c', 'Beige'], ['#f5f0e1', 'Écru'],
+].map(([code, nom]) => ({ code, nom }));
+
+/**
+ * La teinte d'une couleur connue seulement par son nom (« Bleu nuit ») :
+ * une catégorie dont les couleurs sont encore de simples variantes garde des
+ * noms, et la pastille se retrouve par le nom. `null` si le nom est inconnu.
+ */
+export function codeDuNom(nom) {
+  const n = String(nom || '').trim().toLowerCase();
+  const trouvee = REFERENCES.find(([, libelle]) => libelle.toLowerCase() === n);
+  return trouvee ? trouvee[0] : null;
+}
 
 /** `#f2b705` → { r, g, b }. */
 function versRvb(code) {

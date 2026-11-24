@@ -29,82 +29,75 @@ export default function EtapePhotos({ photos, max, occupe, onAjouter, onRetirer,
   };
 
   return (
-    <div className="card">
-      <div className="card-header">
-        <div>
-          <h3 className="card-title">Photos du haut de votre site</h3>
-          <p className="form-hint vitrine-sans-marge">
-            Elles défilent toutes seules, en boucle, en haut de votre page d'accueil.
-          </p>
-        </div>
+    <>
+      <p className="etape-site__intro">
+        Elles défilent toutes seules, en boucle, en haut de votre page d'accueil.
         <span className="vitrine-photos__compte">{photos.length} / {max}</span>
-      </div>
+      </p>
 
-      <div className="card-body">
-        {photos.length > 0 && (
-          <ol className="vitrine-photos" aria-label="Ordre de défilement">
-            {photos.map((p, i) => (
-              <li key={p.id} className="vitrine-photo">
-                <img src={vignette(p.url)} alt={`Photo ${i + 1}`} loading="lazy" />
-                <span className="vitrine-photo__rang">{i === 0 ? 'En premier' : i + 1}</span>
-                <div className="vitrine-photo__outils">
-                  <button type="button" className="vitrine-photo__bouton" onClick={() => onDeplacer(i, -1)}
-                    disabled={occupe || i === 0} aria-label={`Avancer la photo ${i + 1}`} title="Avancer">
-                    <ChevronLeft size={16} strokeWidth={2.4} aria-hidden="true" />
-                  </button>
-                  <button type="button" className="vitrine-photo__bouton" onClick={() => onDeplacer(i, 1)}
-                    disabled={occupe || i === photos.length - 1} aria-label={`Reculer la photo ${i + 1}`} title="Reculer">
-                    <ChevronRight size={16} strokeWidth={2.4} aria-hidden="true" />
-                  </button>
-                  <button type="button" className="vitrine-photo__bouton vitrine-photo__bouton--retirer"
-                    onClick={() => onRetirer(p)} disabled={occupe} aria-label={`Retirer la photo ${i + 1}`} title="Retirer">
-                    <X size={16} strokeWidth={2.4} aria-hidden="true" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
+      {photos.length > 0 && (
+        <ol className="vitrine-photos" aria-label="Ordre de défilement">
+          {photos.map((p, i) => (
+            <li key={p.id} className="vitrine-photo">
+              <img src={vignette(p.url)} alt={`Photo ${i + 1}`} loading="lazy" />
+              <span className="vitrine-photo__rang">{i === 0 ? 'En premier' : i + 1}</span>
+              <div className="vitrine-photo__outils">
+                <button type="button" className="vitrine-photo__bouton" onClick={() => onDeplacer(i, -1)}
+                  disabled={occupe || i === 0} aria-label={`Avancer la photo ${i + 1}`} title="Avancer">
+                  <ChevronLeft size={16} strokeWidth={2.4} aria-hidden="true" />
+                </button>
+                <button type="button" className="vitrine-photo__bouton" onClick={() => onDeplacer(i, 1)}
+                  disabled={occupe || i === photos.length - 1} aria-label={`Reculer la photo ${i + 1}`} title="Reculer">
+                  <ChevronRight size={16} strokeWidth={2.4} aria-hidden="true" />
+                </button>
+                <button type="button" className="vitrine-photo__bouton vitrine-photo__bouton--retirer"
+                  onClick={() => onRetirer(p)} disabled={occupe} aria-label={`Retirer la photo ${i + 1}`} title="Retirer">
+                  <X size={16} strokeWidth={2.4} aria-hidden="true" />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
 
-        <div
-          className={`vitrine-depot${survol ? ' est-survole' : ''}${plein ? ' est-plein' : ''}`}
-          onDragOver={(e) => { e.preventDefault(); if (!plein) setSurvol(true); }}
-          onDragLeave={() => setSurvol(false)}
-          onDrop={deposer}
-        >
-          <ImagePlus size={26} strokeWidth={1.8} aria-hidden="true" />
-          {plein ? (
+      <div
+        className={`vitrine-depot${survol ? ' est-survole' : ''}${plein ? ' est-plein' : ''}`}
+        onDragOver={(e) => { e.preventDefault(); if (!plein) setSurvol(true); }}
+        onDragLeave={() => setSurvol(false)}
+        onDrop={deposer}
+      >
+        <ImagePlus size={26} strokeWidth={1.8} aria-hidden="true" />
+        {plein ? (
+          <p>
+            <strong>{max} photos, c'est le maximum.</strong> Retirez-en une pour en ajouter une autre.
+          </p>
+        ) : (
+          <>
             <p>
-              <strong>{max} photos, c'est le maximum.</strong> Retirez-en une pour en ajouter une autre.
+              {photos.length
+                ? <><strong>Ajoutez d'autres photos</strong> : glissez-les ici, ou</>
+                : <><strong>Aucune photo pour l'instant</strong> : le haut de votre site prend votre couleur. Glissez des photos ici, ou</>}
             </p>
-          ) : (
-            <>
-              <p>
-                {photos.length
-                  ? <><strong>Ajoutez d'autres photos</strong> : glissez-les ici, ou</>
-                  : <><strong>Aucune photo pour l'instant</strong> : le haut de votre site prend vos couleurs. Glissez des photos ici, ou</>}
-              </p>
-              <button type="button" className="btn btn-primary" onClick={() => champ.current?.click()} disabled={occupe}>
-                {occupe ? 'Envoi en cours…' : 'Choisir des photos'}
-              </button>
-            </>
-          )}
-          <input
-            ref={champ}
-            type="file"
-            accept="image/jpeg,image/png"
-            multiple
-            hidden
-            onChange={(e) => { onAjouter(e.target.files); e.target.value = ''; }}
-          />
-        </div>
-
-        <p className="form-hint">
-          Des photos en largeur (paysage), JPEG ou PNG, 5 Mo au plus chacune : votre boutique,
-          vos produits mis en scène, votre équipe. Le texte se pose sur la gauche de la photo.
-          Elles sont enregistrées dès l'envoi, sans avoir à cliquer sur « Enregistrer ».
-        </p>
+            <button type="button" className="btn btn-primary" onClick={() => champ.current?.click()} disabled={occupe}>
+              {occupe ? 'Envoi en cours…' : 'Choisir des photos'}
+            </button>
+          </>
+        )}
+        <input
+          ref={champ}
+          type="file"
+          accept="image/jpeg,image/png"
+          multiple
+          hidden
+          onChange={(e) => { onAjouter(e.target.files); e.target.value = ''; }}
+        />
       </div>
-    </div>
+
+      <p className="form-hint">
+        Des photos en largeur (paysage), JPEG ou PNG, 5 Mo au plus chacune : votre boutique,
+        vos produits mis en scène, votre équipe. <strong>Elles sont enregistrées dès l'envoi</strong>,
+        sans avoir à cliquer sur « Enregistrer ».
+      </p>
+    </>
   );
 }

@@ -82,6 +82,8 @@ export const ENDPOINTS = {
 
   COMMANDES_VENDEUR: {
     LIST:    '/commandes/vendeur',
+    // Commande saisie par le vendeur (téléphone, WhatsApp, en boutique).
+    CREATE:  '/commandes/vendeur',
     DETAIL:  (id) => `/commandes/${id}`,
     STATUT:  (id) => `/commandes/${id}/statut`,
     // L'acheteur demande l'annulation d'une commande déjà engagée ; le

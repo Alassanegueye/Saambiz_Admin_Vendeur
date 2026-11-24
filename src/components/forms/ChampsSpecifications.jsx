@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { enCouleurs, nomSuggere, dejaChoisie } from './couleurs';
+import { useEffect, useRef, useState } from 'react';
+import { Check } from 'lucide-react';
+import { enCouleurs, nomSuggere, NUANCIER, codeDuNom } from './couleurs';
+import { optionsProposees, dansLOrdre } from './tailles';
 
 /**
  * Options et caractéristiques du produit, remplies par le vendeur lui-même.
@@ -16,8 +18,9 @@ import { enCouleurs, nomSuggere, dejaChoisie } from './couleurs';
  * @param {object}   valeurs         { cle: valeur }
  * @param {Function} onChange        reçoit le nouvel objet de valeurs
  * @param {object}   erreurs         { cle: message }
+ * @param {string}   categorie       slug de la catégorie (tailles proposées)
  */
-export default function ChampsSpecifications({ specifications = [], valeurs = {}, onChange, erreurs = {} }) {
+export default function ChampsSpecifications({ specifications = [], valeurs = {}, onChange, erreurs = {}, categorie }) {
   const [nouveauNom, setNouveauNom] = useState('');
   // Blocs que le vendeur a ouverts lui-même pendant cette saisie.
   const [ouverts, setOuverts] = useState(() => new Set());
@@ -87,14 +90,14 @@ export default function ChampsSpecifications({ specifications = [], valeurs = {}
               </button>
             )}
           </div>
-          <Champ spec={s} valeur={valeurs[s.cle]} onChange={(v) => maj(s.cle, v)} />
+          <Champ spec={s} categorie={categorie} valeur={valeurs[s.cle]} onChange={(v) => maj(s.cle, v)} />
           {erreurs[s.cle] && <span className="form-error">{erreurs[s.cle]}</span>}
         </div>
       ) : (
         <div className="specs-repli" key={s.cle}>
           <div>
             <span className="specs-repli-nom">{s.libelle}</span>
-            <span className="specs-repli-aide">{resume(s)}</span>
+            <span className="specs-repli-aide">{resume(s, categorie)}</span>
           </div>
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => ouvrir(s.cle)}>
             + Ajouter
@@ -122,67 +125,129 @@ const estVide = (v) => v == null
   || (typeof v === 'string' && !v.trim())
   || (Array.isArray(v) && v.length === 0);
 
+/** Un champ de couleurs, qu'il soit déclaré comme tel ou resté en variantes. */
+const estCouleurs = (spec) => spec.type === 'couleurs'
+  || (['variantes', 'liste'].includes(spec.type) && spec.cle === 'couleurs' && !spec.options?.length);
+
 /** Ce que le bloc replié annonce, pour qu'on sache s'il nous concerne. */
-function resume(spec) {
-  if (spec.type === 'couleurs') return 'Palette';
-  if (spec.options?.length) {
-    const debut = spec.options.slice(0, 3).join(' · ');
-    return spec.options.length > 3 ? `${debut}…` : debut;
+function resume(spec, categorie) {
+  if (estCouleurs(spec)) return 'Pastilles de couleur et grande palette';
+  const options = optionsProposees(spec, categorie);
+  if (options.length) {
+    const debut = options.slice(0, 4).join(' · ');
+    return options.length > 4 ? `${debut}…` : debut;
   }
   return spec.aide || '';
 }
 
 /**
- * Couleurs d'un produit : une pastille par teinte, autant qu'on veut.
+ * Couleurs d'un produit, à toucher du doigt.
  *
- * Le « + » ouvre le nuancier du système — celui du téléphone ou du
- * navigateur, que le vendeur connaît déjà. Un nom est proposé d'après la
- * teinte choisie, et il reste modifiable : c'est ce nom que le client lira.
+ * Les teintes courantes sont des pastilles : un clic la choisit, un second
+ * la retire. Pour une teinte absente, « Autre couleur » ouvre la grande
+ * palette du système (téléphone ou navigateur). Un nom est proposé d'après
+ * la teinte et reste modifiable : c'est ce nom que le client lira.
+ *
+ * `enNoms` : la catégorie déclare encore ses couleurs comme de simples
+ * variantes (du texte). On garde alors des noms — c'est ce que l'API et
+ * l'application mobile attendent pour ce champ — et la pastille se retrouve
+ * par le nom.
  */
-function Couleurs({ id, valeurs, onChange }) {
-  const [enCours, setEnCours] = useState('#0d1b3d');
+function Couleurs({ id, valeur, onChange, enNoms = false }) {
+  const palette = useRef(null);
+  const liste = enNoms
+    ? enTableau(valeur).map((nom) => ({ nom, code: codeDuNom(nom) }))
+    : enCouleurs(valeur);
 
-  const ajouter = (code) => {
-    if (dejaChoisie(valeurs, code)) return;
-    onChange([...valeurs, { code, nom: nomSuggere(code) || code }]);
-  };
-  const renommer = (i, nom) => onChange(valeurs.map((c, j) => (j === i ? { ...c, nom } : c)));
-  const enlever = (i) => onChange(valeurs.filter((_, j) => j !== i));
+  const emettre = (l) => onChange(enNoms
+    ? l.map((c) => c.nom)
+    : l.map((c) => (c.code ? { code: c.code, nom: c.nom } : { nom: c.nom })));
+  const meme = (a, b) => (a.code && b.code && a.code.toLowerCase() === b.code.toLowerCase())
+    || a.nom.trim().toLowerCase() === b.nom.trim().toLowerCase();
+  const choisie = (c) => liste.some((x) => meme(x, c));
+
+  const basculer = (c) => emettre(choisie(c) ? liste.filter((x) => !meme(x, c)) : [...liste, c]);
+  const renommer = (i, nom) => emettre(liste.map((c, j) => (j === i ? { ...c, nom } : c)));
+  const enlever = (i) => emettre(liste.filter((_, j) => j !== i));
+
+  // La palette du système prévient à sa fermeture (« change ») ; l'évènement
+  // « input » de React, lui, tombe à chaque mouvement de la souris et
+  // ajoutait une couleur par position traversée.
+  const ajouterRef = useRef(null);
+  useEffect(() => {
+    ajouterRef.current = (code) => {
+      const nouvelle = { code: code.toLowerCase(), nom: nomSuggere(code) || code };
+      if (!choisie(nouvelle)) emettre([...liste, nouvelle]);
+    };
+  });
+  useEffect(() => {
+    const champ = palette.current;
+    if (!champ) return undefined;
+    const choisir = (e) => ajouterRef.current?.(e.target.value);
+    champ.addEventListener('change', choisir);
+    return () => champ.removeEventListener('change', choisir);
+  }, []);
 
   return (
-    <div className="couleurs">
-      {valeurs.map((c, i) => (
-        <span className="couleurs-puce" key={c.code || c.nom}>
-          <span
-            className="couleurs-pastille"
-            style={c.code ? { background: c.code } : undefined}
-            // Sans code, la teinte est inconnue : une pastille rayée le dit
-            // mieux qu'une pastille grise, qui passerait pour du gris.
-            data-sans-code={c.code ? undefined : 'true'}
-            aria-hidden="true"
-          />
-          <input
-            className="couleurs-nom" value={c.nom} maxLength={40}
-            aria-label={`Nom de la couleur ${i + 1}`}
-            onChange={(e) => renommer(i, e.target.value)}
-          />
-          <button
-            type="button" className="couleurs-retirer"
-            aria-label={`Retirer ${c.nom}`}
-            onClick={() => enlever(i)}
-          >
-            ×
-          </button>
-        </span>
-      ))}
+    <div className="couleurs-choix">
+      {liste.length > 0 && (
+        <div className="couleurs">
+          {liste.map((c, i) => (
+            <span className="couleurs-puce" key={`${c.code || ''}-${i}`}>
+              <span
+                className="couleurs-pastille"
+                style={c.code ? { background: c.code } : undefined}
+                // Sans code, la teinte est inconnue : une pastille rayée le dit
+                // mieux qu'une pastille grise, qui passerait pour du gris.
+                data-sans-code={c.code ? undefined : 'true'}
+                aria-hidden="true"
+              />
+              <input
+                className="couleurs-nom" value={c.nom} maxLength={40}
+                aria-label={`Nom de la couleur ${i + 1}`}
+                onChange={(e) => renommer(i, e.target.value)}
+              />
+              <button
+                type="button" className="couleurs-retirer"
+                aria-label={`Retirer ${c.nom}`}
+                onClick={() => enlever(i)}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
 
-      <label className="couleurs-plus" title="Ajouter une couleur">
-        <span aria-hidden="true">+</span>
-        <input
-          id={id} type="color" value={enCours}
-          aria-label="Choisir une couleur à ajouter"
-          onChange={(e) => { setEnCours(e.target.value); ajouter(e.target.value); }}
-        />
+      <p className="form-hint couleurs-consigne">
+        {liste.length ? 'Touchez une pastille pour l’ajouter ou la retirer :' : 'Touchez les couleurs disponibles :'}
+      </p>
+      <div className="nuancier" role="group" aria-label="Couleurs proposées">
+        {NUANCIER.map((c) => {
+          const on = choisie(c);
+          return (
+            <button
+              type="button" key={c.code}
+              className={`nuancier-pastille${on ? ' est-choisie' : ''}${c.code === '#ffffff' || c.code === '#f5f0e1' ? ' est-claire' : ''}`}
+              style={{ '--teinte': c.code }}
+              title={c.nom}
+              aria-label={c.nom}
+              aria-pressed={on}
+              onClick={() => basculer(c)}
+            >
+              {on && <Check size={14} strokeWidth={3} aria-hidden="true" />}
+            </button>
+          );
+        })}
+      </div>
+
+      <label className="palette-libre" htmlFor={id}>
+        <span className="palette-libre__roue" aria-hidden="true" />
+        <span className="palette-libre__textes">
+          <strong>Autre couleur</strong>
+          <span>Ouvrir la grande palette et choisir la teinte exacte</span>
+        </span>
+        <input ref={palette} id={id} type="color" defaultValue="#0d1b3d" aria-label="Choisir une autre couleur dans la palette" />
       </label>
     </div>
   );
@@ -195,14 +260,15 @@ const enTableau = (v) => {
   return [];
 };
 
-function Champ({ spec, valeur, onChange }) {
+function Champ({ spec, valeur, onChange, categorie }) {
   const id = `spec-${spec.cle}`;
+  if (estCouleurs(spec)) {
+    return <Couleurs id={id} valeur={valeur} onChange={onChange} enNoms={spec.type !== 'couleurs'} />;
+  }
   switch (spec.type) {
-    case 'couleurs':
-      return <Couleurs id={id} valeurs={enCouleurs(valeur)} onChange={onChange} />;
     case 'variantes':
     case 'liste':
-      return <Valeurs id={id} spec={spec} valeurs={enTableau(valeur)} onChange={onChange} />;
+      return <Valeurs id={id} spec={spec} categorie={categorie} valeurs={enTableau(valeur)} onChange={onChange} />;
     case 'choix':
       return (
         <select id={id} className="form-input" value={valeur || ''} onChange={(e) => onChange(e.target.value)}>
@@ -239,17 +305,22 @@ function Champ({ spec, valeur, onChange }) {
 }
 
 /**
- * Valeurs d'une option : les propositions de l'admin (s'il y en a) à cocher,
- * et un champ pour taper les siennes. Une valeur choisie se retire d'un clic.
+ * Valeurs d'une option : les propositions (celles de l'admin, ou les tailles
+ * de vêtements) à cocher, et un champ pour taper les siennes. Une valeur
+ * choisie se retire d'un clic.
  */
-function Valeurs({ id, spec, valeurs, onChange }) {
+function Valeurs({ id, spec, valeurs, onChange, categorie }) {
   const [saisie, setSaisie] = useState('');
-  const options = spec.options || [];
+  const options = optionsProposees(spec, categorie);
   const coche = (o) => valeurs.some((v) => v.toLowerCase() === o.toLowerCase());
   const tapees = valeurs.filter((v) => !options.some((o) => o.toLowerCase() === v.toLowerCase()));
-  const peutTaper = spec.libre || !options.length;
+  // Les tailles proposées par défaut n'enferment pas : on peut toujours
+  // taper la sienne. Seules les options posées par l'admin sans « libre »
+  // sont une liste fermée.
+  const peutTaper = spec.libre || !spec.options?.length;
+  const emettre = (liste) => onChange(dansLOrdre(liste, options));
 
-  const basculer = (o) => onChange(coche(o)
+  const basculer = (o) => emettre(coche(o)
     ? valeurs.filter((v) => v.toLowerCase() !== o.toLowerCase())
     : [...valeurs, o]);
 
@@ -257,9 +328,13 @@ function Valeurs({ id, spec, valeurs, onChange }) {
     // « S, M, L » tapé d'un coup donne trois valeurs ; « 1,5 L » en reste une.
     const nouvelles = saisie.split(/,(?!\d)/).map((x) => x.trim()).filter(Boolean)
       .filter((x) => !coche(x));
-    if (nouvelles.length) onChange([...valeurs, ...nouvelles]);
+    if (nouvelles.length) emettre([...valeurs, ...nouvelles]);
     setSaisie('');
   };
+
+  const exemple = options.length && spec.cle === 'tailles'
+    ? 'Autre taille (ex. 46, Taille unique) puis Entrée'
+    : (spec.aide || 'Tapez une valeur puis Entrée');
 
   return (
     <div>
@@ -287,7 +362,7 @@ function Valeurs({ id, spec, valeurs, onChange }) {
         <div className="specs-ajout">
           <input
             id={id} className="form-input" value={saisie} maxLength={80}
-            placeholder={spec.aide || 'Tapez une valeur puis Entrée'}
+            placeholder={exemple}
             onChange={(e) => setSaisie(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); ajouter(); } }}
             onBlur={ajouter}

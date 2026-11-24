@@ -1,23 +1,26 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { toast, showConfirm } from '../../utils/alert';
 import {
   getMaVitrine, modifierVitrine, supprimerVitrine, getApercuVitrine,
   ajouterPhotosVitrine, ordonnerPhotosVitrine, supprimerPhotoVitrine,
 } from '../../service/vendeur.service';
 import { messageErreur } from './messageErreur';
+import { completerLien, egal } from '../boutique/outilsSite';
 
 /**
- * Contrôleur de la page « Mon site ».
+ * Contrôleur du site de la boutique, sur la page « Ma boutique ».
  *
  * Le vendeur ne choisit pas un site entier parmi des maquettes : il règle un
  * moteur unique. Trois mises en page, une couleur d'accent, des sections
- * qu'on allume ou qu'on éteint. Une seule base de code à tenir pour toutes
- * les boutiques, et un commerçant qui gère la sienne depuis son téléphone n'a
+ * qu'on remplit de produits. Une seule base de code à tenir pour toutes les
+ * boutiques, et un commerçant qui gère la sienne depuis son téléphone n'a
  * pas à comparer des modèles pour ouvrir son site.
  *
  * Le formulaire est tenu localement et n'est envoyé qu'à l'enregistrement :
  * une sauvegarde à chaque frappe multiplierait les requêtes sur une connexion
- * mobile, et rendrait impossible d'abandonner une modification.
+ * mobile, et rendrait impossible d'abandonner une modification. `serveur`
+ * garde ce qui est enregistré : la différence avec `valeurs` est ce qu'il
+ * reste à enregistrer (`modifie`), et « Annuler » y revient.
  */
 
 /** Les trois mises en page, avec ce à quoi chacune convient. */
@@ -59,21 +62,7 @@ export const COULEURS = [
   { valeur: '#14181F', nom: 'Noir' },
 ];
 
-const CHAMPS_VIDES = {
-  slug: '',
-  active: true,
-  modele: 'classique',
-  accent: '#0D1B3D',
-  apropos: '',
-  annonce: '',
-  horaires: '',
-  reseaux: { facebook: '', instagram: '', snapchat: '', tiktok: '', site: '' },
-  sections: { apropos: true, categories: true, avis: true, contact: true, nouveautes: true, meilleures: true },
-  commande: true,
-  paiementLivraison: true,
-  sectionsPerso: [],
-  blocs: { icones: {}, avantages: [] },
-};
+const SECTIONS_PAR_DEFAUT = { apropos: true, categories: true, avis: true, contact: true, nouveautes: true, meilleures: true };
 
 /** Le serveur refuse les fichiers de plus de 5 Mo. */
 const TAILLE_MAX_PHOTO = 5 * 1024 * 1024;
@@ -81,47 +70,87 @@ const TAILLE_MAX_PHOTO = 5 * 1024 * 1024;
 /** Le corps de réponse peut arriver sous `data` ou nu selon l'ancienneté de la route. */
 const extraire = (reponse) => reponse?.data?.data ?? reponse?.data ?? null;
 
+/** Les réglages du serveur, mis dans la forme exacte du formulaire. */
+function normaliser(v = {}) {
+  return {
+    slug: v.slug || '',
+    active: v.active !== false,
+    modele: v.modele || 'classique',
+    accent: v.accent || '#0D1B3D',
+    apropos: v.apropos || '',
+    annonce: v.annonce || '',
+    horaires: v.horaires || '',
+    reseaux: {
+      facebook: v.reseaux?.facebook || '',
+      instagram: v.reseaux?.instagram || '',
+      snapchat: v.reseaux?.snapchat || '',
+      tiktok: v.reseaux?.tiktok || '',
+      site: v.reseaux?.site || '',
+    },
+    sections: { ...SECTIONS_PAR_DEFAUT, ...(v.sections || {}) },
+    commande: v.commande !== false,
+    paiementLivraison: v.paiementLivraison !== false,
+    sectionsPerso: (Array.isArray(v.sectionsPerso) ? v.sectionsPerso : []).map((s) => ({
+      id: s.id,
+      titre: s.titre || '',
+      produitIds: Array.isArray(s.produitIds) ? s.produitIds : [],
+    })),
+    blocs: {
+      icones: v.blocs?.icones || {},
+      avantages: (v.blocs?.avantages || []).map((a) => ({ icone: a.icone, titre: a.titre || '', texte: a.texte || '' })),
+    },
+  };
+}
+
+/**
+ * Le brouillon tel qu'il part : liens de réseaux complétés (https://…), et
+ * l'adresse seulement si le vendeur l'a changée. Une adresse fabriquée par
+ * le serveur à la création peut ne pas suivre la règle de saisie (« bo »
+ * pour la boutique « Bo ») : la renvoyer telle quelle faisait refuser tout
+ * l'enregistrement, pour une adresse que le vendeur n'avait pas touchée.
+ */
+function aEnvoyer(valeurs, slugEnregistre) {
+  const reseaux = Object.fromEntries(
+    Object.entries(valeurs.reseaux).map(([cle, lien]) => [cle, completerLien(cle, lien)]),
+  );
+  const { slug, ...reste } = valeurs;
+  return slug === slugEnregistre ? { ...reste, reseaux } : { ...reste, slug, reseaux };
+}
+
 export default function useVitrine() {
   const [donnees, setDonnees] = useState(null);
-  const [valeurs, setValeurs] = useState(CHAMPS_VIDES);
+  const [valeurs, setValeurs] = useState(() => normaliser());
+  const [serveur, setServeur] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [erreur, setErreur] = useState(null);
-  // Données de la boutique pour l'aperçu en direct et la liste des catégories.
+  // Données de la boutique pour l'aperçu en direct (catalogue compris).
   const [version, setVersion] = useState(0);
   const [apercu, setApercu] = useState(null);
 
+  /** Tout est remplacé par ce que dit le serveur : réglages et brouillon. */
   const appliquer = useCallback((charge) => {
     if (!charge?.vitrine) return;
-    const v = charge.vitrine;
+    const n = normaliser(charge.vitrine);
     setDonnees(charge);
-    setValeurs({
-      slug: v.slug || '',
-      active: v.active !== false,
-      modele: v.modele || 'classique',
-      accent: v.accent || '#0D1B3D',
-      apropos: v.apropos || '',
-      annonce: v.annonce || '',
-      horaires: v.horaires || '',
-      reseaux: {
-        facebook: v.reseaux?.facebook || '',
-        instagram: v.reseaux?.instagram || '',
-        snapchat: v.reseaux?.snapchat || '',
-        tiktok: v.reseaux?.tiktok || '',
-        site: v.reseaux?.site || '',
-      },
-      sections: { ...CHAMPS_VIDES.sections, ...(v.sections || {}) },
-      commande: v.commande !== false,
-      paiementLivraison: v.paiementLivraison !== false,
-      sectionsPerso: Array.isArray(v.sectionsPerso) ? v.sectionsPerso : [],
-      blocs: {
-        icones: v.blocs?.icones || {},
-        avantages: (v.blocs?.avantages || []).map((a) => ({ icone: a.icone, titre: a.titre || '', texte: a.texte || '' })),
-      },
-    });
+    setServeur(n);
+    setValeurs(n);
+    setErreur(null);
     // Les données de l'aperçu (catalogue, catégories) sont relues après
     // chaque enregistrement.
-    setVersion((n) => n + 1);
+    setVersion((x) => x + 1);
+  }, []);
+
+  /**
+   * Le serveur a changé un seul réglage (mise en ligne) : le brouillon garde
+   * le reste de ce que le vendeur était en train de modifier.
+   */
+  const appliquerEnLigne = useCallback((charge) => {
+    if (!charge?.vitrine) return;
+    const n = normaliser(charge.vitrine);
+    setDonnees(charge);
+    setServeur(n);
+    setValeurs((v) => ({ ...v, active: n.active }));
   }, []);
 
   useEffect(() => {
@@ -133,21 +162,43 @@ export default function useVitrine() {
     return () => { annule = true; };
   }, [version]);
 
+  // Un 404 veut dire « pas encore de boutique » : la page le sait déjà par
+  // useBoutique et propose de la créer. Le message ne sert qu'aux pannes.
+  const echecChargement = useCallback((e) => {
+    setErreur(e?.response?.data?.message || 'Votre site n’a pas pu être chargé.');
+  }, []);
+
   useEffect(() => {
     let annule = false;
-
     getMaVitrine()
-      .then((r) => { if (!annule) { appliquer(extraire(r)); setErreur(null); } })
-      .catch((e) => {
-        if (annule) return;
-        // 404 : le vendeur n'a pas encore de boutique. Ce n'est pas une panne,
-        // c'est une étape — la page le dit et renvoie vers « Ma boutique ».
-        setErreur(e?.response?.data?.message || 'Votre site n\'a pas pu être chargé.');
-      })
+      .then((r) => { if (!annule) appliquer(extraire(r)); })
+      .catch((e) => { if (!annule) echecChargement(e); })
       .finally(() => { if (!annule) setLoading(false); });
-
     return () => { annule = true; };
-  }, [appliquer]);
+  }, [appliquer, echecChargement]);
+
+  /**
+   * Relit le site après un changement fait ailleurs sur la page — les infos
+   * de la boutique (nom, logo, téléphone) que l'aperçu et le partage
+   * reprennent. Le brouillon en cours n'est pas touché ; s'il n'y en a pas
+   * encore (boutique tout juste créée), tout est chargé.
+   */
+  const rafraichir = useCallback(async () => {
+    try {
+      const charge = extraire(await getMaVitrine());
+      if (!charge?.vitrine) return;
+      if (!serveur) {
+        appliquer(charge);
+      } else {
+        setDonnees(charge);
+        setVersion((x) => x + 1);
+      }
+    } catch (e) {
+      echecChargement(e);
+    }
+  }, [serveur, appliquer, echecChargement]);
+
+  const modifie = useMemo(() => Boolean(serveur) && !egal(valeurs, serveur), [valeurs, serveur]);
 
   const majChamp = (champ, valeur) => setValeurs((v) => ({ ...v, [champ]: valeur }));
 
@@ -160,20 +211,27 @@ export default function useVitrine() {
   const majBloc = (nom, valeur) =>
     setValeurs((v) => ({ ...v, blocs: { ...v.blocs, [nom]: valeur } }));
 
+  /** Revenir à ce qui est enregistré. */
+  const annuler = () => { if (serveur) setValeurs(serveur); };
+
+  const configuree = donnees?.vitrine?.configuree === true;
+  const slugEnregistre = donnees?.vitrine?.slug || '';
+
   // Tant que le site n'a jamais été publié, « Enregistrer » garde le
   // brouillon hors ligne : seule « Publier mon site » le met en ligne.
-  const jamaisPublie = donnees?.vitrine?.configuree !== true;
-
   const enregistrer = async () => {
     setSaving(true);
     try {
-      const r = await modifierVitrine(jamaisPublie ? { ...valeurs, active: false } : valeurs);
+      const envoi = aEnvoyer(valeurs, slugEnregistre);
+      const r = await modifierVitrine(configuree ? envoi : { ...envoi, active: false });
       appliquer(extraire(r));
-      toast.success('Votre site a été mis à jour.');
+      toast.success(configuree ? 'Votre site est à jour.' : 'Brouillon enregistré. Publiez votre site quand il vous plaît.');
+      return true;
     } catch (e) {
       // Le message du serveur est écrit pour le vendeur — « Cette adresse est
       // déjà prise par une autre boutique » — et vaut mieux qu'un texte générique.
       toast.error(messageErreur(e, 'La mise à jour a échoué.'));
+      return false;
     } finally {
       setSaving(false);
     }
@@ -181,15 +239,14 @@ export default function useVitrine() {
 
   /**
    * Mise en ligne / hors ligne immédiate, sans passer par « Enregistrer ».
-   * Si le site n'a jamais été composé, il est créé avec la mise en page par
-   * défaut et les informations de la boutique.
+   * Les modifications en cours restent dans le brouillon.
    */
   const [bascule, setBascule] = useState(false);
   const basculerEnLigne = async (active) => {
     const ok = await showConfirm(active ? {
-      titre: 'Mettre mon site en ligne',
-      message: 'Votre site sera visible par tous à son adresse. Vous pourrez le modifier ou le fermer à tout moment.',
-      confirmText: 'Mettre en ligne',
+      titre: 'Remettre mon site en ligne',
+      message: 'Votre site sera de nouveau visible par tous à son adresse.',
+      confirmText: 'Remettre en ligne',
     } : {
       titre: 'Mettre mon site hors ligne',
       message: "Vos clients ne pourront plus l'ouvrir. Votre boutique reste visible dans l'application.",
@@ -199,8 +256,7 @@ export default function useVitrine() {
     if (!ok) return;
     setBascule(true);
     try {
-      const r = await modifierVitrine({ active });
-      appliquer(extraire(r));
+      appliquerEnLigne(extraire(await modifierVitrine({ active })));
       toast.success(active ? 'Votre site est en ligne.' : 'Votre site est hors ligne.');
     } catch (e) {
       toast.error(messageErreur(e, 'Impossible de modifier votre site.'));
@@ -210,8 +266,8 @@ export default function useVitrine() {
   };
 
   /**
-   * Première publication : le vendeur a personnalisé son site (mise en page,
-   * couleur, textes) ; ses réglages sont enregistrés et le site passe en ligne.
+   * Première publication : les réglages du vendeur sont enregistrés et le
+   * site passe en ligne, en un geste.
    */
   const publier = async () => {
     const ok = await showConfirm({
@@ -219,15 +275,16 @@ export default function useVitrine() {
       message: 'Votre site sera visible par tous à son adresse. Vous pourrez encore le modifier ou le mettre hors ligne.',
       confirmText: 'Publier',
     });
-    if (!ok) return;
+    if (!ok) return false;
     setSaving(true);
     try {
-      const r = await modifierVitrine({ ...valeurs, active: true });
+      const r = await modifierVitrine({ ...aEnvoyer(valeurs, slugEnregistre), active: true });
       appliquer(extraire(r));
-      toast.success('Votre site est en ligne !');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      toast.success('Votre site est en ligne ! Partagez son adresse à vos clients.');
+      return true;
     } catch (e) {
       toast.error(messageErreur(e, 'La publication a échoué.'));
+      return false;
     } finally {
       setSaving(false);
     }
@@ -337,24 +394,30 @@ export default function useVitrine() {
 
   return {
     donnees,
-    publier,
-    supprimerSite,
-    basculerEnLigne,
-    bascule,
     valeurs,
     loading,
     saving,
     erreur,
+    modifie,
     majChamp,
     majSection,
     majReseau,
     majBloc,
-    apercu,
+    annuler,
+    rafraichir,
     enregistrer,
+    publier,
+    supprimerSite,
+    basculerEnLigne,
+    bascule,
+    apercu,
     url: donnees?.vitrine?.url || '',
-    // Le site a-t-il déjà été créé (assistant de l'application, ou bouton
-    // « Mettre mon site en ligne » de cette page) ?
-    configuree: donnees?.vitrine?.configuree === true,
+    // Le site a-t-il déjà été publié une fois (assistant de l'application,
+    // ou bouton « Publier mon site » de cette page) ?
+    configuree,
+    // Ce qui est en ligne pour de vrai — pas le brouillon.
+    enLigne: configuree && donnees?.vitrine?.active !== false,
+    slugEnregistre,
     nombreProduits: donnees?.nombreProduits ?? 0,
     vues: donnees?.vitrine?.vues ?? 0,
     boutique: donnees?.boutique || null,

@@ -1,13 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════
-   PAGE « MON SITE »
+   LE SITE DE LA BOUTIQUE (page « Ma boutique »)
 
    Réglages du site web public de la boutique. Tout est préfixé
-   `vitrine-` / `apercu-` et chargé uniquement par cette page : les
-   classes communes (card, form-*, btn) viennent de global.css.
+   `vitrine-` / `apercu-` et chargé uniquement par la page « Ma
+   boutique », avec boutique.css : les classes communes (card, form-*,
+   btn) viennent de global.css.
    ═══════════════════════════════════════════════════════════════════ */
 
 .vitrine-marge-haut { margin-top: 0.85rem; }
-.vitrine-marge-bas  { margin-bottom: 0.85rem; }
 
 /* ─── Site pas encore créé : renvoi vers l'application ──────────── */
 .vitrine-invitation .card-body {
@@ -49,14 +49,6 @@
 .vitrine-invitation__chemin strong { color: var(--color-text); }
 .vitrine-invitation__note { font-size: 0.78rem; margin-bottom: 0; }
 
-/* ─── Partage : adresse, boutons, QR ────────────────────────────── */
-.vitrine-partage {
-  display: flex;
-  gap: 1.75rem;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-.vitrine-partage__gauche { flex: 1; min-width: 260px; }
 
 .vitrine-url {
   font-family: var(--font-display);
@@ -67,36 +59,6 @@
   margin-bottom: 0.6rem;
 }
 
-.vitrine-hors-ligne { color: var(--color-warning); }
-
-.vitrine-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.7rem;
-}
-
-.vitrine-qr {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  width: 172px;
-}
-.vitrine-qr img {
-  width: 172px;
-  height: 172px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: #fff;
-}
-.vitrine-qr .form-hint { text-align: center; }
-
-.vitrine-vues {
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-  margin: 0.75rem 0 0;
-}
 
 /* ─── Deux colonnes : réglages + aperçu ─────────────────────────── */
 .vitrine-colonnes {
@@ -117,7 +79,6 @@
     top: calc(var(--topnav-height) + 1rem);
   }
 }
-.vitrine-etapes ol { margin: 0.5rem 0 0 1.2rem; line-height: 1.8; color: var(--color-text); }
 .vitrine-apercu-titre {
   font-family: var(--font-display);
   font-size: 0.82rem;
@@ -277,14 +238,6 @@
   cursor: pointer;
 }
 
-/* ─── Barre d'enregistrement ────────────────────────────────────── */
-.vitrine-barre-enregistrer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  margin-top: 1.25rem;
-}
 
 /* ═══════════════════════════════════════════════════════════════
    APERÇU
@@ -441,72 +394,18 @@
   .vitrine-apercu-colonne { display: none; }
 }
 
-@media (max-width: 640px) {
-  .vitrine-partage { flex-direction: column; }
-  .vitrine-qr { width: 100%; align-items: flex-start; }
-  .vitrine-actions .btn { flex: 1; justify-content: center; }
-}
 
 .carte-danger { border-color: rgba(201, 64, 48, 0.35); }
 .carte-danger .card-title { color: var(--color-danger); }
 
-/* ── Mes sections ─────────────────────────────────────────────────── */
-.sections-perso { list-style: none; margin: 12px 0; padding: 0; display: grid; gap: 12px; }
-.sections-perso__ligne { border: 1px solid var(--color-border); border-radius: 12px; padding: 12px; }
-.sections-perso__haut { display: flex; gap: 8px; align-items: center; }
-.sections-perso__haut .form-input { flex: 1; min-width: 0; font-weight: 600; }
-.sections-perso__ordre { display: flex; gap: 4px; }
-.sections-perso__produits { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
-.sections-perso__puce {
-  padding: 3px 10px; border-radius: 999px; background: var(--color-accent-soft);
-  font-size: 0.78rem; color: var(--color-primary); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.sections-perso__actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
-.sections-perso__supprimer { color: var(--color-danger); }
-.sections-perso__vide { color: var(--color-text-muted); font-size: 0.88rem; margin: 12px 0; }
-.sections-perso__recherche { margin-bottom: 12px; }
-.sections-perso__choix { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.sections-perso__option {
-  display: flex; align-items: center; gap: 12px; padding: 8px 10px; cursor: pointer;
-  border: 1px solid var(--color-border); border-radius: 10px;
-}
-.sections-perso__option.est-choisi { border-color: var(--color-primary); background: rgba(13, 27, 61, 0.04); }
-.sections-perso__option input { width: 18px; height: 18px; accent-color: var(--color-primary); flex-shrink: 0; }
-.sections-perso__vignette { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
-.sections-perso__vignette--vide { display: inline-block; background: var(--color-bg); }
-.sections-perso__nom { flex: 1; min-width: 0; font-weight: 600; font-size: 0.9rem; overflow-wrap: anywhere; }
-.sections-perso__prix { font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap; }
-
 /* ═══ Personnalisation en étapes ═══════════════════════════════════ */
-.vitrine-sans-marge { margin: 0.2rem 0 0; }
 .vitrine-danger { color: var(--color-danger); }
 .vitrine-alerte { color: var(--color-warning); margin: 0.4rem 0 0; }
 .vitrine-vide { padding: 0.9rem 1rem; border: 1px dashed var(--color-border); border-radius: var(--radius); background: var(--color-bg); margin-bottom: 1rem; color: var(--color-text); }
 .vitrine-vide p { margin: 0; }
 .vitrine-vide p + p { margin-top: 0.35rem; }
 
-.vitrine-etapes-nav {
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.25rem;
-  padding: 0.35rem; margin-bottom: 0.6rem;
-  background: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
-}
-.vitrine-etapes-nav::-webkit-scrollbar { display: none; }
-.vitrine-etape {
-  min-width: 0; display: inline-flex; align-items: center; justify-content: flex-start; gap: 0.45rem;
-  padding: 0.5rem 0.7rem; border: 0; border-radius: var(--radius); background: none; cursor: pointer;
-  font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted); white-space: nowrap;
-}
-.vitrine-etape:hover { background: var(--color-bg); color: var(--color-text); }
-.vitrine-etape__num {
-  width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center;
-  font-size: 0.72rem; background: var(--color-bg); border: 1px solid var(--color-border);
-}
-.vitrine-etape.est-faite .vitrine-etape__num { background: var(--color-accent-soft); border-color: transparent; color: var(--color-primary); }
-.vitrine-etape.est-active { background: var(--color-primary); color: #fff; }
-.vitrine-etape.est-active .vitrine-etape__num { background: rgba(255, 255, 255, 0.18); border-color: transparent; color: #fff; }
-.vitrine-etape-texte { font-size: 0.8rem; color: var(--color-text-muted); margin: 0 0 0.8rem 0.2rem; }
 .vitrine-reglages .card + .card { margin-top: 1rem; }
-.vitrine-precedent { margin-right: auto; }
 
 /* Images (bannières, bloc contact) */
 .vitrine-image { display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap; margin-bottom: 0.8rem; }
@@ -586,29 +485,10 @@
 }
 
 @media (max-width: 640px) {
-  .vitrine-etapes-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .vitrine-avantage { flex-wrap: wrap; }
   .vitrine-avantage__champs { grid-template-columns: 1fr; flex-basis: 100%; order: 3; }
   .vitrine-image__cadre { width: 100%; }
 }
-
-/* ═══ Sections du site ═════════════════════════════════════════════ */
-.vitrine-vide-page { text-align: center; padding: 2.5rem 1.5rem; }
-.vitrine-vide-page p { margin: 0 0 0.35rem; }
-.sections-onglets { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
-.sections-onglet {
-  display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.85rem;
-  border: 1px solid var(--color-border); border-radius: 999px; background: var(--color-white);
-  font: inherit; font-size: 0.82rem; font-weight: 600; color: var(--color-text); cursor: pointer;
-}
-.sections-onglet span {
-  min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; display: inline-grid; place-items: center;
-  background: var(--color-bg); font-size: 0.72rem; color: var(--color-text-muted);
-}
-.sections-onglet.est-actif { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
-.sections-onglet.est-actif span { background: rgba(255, 255, 255, 0.2); color: #fff; }
-.sections-outils { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.9rem; }
-.sections-outils .form-input { flex: 1 1 220px; }
 
 /* ── Photos du haut du site (étape « Photos ») ── */
 .vitrine-photos__compte {

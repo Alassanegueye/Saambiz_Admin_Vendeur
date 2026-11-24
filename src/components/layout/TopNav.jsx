@@ -10,8 +10,8 @@ import { AIDES, construireNavigation, estActif } from './navigationVendeur';
  * Barre du haut de l'espace vendeur (même modèle que l'administration), dans le style du dashboard Yobante
  * Boutique :
  *  - pictogramme à gauche ;
- *  - rubriques regroupées par sujet (menus dépliants), centrées, sans menu
- *    « Plus » ;
+ *  - rubriques centrées, une par onglet (un groupe déclaré dans
+ *    navigationVendeur devient un menu dépliant), sans menu « Plus » ;
  *  - rubrique active repérée par un simple soulignement, sans fond coloré ;
  *  - à droite, les initiales et le nom de l'administrateur connecté ; nom, email et
  *    rôle ne s'affichent que dans le menu de compte.
@@ -118,7 +118,7 @@ export default function TopNav({ items = [] }) {
                 const { item } = entree;
                 return (
                   <li key={item.to}>
-                    <NavLink to={item.to} end={item.end}
+                    <NavLink to={item.to} end={item.end} title={AIDES[item.code]}
                              className={() => `tn-onglet${estActif(item, pathname) ? ' actif' : ''}`}>
                       <Icone>{item.icon}</Icone>
                       {item.label}

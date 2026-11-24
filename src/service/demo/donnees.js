@@ -95,6 +95,7 @@ export const PRODUITS_DEMO = [
     categorie: { id: 'c1', nom: 'Mode' }, description: 'Bazin riche brodé main, coupe ajustée.',
     statut: 'approuve', vues: 842, createdAt: ilYA(41) },
   { id: 'p2', nom: 'Robe wax cintrée', prix: 28000, quantite: 12, disponible: true,
+    attributs: { tailles: ['S', 'M', 'L', 'XL', '2XL'], couleurs: ['Noir', 'Rouge', 'Bleu nuit'] },
     categorie: { id: 'c1', nom: 'Mode' }, description: 'Wax authentique, doublure coton.',
     statut: 'approuve', vues: 631, createdAt: ilYA(33) },
   { id: 'p3', nom: 'Chemise lin homme', prix: 18500, quantite: 0, disponible: false,
@@ -111,12 +112,34 @@ export const PRODUITS_DEMO = [
     statut: 'approuve', vues: 267, createdAt: ilYA(12) },
 ];
 
+// Les caractéristiques suivent celles de l'API (constants/
+// specificationsCategories.js) : tailles proposées pour la mode, et une
+// catégorie à part pour les tissus, vendus au mètre ou à la pièce.
+const COULEURS_SPEC = { cle: 'couleurs', libelle: 'Couleurs', type: 'variantes', options: [], libre: true, aide: 'Ex. Noir, Blanc, Rouge' };
+
 export const CATEGORIES_DEMO = [
-  { id: 'c1', nom: 'Mode' },
-  { id: 'c2', nom: 'Accessoires' },
-  { id: 'c3', nom: 'Beauté' },
-  { id: 'c4', nom: 'Maison' },
-  { id: 'c5', nom: 'Alimentation' },
+  {
+    id: 'c1', nom: 'Mode', slug: 'mode-femme',
+    specifications: [
+      { cle: 'tailles', libelle: 'Tailles', type: 'variantes', libre: true, aide: 'Ex. S, M, L, XL',
+        options: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '6XL'] },
+      COULEURS_SPEC,
+    ],
+  },
+  { id: 'c6', nom: 'Tissus & pagnes', slug: 'tissus',
+    specifications: [
+      { cle: 'unite', libelle: 'Vendu au', type: 'choix', obligatoire: true, aide: "L'unité de votre prix",
+        options: ['Mètre', 'Yard', 'Pièce de 6 yards', 'Demi-pièce (3 yards)', 'Coupon', 'Rouleau'] },
+      { cle: 'matiere', libelle: 'Type de tissu', type: 'texte', aide: 'Ex. wax, bazin riche, getzner, soie, lin' },
+      { cle: 'modeles', libelle: 'Modèles ou motifs', type: 'variantes', options: [], libre: true, aide: 'Ex. motif fleuri, motif 2, uni' },
+      COULEURS_SPEC,
+      { cle: 'largeur', libelle: 'Largeur du tissu', type: 'texte', aide: 'Ex. 1,15 m' },
+    ],
+  },
+  { id: 'c2', nom: 'Accessoires', slug: 'bijoux-accessoires', specifications: [COULEURS_SPEC] },
+  { id: 'c3', nom: 'Beauté', slug: 'beaute-cosmetiques', specifications: [] },
+  { id: 'c4', nom: 'Maison', slug: 'maison-deco', specifications: [] },
+  { id: 'c5', nom: 'Alimentation', slug: 'alimentation-epicerie', specifications: [] },
 ];
 
 export const COMMANDES_DEMO = [

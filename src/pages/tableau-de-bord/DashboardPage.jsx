@@ -60,7 +60,7 @@ function dateDuJour() {
 function tachesDuJour({ boutique, stats, abonnement, messagesNonLus }) {
   const t = [];
   if (!boutique) {
-    t.push({ ton: 'urgent', icone: ICONES.boutique, texte: 'Créez votre boutique pour commencer à vendre', bouton: 'Créer ma boutique', to: ROUTES.BOUTIQUE });
+    t.push({ ton: 'urgent', icone: ICONES.boutique, texte: 'Créez votre boutique pour commencer à vendre', bouton: 'Créer ma boutique', to: `${ROUTES.BOUTIQUE}?infos=1` });
     return t;
   }
   const attente = stats.commandesEnAttente ?? 0;
@@ -128,7 +128,7 @@ export default function DashboardPage() {
               <Link className="btn btn-accent" to={`${ROUTES.PRODUITS}?nouveau=1`}>
                 <Icone taille={16}>{ICONES.plus}</Icone> Ajouter un produit
               </Link>
-              <Link className="btn btn-clair" to={ROUTES.VITRINE}>
+              <Link className="btn btn-clair" to={ROUTES.BOUTIQUE}>
                 <Icone taille={16}>{ICONES.site}</Icone> Mon site
               </Link>
             </div>

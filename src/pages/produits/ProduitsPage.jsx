@@ -92,6 +92,7 @@ export default function ProduitsPage() {
           categories={p.categories}
           image={p.image}
           setImage={p.setImage}
+          images={p.images}
           setImages={p.setImages}
           estModification={Boolean(p.edition?.id)}
           produit={p.edition}

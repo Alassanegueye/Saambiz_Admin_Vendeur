@@ -7,7 +7,7 @@
  * l'API.
  */
 import { describe, it, expect } from 'vitest';
-import { enCouleurs, nomSuggere, dejaChoisie } from './couleurs';
+import { enCouleurs, nomSuggere, dejaChoisie, NUANCIER, codeDuNom } from './couleurs';
 
 describe('Lecture de la valeur enregistrée', () => {
   it('garde le code et le nom', () => {
@@ -70,5 +70,16 @@ describe('Teinte déjà choisie', () => {
 
   it('ignore les couleurs sans code', () => {
     expect(dejaChoisie(couleurs, '#c0392b')).toBe(false);
+  });
+});
+
+describe('Nuancier et noms seuls', () => {
+  it('propose des pastilles toutes nommées comme la suggestion', () => {
+    NUANCIER.forEach((c) => expect(nomSuggere(c.code), c.nom).toBe(c.nom));
+  });
+
+  it('retrouve la teinte d’une couleur connue par son nom', () => {
+    expect(codeDuNom('bleu nuit')).toBe('#0d1b3d');
+    expect(codeDuNom('Fuchsia électrique')).toBeNull();
   });
 });

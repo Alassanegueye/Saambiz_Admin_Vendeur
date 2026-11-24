@@ -1,11 +1,29 @@
+import { useEffect, useRef, useState } from 'react';
+import { ImagePlus } from 'lucide-react';
 import { MAX_CATEGORIES } from '../useBoutique';
 
-/** Informations de la vitrine — ce que les clients voient de la boutique. */
+/**
+ * Les champs des infos de la boutique — ce que les clients voient d'elle,
+ * dans l'application et sur son site. Sans cadre ni bouton : la fenêtre
+ * « Infos de la boutique » les porte.
+ */
 export default function FormBoutique({
-  valeurs, setValeurs, erreurs, saving,
-  boutique, logo, setLogo, onEnregistrer, categories = [], etatCategories = 'ok', onRechargerCategories,
+  valeurs, setValeurs, erreurs,
+  boutique, logo, setLogo, categories = [], etatCategories = 'ok', onRechargerCategories,
 }) {
+  const champLogo = useRef(null);
   const majChamp = (champ) => (e) => setValeurs({ ...valeurs, [champ]: e.target.value });
+
+  // Le logo choisi se voit avant d'être envoyé. L'adresse locale est créée
+  // et libérée dans le même effet (voir ApercuFichier).
+  const [apercuLogo, setApercuLogo] = useState(null);
+  useEffect(() => {
+    if (!logo) { setApercuLogo(null); return undefined; }
+    const adresse = URL.createObjectURL(logo);
+    setApercuLogo(adresse);
+    return () => URL.revokeObjectURL(adresse);
+  }, [logo]);
+  const logoAffiche = apercuLogo || boutique?.logo || null;
 
   // Les valeurs peuvent être des slugs, des ids ou un ancien libellé.
   const correspond = (c, v) => [c.slug, c.id, c.nom].some((x) => x && x.toLowerCase() === String(v).toLowerCase());
@@ -21,114 +39,123 @@ export default function FormBoutique({
   };
 
   return (
-    <div className="card">
-      <div className="card-header"><h3 className="card-title">Informations</h3></div>
-      <div className="card-body">
-        <div className="form-field">
-          <label className="form-label" htmlFor="b-nom">Nom de la boutique</label>
-          <input
-            id="b-nom"
-            className="form-input"
-            value={valeurs.nom}
-            onChange={majChamp('nom')}
-          />
-          {erreurs.nom && <span className="form-error">{erreurs.nom}</span>}
-        </div>
-
-        <div className="form-field">
-          <label className="form-label" htmlFor="b-slogan">Slogan</label>
-          <input
-            id="b-slogan"
-            className="form-input"
-            value={valeurs.slogan}
-            onChange={majChamp('slogan')}
-            placeholder="Une phrase qui résume votre boutique"
-          />
-        </div>
-
-        <div className="form-field">
-          <label className="form-label" htmlFor="b-desc">Description</label>
-          <textarea
-            id="b-desc"
-            className="form-textarea"
-            rows={4}
-            value={valeurs.description}
-            onChange={majChamp('description')}
-          />
-        </div>
-
-        <div className="form-duo">
-          <div className="form-field">
-            <label className="form-label" htmlFor="b-ville">Ville</label>
-            <input
-              id="b-ville"
-              className="form-input"
-              value={valeurs.localisation}
-              onChange={majChamp('localisation')}
-              placeholder="Dakar"
-            />
-          </div>
-          <div className="form-field">
-            <label className="form-label" htmlFor="b-tel">Téléphone / WhatsApp</label>
-            <input
-              id="b-tel"
-              className="form-input"
-              value={valeurs.telephone}
-              onChange={majChamp('telephone')}
-              placeholder="+221 77 000 00 00"
-            />
-          </div>
-        </div>
-
-        <div className="form-field">
-          <span className="form-label">Catégories de la boutique</span>
-          <span className="form-hint">
-            1 à {MAX_CATEGORIES} catégories. La première choisie (★) est la principale.
-          </span>
-          <div className="specs-puces" role="group" aria-label="Catégories de la boutique">
-            {etatCategories === 'chargement' && <span className="form-hint">Chargement des catégories…</span>}
-            {etatCategories === 'erreur' && (
-              <span className="form-hint">
-                Impossible de charger les catégories.{' '}
-                <button type="button" className="btn btn-ghost btn-sm" onClick={onRechargerCategories}>Réessayer</button>
-              </span>
-            )}
-            {categories.map((c) => {
-              const i = rang(c);
-              const plein = i < 0 && choisies.length >= MAX_CATEGORIES;
-              return (
-                <button
-                  type="button" key={c.id}
-                  className={`specs-puce${i >= 0 ? ' specs-puce--on' : ''}`}
-                  aria-pressed={i >= 0}
-                  disabled={plein}
-                  onClick={() => basculerCategorie(c)}
-                >{i === 0 ? '★ ' : ''}{c.nom}</button>
-              );
-            })}
-          </div>
-          {erreurs.categories && <span className="form-error">{erreurs.categories}</span>}
-        </div>
-
-        <div className="form-field">
-          <label className="form-label" htmlFor="b-logo">Logo</label>
-          {/* Le logo actuel disparaît dès qu'un nouveau fichier est choisi :
-              afficher les deux laisserait croire qu'ils coexistent. */}
-          {boutique?.logo && !logo && (
-            <img src={boutique.logo} alt="Logo de la boutique" className="apercu-logo" />
-          )}
-          <input
-            id="b-logo"
-            className="form-input"
-            type="file"
-            accept="image/*"
-            onChange={(e) => setLogo(e.target.files?.[0] || null)}
-          />
-        </div>
-
-        <button className="btn btn-primary" onClick={onEnregistrer} disabled={saving}>
-          {saving ? 'Enregistrement…' : 'Enregistrer les modifications'}
+    <div className="form-boutique">
+      <div className="form-boutique__logo">
+        <button type="button" className="form-boutique__logo-cadre" onClick={() => champLogo.current?.click()}
+          aria-label={logoAffiche ? 'Changer le logo' : 'Ajouter un logo'}>
+          {logoAffiche
+            ? <img src={logoAffiche} alt="Logo de la boutique" />
+            : <ImagePlus size={26} strokeWidth={1.8} aria-hidden="true" />}
         </button>
+        <div>
+          <span className="form-label">Logo</span>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={() => champLogo.current?.click()}>
+            {logoAffiche ? 'Changer le logo' : 'Ajouter un logo'}
+          </button>
+          {logo && (
+            <button type="button" className="btn btn-ghost btn-sm form-boutique__annuler-logo" onClick={() => setLogo(null)}>
+              Garder l’ancien
+            </button>
+          )}
+          <p className="form-hint">Une image carrée de préférence (JPEG ou PNG).</p>
+        </div>
+        <input
+          ref={champLogo}
+          id="b-logo"
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => { setLogo(e.target.files?.[0] || null); e.target.value = ''; }}
+        />
+      </div>
+
+      <div className="form-field">
+        <label className="form-label" htmlFor="b-nom">Nom de la boutique <span className="champ-requis">*</span></label>
+        <input
+          id="b-nom"
+          className={`form-input${erreurs.nom ? ' input-error' : ''}`}
+          value={valeurs.nom}
+          onChange={majChamp('nom')}
+          placeholder="Boutique Awa"
+        />
+        {erreurs.nom && <span className="form-error">{erreurs.nom}</span>}
+      </div>
+
+      <div className="form-field">
+        <label className="form-label" htmlFor="b-slogan">Slogan</label>
+        <input
+          id="b-slogan"
+          className="form-input"
+          value={valeurs.slogan}
+          onChange={majChamp('slogan')}
+          placeholder="Une phrase qui résume votre boutique"
+        />
+      </div>
+
+      <div className="form-field">
+        <label className="form-label" htmlFor="b-desc">Description</label>
+        <textarea
+          id="b-desc"
+          className="form-textarea"
+          rows={3}
+          value={valeurs.description}
+          onChange={majChamp('description')}
+          placeholder="Ce que vous vendez, ce qui vous distingue…"
+        />
+      </div>
+
+      <div className="form-duo">
+        <div className="form-field">
+          <label className="form-label" htmlFor="b-ville">Ville / quartier</label>
+          <input
+            id="b-ville"
+            className="form-input"
+            value={valeurs.localisation}
+            onChange={majChamp('localisation')}
+            placeholder="Sacré-Cœur, Dakar"
+          />
+        </div>
+        <div className="form-field">
+          <label className="form-label" htmlFor="b-tel">Téléphone / WhatsApp</label>
+          <input
+            id="b-tel"
+            className="form-input"
+            type="tel"
+            value={valeurs.telephone}
+            onChange={majChamp('telephone')}
+            placeholder="+221 77 000 00 00"
+          />
+        </div>
+      </div>
+
+      <div className="form-field">
+        <span className="form-label">Catégories de la boutique <span className="champ-requis">*</span></span>
+        <span className="form-hint">
+          1 à {MAX_CATEGORIES} catégories. La première choisie (★) est la principale.
+        </span>
+        <div className="specs-puces" role="group" aria-label="Catégories de la boutique">
+          {etatCategories === 'chargement' && <span className="form-hint">Chargement des catégories…</span>}
+          {etatCategories === 'erreur' && (
+            <span className="form-hint">
+              Impossible de charger les catégories.{' '}
+              <button type="button" className="btn btn-ghost btn-sm" onClick={onRechargerCategories}>Réessayer</button>
+            </span>
+          )}
+          {categories.map((c) => {
+            const i = rang(c);
+            const plein = i < 0 && choisies.length >= MAX_CATEGORIES;
+            return (
+              <button
+                type="button" key={c.id}
+                className={`specs-puce${i >= 0 ? ' specs-puce--on' : ''}`}
+                aria-pressed={i >= 0}
+                disabled={plein}
+                onClick={() => basculerCategorie(c)}
+              >{i === 0 ? '★ ' : ''}{c.nom}</button>
+            );
+          })}
+        </div>
+        {erreurs.categories && <span className="form-error">{erreurs.categories}</span>}
       </div>
     </div>
   );

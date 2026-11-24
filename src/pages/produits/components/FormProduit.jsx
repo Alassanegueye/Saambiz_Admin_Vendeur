@@ -1,4 +1,8 @@
+import { useRef } from 'react';
+import { ImagePlus, X } from 'lucide-react';
 import ChampsSpecifications from '../../../components/forms/ChampsSpecifications';
+import ApercuFichier from './ApercuFichier';
+import { MAX_IMAGES_SUPPLEMENTAIRES } from '../../../service/vendeur.service';
 
 /**
  * Champs du produit, présentés dans la modale de création comme dans celle de
@@ -13,6 +17,7 @@ export default function FormProduit({
   categories,
   image,
   setImage,
+  images = [],
   setImages,
   estModification,
   produit,
@@ -23,7 +28,22 @@ export default function FormProduit({
   // Changer de catégorie change les caractéristiques à renseigner : celles
   // de l'ancienne catégorie n'ont plus de sens (des pointures pour un jus).
   const majCategorie = (e) => setValeurs({ ...valeurs, categorieId: e.target.value, attributs: {} });
-  const specifications = categories.find((c) => c.id === valeurs.categorieId)?.specifications || [];
+  const categorie = categories.find((c) => c.id === valeurs.categorieId);
+  const specifications = categorie?.specifications || [];
+  const champPrincipale = useRef(null);
+  const champSupplementaires = useRef(null);
+  const place = MAX_IMAGES_SUPPLEMENTAIRES - images.length;
+  // Un tissu se vend au mètre, au yard, à la pièce… : le prix le dit.
+  const unite = typeof valeurs.attributs?.unite === 'string' ? valeurs.attributs.unite : '';
+  const parUnite = unite ? ` par ${unite.charAt(0).toLowerCase()}${unite.slice(1)}` : '';
+
+  // Les photos choisies s'ajoutent aux précédentes au lieu de les remplacer :
+  // on peut en prendre une, puis une autre, sans tout reprendre.
+  const ajouterPhotos = (fichiers) => {
+    const nouvelles = Array.from(fichiers || []);
+    if (nouvelles.length) setImages([...images, ...nouvelles]);
+  };
+  const retirerPhoto = (i) => setImages(images.filter((_, j) => j !== i));
 
   return (
     <>
@@ -53,7 +73,7 @@ export default function FormProduit({
 
       <div className="form-duo">
         <div className="form-field">
-          <label className="form-label" htmlFor="p-prix">Prix (FCFA)</label>
+          <label className="form-label" htmlFor="p-prix">Prix (FCFA){parUnite}</label>
           <input
             id="p-prix"
             className="form-input"
@@ -74,6 +94,7 @@ export default function FormProduit({
             value={valeurs.quantite}
             onChange={majChamp('quantite')}
           />
+          {unite && <span className="form-hint">Comptée dans la même unité que le prix.</span>}
           {erreurs.quantite && <span className="form-error">{erreurs.quantite}</span>}
         </div>
       </div>
@@ -103,43 +124,90 @@ export default function FormProduit({
         valeurs={valeurs.attributs || {}}
         onChange={(attributs) => setValeurs({ ...valeurs, attributs })}
         erreurs={erreurs.attributs || {}}
+        categorie={categorie?.slug}
       />
 
+      {/* Photo principale : elle se voit dès qu'elle est choisie. Sans
+          aperçu, le vendeur ne savait pas s'il avait pris la bonne. */}
       <div className="form-field">
-        <label className="form-label" htmlFor="p-img">Photo principale</label>
+        <span className="form-label">Photo principale</span>
+        <div className="photo-principale">
+          {image ? (
+            <ApercuFichier fichier={image} grand alt="Nouvelle photo principale" />
+          ) : estModification && produit?.image ? (
+            <img className="photo-principale__image" src={produit.image} alt="Photo actuelle du produit" />
+          ) : (
+            <button type="button" className="photo-principale__vide" onClick={() => champPrincipale.current?.click()}>
+              <ImagePlus size={28} strokeWidth={1.8} aria-hidden="true" />
+              <span>Ajouter la photo</span>
+            </button>
+          )}
+          <div className="photo-principale__actions">
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => champPrincipale.current?.click()}>
+              {image || (estModification && produit?.image) ? 'Changer la photo' : 'Choisir une photo'}
+            </button>
+            {image && (
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setImage(null)}>
+                {estModification && produit?.image ? 'Garder l’ancienne' : 'Retirer'}
+              </button>
+            )}
+            <span className="form-hint">
+              C'est elle que vos clients voient en premier. JPEG ou PNG, 5 Mo au plus.
+            </span>
+          </div>
+        </div>
         <input
+          ref={champPrincipale}
           id="p-img"
-          className="form-input"
           type="file"
           accept="image/png,image/jpeg"
-          onChange={(e) => setImage(e.target.files?.[0] || null)}
+          hidden
+          onChange={(e) => { setImage(e.target.files?.[0] || null); e.target.value = ''; }}
         />
-        {estModification && !image && (
-          <span className="form-hint">Laissez vide pour conserver la photo actuelle.</span>
-        )}
-        {/* « La photo actuelle » : encore faut-il la voir. Sans vignette, le
-            vendeur ne sait pas ce qu'il garde. */}
-        {estModification && !image && produit?.image && (
-          <img className="apercu-photo" src={produit.image} alt="Photo actuelle du produit" />
-        )}
       </div>
 
       <div className="form-field">
-        <label className="form-label" htmlFor="p-imgs">Photos supplémentaires</label>
+        <span className="form-label">Photos supplémentaires</span>
+        <ul className="photos-ajoutees">
+          {images.map((f, i) => (
+            <li key={`${f.name}-${f.lastModified}-${i}`}>
+              <ApercuFichier fichier={f} alt={`Photo supplémentaire ${i + 1}`} />
+              <button type="button" className="photos-ajoutees__retirer" onClick={() => retirerPhoto(i)}
+                aria-label={`Retirer la photo ${i + 1}`} title="Retirer">
+                <X size={14} strokeWidth={2.6} aria-hidden="true" />
+              </button>
+            </li>
+          ))}
+          {place > 0 && (
+            <li>
+              <button type="button" className="photos-ajoutees__ajouter" onClick={() => champSupplementaires.current?.click()}>
+                <ImagePlus size={22} strokeWidth={1.8} aria-hidden="true" />
+                <span>Ajouter</span>
+              </button>
+            </li>
+          )}
+        </ul>
         <input
+          ref={champSupplementaires}
           id="p-imgs"
-          className="form-input"
           type="file"
           accept="image/png,image/jpeg"
           multiple
-          onChange={(e) => setImages(Array.from(e.target.files || []))}
+          hidden
+          onChange={(e) => { ajouterPhotos(e.target.files); e.target.value = ''; }}
         />
-        <span className="form-hint">8 photos au maximum, 5 Mo chacune, en JPEG ou PNG.</span>
+        <span className="form-hint">
+          {MAX_IMAGES_SUPPLEMENTAIRES} photos au maximum, 5 Mo chacune, en JPEG ou PNG
+          {images.length > 0 && ` — ${images.length} choisie${images.length > 1 ? 's' : ''}`}.
+        </span>
         {erreurs.images && <span className="form-error">{erreurs.images}</span>}
 
         {/* Les photos déjà en ligne, et de quoi en retirer une. L'adresse
             existait côté API et l'application mobile s'en sert ; ici, une
             photo ratée restait sur la fiche pour toujours. */}
+        {estModification && produit?.images?.length > 0 && (
+          <span className="form-hint photos-existantes__titre">Déjà sur la fiche du produit :</span>
+        )}
         {estModification && produit?.images?.length > 0 && (
           <ul className="photos-existantes">
             {produit.images.map((img) => (

@@ -15,8 +15,6 @@ const ProduitsPage   = lazyFiable(() => import('../pages/produits/ProduitsPage')
 const CommandesPage  = lazyFiable(() => import('../pages/commandes/CommandesPage'));
 const PromotionsPage = lazyFiable(() => import('../pages/promotions/PromotionsPage'));
 const BoutiquePage   = lazyFiable(() => import('../pages/boutique/BoutiquePage'));
-const VitrinePage    = lazyFiable(() => import('../pages/vitrine/VitrinePage'));
-const SectionsSitePage = lazyFiable(() => import('../pages/vitrine/SectionsSitePage'));
 const MessagesPage   = lazyFiable(() => import('../pages/messages/MessagesPage'));
 const AbonnementPage = lazyFiable(() => import('../pages/abonnement/AbonnementPage'));
 const ProfilPage     = lazyFiable(() => import('../pages/profil/ProfilPage'));
@@ -45,8 +43,11 @@ export default function AppRoutes() {
               <Route path={ROUTES.COMMANDES}  element={<ErrorBoundary><CommandesPage /></ErrorBoundary>} />
               <Route path={ROUTES.PROMOTIONS} element={<ErrorBoundary><PromotionsPage /></ErrorBoundary>} />
               <Route path={ROUTES.BOUTIQUE}   element={<ErrorBoundary><BoutiquePage /></ErrorBoundary>} />
-              <Route path={ROUTES.VITRINE}    element={<ErrorBoundary><VitrinePage /></ErrorBoundary>} />
-              <Route path={ROUTES.SECTIONS}   element={<ErrorBoundary><SectionsSitePage /></ErrorBoundary>} />
+              {/* Anciennes adresses : « Mon site » et « Sections du site »
+                  vivent désormais dans « Ma boutique ». Les liens déjà
+                  partagés ou enregistrés y mènent toujours. */}
+              <Route path={ROUTES.VITRINE}    element={<Navigate to={ROUTES.BOUTIQUE} replace />} />
+              <Route path={ROUTES.SECTIONS}   element={<Navigate to={`${ROUTES.BOUTIQUE}?etape=sections`} replace />} />
               <Route path={ROUTES.MESSAGES}   element={<ErrorBoundary><MessagesPage /></ErrorBoundary>} />
               <Route path={ROUTES.ABONNEMENT} element={<ErrorBoundary><AbonnementPage /></ErrorBoundary>} />
               <Route path={ROUTES.PROFIL}     element={<ErrorBoundary><ProfilPage /></ErrorBoundary>} />

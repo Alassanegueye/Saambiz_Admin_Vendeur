@@ -11,6 +11,8 @@ export const ROUTES = {
   PRODUITS:   '/produits',
   COMMANDES:  '/commandes',
   PROMOTIONS: '/promotions',
+  // Le site, les produits qu'il montre et les infos de la boutique : une
+  // seule page. Les deux adresses suivantes y renvoient (voir AppRoutes).
   BOUTIQUE:   '/boutique',
   VITRINE:    '/mon-site',
   SECTIONS:   '/sections-du-site',

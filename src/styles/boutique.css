@@ -1,0 +1,373 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE « MA BOUTIQUE »
+
+   Le site, ses produits et les infos de la boutique sur une seule page.
+   S'ajoute à vitrine.css (mises en page, couleurs, photos, aperçu) ; les
+   briques communes (card, btn, form-*, modal) viennent de global.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ma-boutique__infos { gap: 0.5rem; padding: 0.6rem 1.05rem; }
+.ma-boutique__infos svg { width: 17px; height: 17px; }
+
+/* Les colonnes commencent tout de suite : la carte du site est la première
+   chose à gauche, l'aperçu démarre à sa hauteur. */
+.ma-boutique__colonnes { margin-top: 0; }
+
+/* ─── Pas encore de boutique / panne ─────────────────────────────── */
+.ma-boutique__vide {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 2.4rem 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+.ma-boutique__vide h2 { font-family: var(--font-display); font-size: 1.25rem; color: var(--color-text); }
+.ma-boutique__vide p { margin: 0; color: var(--color-text-muted); line-height: 1.6; }
+.ma-boutique__vide .btn { margin-top: 0.6rem; }
+.ma-boutique__picto {
+  display: inline-grid; place-items: center;
+  width: 60px; height: 60px; border-radius: 18px;
+  background: var(--color-accent-soft); color: var(--color-primary);
+  margin-bottom: 0.4rem;
+}
+
+/* ─── Titre au-dessus des étapes ─────────────────────────────────── */
+.ma-boutique__intro { margin: 1.6rem 0 0.75rem; }
+.ma-boutique__intro h2 {
+  font-family: var(--font-display); font-size: 1.08rem; font-weight: 700;
+  color: var(--color-text); letter-spacing: -0.2px;
+}
+.ma-boutique__intro p { margin: 0.2rem 0 0; font-size: 0.84rem; color: var(--color-text-muted); }
+
+/* ═══ Carte du site (haut de page) ═══════════════════════════════════ */
+.carte-site { margin-bottom: 0; }
+.carte-site__haut {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border-soft);
+  background: linear-gradient(180deg, var(--color-surface-2), var(--color-white));
+}
+.carte-site__identite {
+  display: flex; align-items: center; gap: 0.85rem; min-width: 0;
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem; margin: -0.25rem;
+  border: 1px solid transparent; border-radius: 14px; background: none;
+  font: inherit; text-align: left; cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.carte-site__identite:hover { background: var(--color-white); border-color: var(--color-border-soft); }
+.carte-site__identite:focus-visible { outline: none; box-shadow: var(--ring); }
+.carte-site__logo {
+  width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+  object-fit: cover; background: var(--color-white);
+  box-shadow: 0 0 0 1px var(--color-border-soft);
+}
+.carte-site__logo--vide {
+  display: grid; place-items: center;
+  background: var(--color-primary); color: var(--color-accent);
+  font-weight: 800; font-size: 1rem; letter-spacing: 0.02em; box-shadow: none;
+}
+.carte-site__noms { display: flex; flex-direction: column; min-width: 0; }
+.carte-site__noms strong {
+  font-family: var(--font-display); font-size: 1.08rem; color: var(--color-text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.carte-site__noms span {
+  font-size: 0.82rem; color: var(--color-text-muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.carte-site__badges { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.carte-site__corps { padding: 1.1rem 1.25rem 1.2rem; }
+.carte-site__titre { margin: 0 0 0.75rem; font-weight: 700; color: var(--color-text); }
+
+/* Les trois étapes de la création du site. */
+.carte-site__guide { list-style: none; margin: 0 0 0.75rem; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.5rem; }
+.carte-site__guide li {
+  display: flex; align-items: center; gap: 0.8rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--color-border-soft); border-radius: 12px;
+  background: var(--color-white);
+}
+.carte-site__guide li.est-fait { background: #F3FAF6; border-color: #CDEBD9; }
+.carte-site__puce {
+  width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 0.82rem; font-weight: 700;
+  background: var(--color-accent-soft); color: var(--color-primary);
+}
+.carte-site__guide li.est-fait .carte-site__puce { background: var(--color-ink-success); color: #fff; }
+.carte-site__etape { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.carte-site__etape strong { font-size: 0.9rem; color: var(--color-text); }
+.carte-site__etape span { font-size: 0.8rem; color: var(--color-text-muted); }
+.carte-site__guide .btn { flex-shrink: 0; }
+
+/* Site publié : l'adresse et de quoi la partager. */
+.carte-site__libelle { display: block; font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted); }
+.carte-site__url {
+  display: inline-block; margin: 0.15rem 0 0.8rem;
+  font-family: var(--font-display); font-size: 1.12rem; font-weight: 650;
+  color: var(--color-primary); text-decoration: none; word-break: break-all;
+}
+.carte-site__url:hover { text-decoration: underline; }
+.carte-site__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.carte-site__actions .btn svg { width: 16px; height: 16px; }
+.carte-site__alerte {
+  margin: 0.8rem 0 0; padding: 0.6rem 0.8rem;
+  border-radius: 10px; background: #FEF8E7; border: 1px solid #F6E3A8;
+  font-size: 0.84rem; color: var(--color-ink-warning); line-height: 1.5;
+}
+.carte-site__alerte a, .carte-site__lien { color: var(--color-primary); font-weight: 600; text-decoration: underline; font-size: inherit; }
+.carte-site__pied {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;
+  margin-top: 0.9rem; font-size: 0.8rem; color: var(--color-text-muted);
+}
+.carte-site__hors-ligne { color: var(--color-text-muted); font-size: 0.8rem; text-decoration: underline; }
+.carte-site__hors-ligne:hover { color: var(--color-ink-danger); }
+
+.carte-site__conseil {
+  width: 100%; display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.65rem 1.25rem; border: 0; border-top: 1px dashed var(--color-border);
+  background: var(--color-surface-2); cursor: pointer;
+  font: inherit; font-size: 0.82rem; color: var(--color-text); text-align: left;
+}
+.carte-site__conseil svg { color: var(--color-accent-dark); flex-shrink: 0; }
+.carte-site__conseil:hover { background: var(--color-accent-soft); }
+
+.carte-site__qr { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; padding-bottom: 0.5rem; }
+.carte-site__qr img {
+  width: min(260px, 100%); aspect-ratio: 1; border-radius: 14px;
+  border: 1px solid var(--color-border); background: #fff;
+}
+.carte-site__qr .vitrine-url { font-size: 0.9rem; text-align: center; margin: 0; }
+
+/* ═══ Étapes repliables ═══════════════════════════════════════════════ */
+/* minmax(0, 1fr) : un résumé trop long se coupe (…) au lieu d'élargir la
+   colonne au-delà de l'écran sur téléphone. */
+.etapes-site { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.6rem; }
+.etape-site {
+  background: var(--color-white);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
+  scroll-margin-top: calc(var(--topnav-height) + 14px);
+  transition: border-color 0.15s ease, box-shadow 0.2s ease;
+}
+.etape-site:hover { border-color: var(--color-border-strong); }
+.etape-site.est-ouverte {
+  border-color: rgba(13, 27, 61, 0.28);
+  box-shadow: 0 10px 30px -18px rgba(13, 27, 61, 0.45);
+}
+.etape-site__titre { margin: 0; font: inherit; }
+.etape-site__entete {
+  width: 100%; display: flex; align-items: center; gap: 0.85rem;
+  padding: 0.9rem 1.1rem; border: 0; border-radius: var(--radius-xl);
+  background: none; cursor: pointer; font: inherit; text-align: left;
+}
+.etape-site__entete:focus-visible { outline: none; box-shadow: var(--ring); }
+.etape-site__num {
+  width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 0.84rem; font-weight: 700;
+  background: var(--color-bg); color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+.etape-site.est-ouverte .etape-site__num { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-accent); }
+.etape-site.est-faite .etape-site__num { background: var(--color-ink-success); border-color: var(--color-ink-success); color: #fff; }
+.etape-site__textes { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.etape-site__nom { font-family: var(--font-display); font-size: 0.96rem; font-weight: 600; color: var(--color-text); }
+.etape-site__resume {
+  font-size: 0.8rem; color: var(--color-text-muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.etape-site.est-ouverte .etape-site__resume { white-space: normal; }
+.etape-site__a-faire {
+  flex-shrink: 0; padding: 0.2rem 0.6rem; border-radius: 999px;
+  background: #FEF3D6; color: var(--color-ink-warning);
+  font-size: 0.72rem; font-weight: 700;
+}
+.etape-site__chevron { flex-shrink: 0; color: var(--color-text-muted); transition: transform 0.2s ease; }
+.etape-site.est-ouverte .etape-site__chevron { transform: rotate(180deg); color: var(--color-primary); }
+
+.etape-site__contenu {
+  padding: 0.25rem 1.1rem 1.2rem calc(1.1rem + 30px + 0.85rem);
+  animation: etape-ouvre 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes etape-ouvre { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.etape-site__intro {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  margin: 0 0 0.9rem; font-size: 0.86rem; color: var(--color-text-muted); line-height: 1.55;
+}
+.etape-site__grille { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 0.75rem; }
+.etape-site__grille .form-field { margin-bottom: 0.7rem; }
+.etape-site__petit-libelle { display: block; margin: 0 0 4px; font-weight: 600; }
+.etape-site__note { margin-top: 0; }
+.etape-site__attention {
+  margin: 0.6rem 0 0; padding: 0.55rem 0.75rem; border-radius: 10px;
+  background: #FEF8E7; border: 1px solid #F6E3A8; color: var(--color-ink-warning); font-size: 0.82rem;
+}
+.etape-site__danger {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  margin-top: 1.25rem; padding: 0.85rem 1rem;
+  border: 1px solid #F3C9C3; border-radius: 12px; background: #FFF8F7;
+}
+.etape-site__danger strong { color: var(--color-ink-danger); font-size: 0.9rem; }
+.etape-site__danger .form-hint { margin: 0.2rem 0 0; max-width: 52ch; }
+.etape-site .vitrine-photos__compte { flex-shrink: 0; }
+.etape-site .vitrine-avantage:last-of-type { border-bottom: 0; }
+
+.vitrine-slug.est-en-erreur { border-color: var(--color-danger); }
+
+/* ═══ Sections et leurs produits ══════════════════════════════════════ */
+.sections-site { list-style: none; margin: 0 0 0.5rem; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.6rem; }
+.section-site {
+  padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 12px;
+  background: var(--color-white);
+}
+.section-site.est-vide { border-style: dashed; background: var(--color-surface-2); }
+.section-site__haut { display: flex; align-items: center; gap: 0.6rem; }
+.section-site__rang {
+  width: 24px; height: 24px; flex-shrink: 0; border-radius: 7px;
+  display: grid; place-items: center;
+  background: var(--color-accent-soft); color: var(--color-primary);
+  font-size: 0.76rem; font-weight: 700;
+}
+.section-site__nom { flex: 1; min-width: 0; font-weight: 600; }
+.section-site__ordre { display: flex; gap: 4px; }
+.section-site__ordre .btn { padding: 0.35rem 0.5rem; }
+.section-site__bas {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap;
+  margin-top: 0.6rem; padding-left: calc(24px + 0.6rem);
+}
+.section-site__vide { font-size: 0.8rem; color: var(--color-ink-warning); }
+.section-site__produits { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.section-site__vignette {
+  width: 34px; height: 34px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 3px var(--color-border-soft);
+}
+.section-site__vignette + .section-site__vignette { margin-left: -8px; }
+.section-site__vignette--vide { display: grid; place-items: center; background: var(--color-bg); color: var(--color-text-muted); }
+.section-site__compte { margin-left: 0.45rem; font-size: 0.8rem; font-weight: 600; color: var(--color-text); }
+.section-site__actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+/* Fenêtre de choix des produits. */
+.choix-produits__outils { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.8rem; }
+.choix-produits__outils .form-input { flex: 1 1 220px; }
+.choix-produits { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.choix-produit {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.5rem 0.65rem; cursor: pointer;
+  border: 1px solid var(--color-border); border-radius: 10px;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.choix-produit:hover { border-color: var(--color-border-strong); }
+.choix-produit.est-choisi { border-color: var(--color-primary); background: rgba(13, 27, 61, 0.04); }
+.choix-produit.est-bloque { opacity: 0.5; cursor: not-allowed; }
+.choix-produit input { width: 18px; height: 18px; accent-color: var(--color-primary); flex-shrink: 0; }
+.choix-produit__vignette { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.choix-produit__vignette--vide { display: grid; place-items: center; background: var(--color-bg); color: var(--color-text-muted); }
+.choix-produit__textes { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.choix-produit__nom { font-weight: 600; font-size: 0.9rem; color: var(--color-text); overflow-wrap: anywhere; }
+.choix-produit__etat { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; font-size: 0.74rem; color: var(--color-text-muted); }
+.choix-produit__prix { font-size: 0.85rem; color: var(--color-text-muted); white-space: nowrap; }
+.choix-produits__compte { margin-right: auto; font-size: 0.84rem; color: var(--color-text-muted); }
+
+/* ═══ Barre d'enregistrement ══════════════════════════════════════════ */
+.barre-site {
+  position: sticky; bottom: 12px; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; flex-wrap: wrap;
+  margin-top: 1rem; padding: 0.75rem 0.85rem 0.75rem 1.1rem;
+  background: var(--color-primary); color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 18px 40px -16px rgba(6, 15, 38, 0.6);
+  animation: barre-monte-site 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes barre-monte-site { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.barre-site__texte { margin: 0; font-size: 0.88rem; font-weight: 500; }
+.barre-site__boutons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.barre-site .btn-ghost { color: rgba(255, 255, 255, 0.85); border-color: rgba(255, 255, 255, 0.28); font-size: 0.85rem; padding: 0.5rem 0.9rem; }
+.barre-site .btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.barre-site .btn-secondary { background: rgba(255, 255, 255, 0.08); color: #fff; border-color: rgba(255, 255, 255, 0.3); }
+.barre-site .btn-secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.5); }
+.barre-site .btn-primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-primary); }
+.barre-site .btn-primary:hover:not(:disabled) { background: #FFC93C; border-color: #FFC93C; }
+
+/* ═══ Fenêtre « Infos de la boutique » ════════════════════════════════ */
+.infos-boutique__identite { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.1rem; }
+.infos-boutique__identite > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.infos-boutique__identite strong { font-family: var(--font-display); font-size: 1.15rem; color: var(--color-text); }
+.infos-boutique__identite > div > span { font-size: 0.86rem; color: var(--color-text-muted); }
+.infos-boutique__logo {
+  width: 72px; height: 72px; border-radius: 18px; flex-shrink: 0; object-fit: cover;
+  box-shadow: 0 0 0 1px var(--color-border-soft);
+}
+.infos-boutique__logo--vide {
+  display: grid; place-items: center; box-shadow: none;
+  background: var(--color-primary); color: var(--color-accent);
+  font-weight: 800; font-size: 1.3rem;
+}
+.infos-boutique__categories { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.4rem; }
+.infos-boutique__categories .specs-puce { cursor: default; font-size: 0.76rem; padding: 0.2rem 0.6rem; }
+.infos-boutique__details {
+  margin: 0 0 1rem; padding: 0.2rem 0.9rem;
+  border: 1px solid var(--color-border-soft); border-radius: 12px; background: var(--color-surface-2);
+}
+.infos-boutique__detail {
+  display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 0.75rem;
+  padding: 0.65rem 0; border-bottom: 1px solid var(--color-border-soft);
+}
+.infos-boutique__detail:last-child { border-bottom: 0; }
+.infos-boutique__detail dt { font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted); }
+.infos-boutique__detail dd { margin: 0; font-size: 0.9rem; color: var(--color-text); overflow-wrap: anywhere; }
+.infos-boutique__completer { color: var(--color-primary-light); font-weight: 600; font-size: 0.84rem; }
+.infos-boutique__completer:hover { text-decoration: underline; }
+.infos-boutique__bloc {
+  padding: 0.9rem 0; border-top: 1px solid var(--color-border-soft);
+}
+.infos-boutique__bloc > .btn { margin-top: 0.1rem; }
+.infos-boutique__ligne { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.6rem; }
+.infos-boutique__ligne strong { font-size: 0.92rem; color: var(--color-text); }
+.infos-boutique__ligne .form-hint { margin: 0.2rem 0 0; }
+.infos-boutique__confirmation {
+  padding: 0.75rem 0.85rem; border-radius: 10px;
+  background: #FEF8E7; border: 1px solid #F6E3A8;
+}
+.infos-boutique__confirmation p { margin: 0 0 0.6rem; font-size: 0.85rem; color: var(--color-ink-warning); }
+.infos-boutique__confirmation .barre-actions,
+.infos-boutique__verif .barre-actions { margin-top: 0; justify-content: flex-end; }
+.infos-boutique__verif { margin-top: 0.4rem; padding: 0.8rem; border: 1px solid var(--color-border-soft); border-radius: 12px; }
+
+.form-boutique__logo { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.1rem; }
+.form-boutique__logo .form-label { margin-bottom: 0.35rem; }
+.form-boutique__logo .form-hint { margin: 0.35rem 0 0; }
+.form-boutique__logo-cadre {
+  width: 76px; height: 76px; flex-shrink: 0; overflow: hidden;
+  display: grid; place-items: center;
+  border: 1.5px dashed var(--color-border-strong); border-radius: 18px;
+  background: var(--color-surface-2); color: var(--color-text-muted); cursor: pointer;
+}
+.form-boutique__logo-cadre:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.form-boutique__logo-cadre img { width: 100%; height: 100%; object-fit: cover; }
+.form-boutique__annuler-logo { margin-left: 0.4rem; }
+
+/* ─── Petits écrans ─────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ma-boutique .page-header { align-items: flex-start; }
+  .ma-boutique__infos { width: 100%; justify-content: center; }
+  .carte-site__haut, .carte-site__corps { padding-left: 1rem; padding-right: 1rem; }
+  .carte-site__guide li { flex-wrap: wrap; }
+  .carte-site__guide .btn { margin-left: calc(28px + 0.8rem); }
+  .carte-site__actions .btn { flex: 1 1 calc(50% - 0.5rem); justify-content: center; }
+  .etape-site__entete { padding: 0.85rem 0.9rem; gap: 0.7rem; }
+  .etape-site__contenu { padding: 0.25rem 0.9rem 1.1rem; }
+  .etape-site__grille { grid-template-columns: 1fr; }
+  .section-site__bas { padding-left: 0; }
+  .barre-site { bottom: 8px; padding: 0.7rem; }
+  .barre-site__boutons { width: 100%; }
+  .barre-site__boutons .btn { flex: 1; justify-content: center; }
+  .infos-boutique__detail { grid-template-columns: 1fr; gap: 0.15rem; }
+  .choix-produits__compte { order: 3; text-align: center; margin: 0; }
+}

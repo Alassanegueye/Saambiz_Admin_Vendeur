@@ -112,20 +112,53 @@ export const dupliquerProduit  = (id) => api.post(VENDEUR.DUPLIQUER(id));
 export const basculerDisponibilite = (id, disponible) =>
   api.patch(VENDEUR.DISPONIBILITE(id), { disponible });
 
+/**
+ * Tous les produits du vendeur, pour choisir ceux qu'affiche son site.
+ *
+ * L'API rend au plus cent produits par page : demander « limit: 200 » en
+ * rendait cent sans le dire, et le cent-unième produit n'était jamais
+ * proposable. On parcourt donc les pages, jusqu'à `max` produits.
+ */
+export async function getTousMesProduits({ max = 500 } = {}) {
+  const parPage = 100;
+  const tous = [];
+  for (let page = 1; tous.length < max; page += 1) {
+    const reponse = await getProduits({ page, limit: parPage });
+    const corps = reponse?.data || {};
+    const liste = corps.produits || corps.data?.produits || [];
+    if (!Array.isArray(liste) || liste.length === 0) break;
+    tous.push(...liste);
+    const pages = Number(corps.pages ?? corps.data?.pages) || 1;
+    if (page >= pages || liste.length < parPage) break;
+  }
+  return tous.slice(0, max);
+}
+
 // ── Boutique ────────────────────────────────────────────────────────────────
 export const getMaBoutique = () => api.get(VENDEUR.MA_BOUTIQUE);
 
-export const modifierBoutique = (valeurs, logo) => {
+/** Champs texte et listes (catégories) en multipart, avec le logo s'il change. */
+function formulaireBoutique(valeurs, logo) {
   const form = new FormData();
   Object.entries(valeurs).forEach(([cle, valeur]) => {
     if (valeur === undefined || valeur === null) return;
     form.append(cle, typeof valeur === 'object' ? JSON.stringify(valeur) : valeur);
   });
   if (logo) form.append('logo', logo);
-  return api.put(VENDEUR.MODIFIER_BOUTIQUE, form, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-};
+  return form;
+}
+
+export const modifierBoutique = (valeurs, logo) =>
+  api.put(VENDEUR.MODIFIER_BOUTIQUE, formulaireBoutique(valeurs, logo), ENTETES_MULTIPART);
+
+/**
+ * Ouvre la boutique d'un vendeur qui n'en a pas encore — inscrit depuis une
+ * ancienne version de l'application, par exemple. `modifierBoutique` lui
+ * répondait « Boutique introuvable » : la page lui demandait de remplir un
+ * formulaire qu'il ne pouvait pas enregistrer.
+ */
+export const creerBoutique = (valeurs, logo) =>
+  api.post(VENDEUR.CREER_BOUTIQUE, formulaireBoutique(valeurs, logo), ENTETES_MULTIPART);
 
 export const mettreBoutiqueEnPause = () => api.patch(VENDEUR.BOUTIQUE_PAUSE);
 export const reactiverBoutique     = () => api.patch(VENDEUR.BOUTIQUE_REACTIVER);
@@ -177,6 +210,8 @@ export const getHistoriquePaiements = () => api.get(VENDEUR.HISTORIQUE_PAIEMENTS
 // ── Commandes reçues ────────────────────────────────────────────────────────
 export const getCommandes      = () => api.get(COMMANDES_VENDEUR.LIST);
 export const getCommande       = (id) => api.get(COMMANDES_VENDEUR.DETAIL(id));
+/** Enregistrer une commande prise hors du site (téléphone, WhatsApp, boutique). */
+export const creerCommandeVendeur = (payload) => api.post(COMMANDES_VENDEUR.CREATE, payload);
 export const changerStatutCommande = (id, statut) =>
   api.patch(COMMANDES_VENDEUR.STATUT(id), { statut });
 

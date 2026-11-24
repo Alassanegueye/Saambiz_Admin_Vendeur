@@ -161,5 +161,8 @@ export default function useCommandes() {
     search, rechercher, rechercheDifferee,
     filtreStatut, filtrerParStatut, compteurs,
     detail, setDetail, saving, changerStatut, repondreAnnulation,
+    // Après une commande saisie par le vendeur : la liste se met à jour sans
+    // repasser par l'écran de chargement.
+    recharger: () => charger({ initial: true }),
   };
 }

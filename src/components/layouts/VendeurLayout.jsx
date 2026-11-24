@@ -38,22 +38,13 @@ const ITEMS = [
     icon: <><path d="m3 11 8-8 10 10-8 8z"/><circle cx="7.5" cy="7.5" r="1.5"/></>,
   },
   {
+    // Une seule page : le site, les produits qu'il montre et, derrière un
+    // bouton, les infos de la boutique. « Mon site » et « Sections du site »
+    // y renvoient (voir AppRoutes).
     code: 'BOUTIQUE',
     to: ROUTES.BOUTIQUE,
-    label: 'Infos de la boutique',
+    label: 'Ma boutique',
     icon: <><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M9 21v-6h6v6"/></>,
-  },
-  {
-    code: 'VITRINE',
-    to: ROUTES.VITRINE,
-    label: 'Mon site',
-    icon: <><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/></>,
-  },
-  {
-    code: 'SECTIONS',
-    to: ROUTES.SECTIONS,
-    label: 'Sections du site',
-    icon: <><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></>,
   },
 ];
 
@@ -92,8 +83,8 @@ export default function VendeurLayout() {
 
   return (
     <div className="admin-layout">
-      {/* Rubriques regroupées comme dans l'administration : Accueil, Mes
-          produits, Ventes ▾, Ma boutique ▾. */}
+      {/* Une rubrique, un onglet : Accueil, Mes produits, Commandes,
+          Promotions, Ma boutique. */}
       <TopNav items={ITEMS} />
       <div className="admin-main">
         <div className="admin-content">

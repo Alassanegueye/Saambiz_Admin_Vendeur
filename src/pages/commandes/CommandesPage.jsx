@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet';
+import { Plus } from 'lucide-react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Modal from '../../components/common/Modal';
 import SearchInput from '../../components/common/SearchInput';
@@ -6,11 +7,15 @@ import Pagination from '../../components/common/Pagination';
 import TableCommandes from './components/TableCommandes';
 import DetailCommande from './components/DetailCommande';
 import FiltresStatut from '../../components/common/FiltresStatut';
+import FormNouvelleCommande from './components/FormNouvelleCommande';
 import useCommandes, { FILTRES_COMMANDES } from './useCommandes';
+import useNouvelleCommande from './useNouvelleCommande';
+import { formatMontant } from '../../utils/formatters';
 
 /** Commandes reçues par le vendeur, et leur avancement. */
 export default function CommandesPage() {
   const c = useCommandes();
+  const n = useNouvelleCommande({ onCreee: c.recharger });
 
   if (c.loading) return <LoadingSpinner fullPage />;
 
@@ -28,6 +33,11 @@ export default function CommandesPage() {
             {c.enAttente > 0 && ` — ${c.enAttente} en attente de traitement`}
           </p>
         </div>
+        {/* Une commande prise par téléphone, sur WhatsApp ou en boutique :
+            enregistrée ici, elle se suit comme celles venues du site. */}
+        <button type="button" className="btn btn-primary" onClick={n.ouvrir}>
+          <Plus size={16} aria-hidden="true" /> Nouvelle commande
+        </button>
       </div>
 
       <div className="card">
@@ -69,6 +79,28 @@ export default function CommandesPage() {
           onChangerStatut={c.changerStatut}
           onRepondreAnnulation={c.repondreAnnulation}
         />
+      </Modal>
+
+      <Modal
+        isOpen={n.ouvert}
+        onClose={n.fermer}
+        large
+        title="Nouvelle commande"
+        description="Une commande prise par téléphone, sur WhatsApp ou en boutique."
+        footer={(
+          <div className="nc-pied">
+            <p className="nc-pied__total">
+              <span>Total</span>
+              <strong>{formatMontant(n.total)}</strong>
+            </p>
+            <button type="button" className="btn btn-secondary" onClick={n.fermer} disabled={n.saving}>Annuler</button>
+            <button type="button" className="btn btn-primary" onClick={n.enregistrer} disabled={n.saving}>
+              {n.saving ? 'Enregistrement…' : 'Enregistrer la commande'}
+            </button>
+          </div>
+        )}
+      >
+        <FormNouvelleCommande n={n} />
       </Modal>
     </div>
   );
